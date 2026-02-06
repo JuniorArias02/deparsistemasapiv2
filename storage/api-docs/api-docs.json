@@ -1,0 +1,2662 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "API Departamento de Sistemas",
+        "description": "Documentación de la API para el sistema de gestión del Departamento de Sistemas.",
+        "contact": {
+            "email": "soporte@example.com"
+        },
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "/api",
+            "description": "API Server"
+        }
+    ],
+    "paths": {
+        "/api/auth/login": {
+            "post": {
+                "tags": [
+                    "Autenticación"
+                ],
+                "summary": "Iniciar sesión",
+                "description": "Autentica al usuario y devuelve un token JWT.",
+                "operationId": "authLogin",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "usuario",
+                                    "contrasena"
+                                ],
+                                "properties": {
+                                    "usuario": {
+                                        "type": "string",
+                                        "example": "junior@house"
+                                    },
+                                    "contrasena": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "qweasdzxc"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Login exitoso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                },
+                                "example": {
+                                    "mensaje": "Login exitoso",
+                                    "objeto": {
+                                        "access_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...",
+                                        "token_type": "bearer",
+                                        "expires_in": 3600
+                                    },
+                                    "status": 200
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Credenciales inválidas",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/auth/me": {
+            "post": {
+                "tags": [
+                    "Autenticación"
+                ],
+                "summary": "Obtener usuario autenticado",
+                "description": "Devuelve los datos del usuario actual.",
+                "operationId": "authMe",
+                "responses": {
+                    "200": {
+                        "description": "Datos del usuario",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/cp-productos": {
+            "get": {
+                "tags": [
+                    "CpProductos"
+                ],
+                "summary": "Listar productos",
+                "operationId": "9442543459441828a20270871f9ad863",
+                "responses": {
+                    "200": {
+                        "description": "Lista de productos",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Prohibido"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "CpProductos"
+                ],
+                "summary": "Crear producto",
+                "operationId": "73b0149de732daed69a1f5d89a60c6d1",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "codigo": {
+                                        "type": "string"
+                                    },
+                                    "nombre": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Producto creado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Prohibido"
+                    },
+                    "500": {
+                        "description": "Error del servidor"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/cp-productos/{id}": {
+            "get": {
+                "tags": [
+                    "CpProductos"
+                ],
+                "summary": "Obtener producto",
+                "operationId": "e8516acae6aa949a1e5189d471c96cd6",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Detalle del producto",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Producto no encontrado"
+                    },
+                    "403": {
+                        "description": "Prohibido"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "CpProductos"
+                ],
+                "summary": "Actualizar producto",
+                "operationId": "0c96cc49cc9813f8ec8d15a23532e51e",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "codigo": {
+                                        "type": "string"
+                                    },
+                                    "nombre": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Producto actualizado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Producto no encontrado"
+                    },
+                    "403": {
+                        "description": "Prohibido"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "CpProductos"
+                ],
+                "summary": "Eliminar producto",
+                "operationId": "d1597bd81cbec0b04942a8dcb69b2c7e",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Producto eliminado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Producto no encontrado"
+                    },
+                    "403": {
+                        "description": "Prohibido"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/cp-productos-servicios": {
+            "get": {
+                "tags": [
+                    "CpProductosServicios"
+                ],
+                "summary": "Listar productos servicios",
+                "operationId": "58efd0979a5a30947a7b6f7244a3a692",
+                "responses": {
+                    "200": {
+                        "description": "Lista de productos servicios",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Prohibido"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "CpProductosServicios"
+                ],
+                "summary": "Crear producto servicio",
+                "operationId": "25a3ad87614d5015d78a29dce9c76fef",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "codigo_producto": {
+                                        "type": "string"
+                                    },
+                                    "nombre": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Producto servicio creado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Prohibido"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/cp-productos-servicios/{id}": {
+            "get": {
+                "tags": [
+                    "CpProductosServicios"
+                ],
+                "summary": "Obtener producto servicio",
+                "operationId": "0ca0a49cdd4ebb4c42c44fb19d4c534e",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Detalle del producto servicio",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No encontrado"
+                    },
+                    "403": {
+                        "description": "Prohibido"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "CpProductosServicios"
+                ],
+                "summary": "Actualizar producto servicio",
+                "operationId": "e4b478f8545570968e58a430f26f480a",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "codigo_producto": {
+                                        "type": "string"
+                                    },
+                                    "nombre": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Actualizado exitosamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No encontrado"
+                    },
+                    "403": {
+                        "description": "Prohibido"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "CpProductosServicios"
+                ],
+                "summary": "Eliminar producto servicio",
+                "operationId": "d4fd4aa18d015bf1121c799e88bbe195",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Eliminado exitosamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No encontrado"
+                    },
+                    "403": {
+                        "description": "Prohibido"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/cp-proveedores": {
+            "get": {
+                "tags": [
+                    "CpProveedores"
+                ],
+                "summary": "Listar proveedores",
+                "operationId": "05fa706afe10676098bcaeffcb388117",
+                "responses": {
+                    "200": {
+                        "description": "Lista de proveedores",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Prohibido"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "CpProveedores"
+                ],
+                "summary": "Crear proveedor",
+                "operationId": "ecbeb6fabbb443b48174423e0e1c55b4",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "nombre": {
+                                        "type": "string"
+                                    },
+                                    "nit": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Proveedor creado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Prohibido"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/cp-proveedores/{id}": {
+            "get": {
+                "tags": [
+                    "CpProveedores"
+                ],
+                "summary": "Obtener proveedor",
+                "operationId": "69039b0e97f0c958d6bc127669be265a",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Detalle del proveedor",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No encontrado"
+                    },
+                    "403": {
+                        "description": "Prohibido"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "CpProveedores"
+                ],
+                "summary": "Actualizar proveedor",
+                "operationId": "f85f47d2421e6a94237bfff50982e3c5",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "nombre": {
+                                        "type": "string"
+                                    },
+                                    "nit": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Actualizado exitosamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No encontrado"
+                    },
+                    "403": {
+                        "description": "Prohibido"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "CpProveedores"
+                ],
+                "summary": "Eliminar proveedor",
+                "operationId": "8f2ef7ce7c017c1f7b3c926ad67e3dca",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Eliminado exitosamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No encontrado"
+                    },
+                    "403": {
+                        "description": "Prohibido"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/cp-tipos-solicitud": {
+            "get": {
+                "tags": [
+                    "CpTiposSolicitud"
+                ],
+                "summary": "Listar tipos de solicitud",
+                "operationId": "c89a806c488ea6040d2c366ecc4b0b00",
+                "responses": {
+                    "200": {
+                        "description": "Lista de tipos",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Prohibido"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "CpTiposSolicitud"
+                ],
+                "summary": "Crear tipo de solicitud",
+                "operationId": "4a8cc697437fb41104e7ea5e697ccf7e",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "nombre": {
+                                        "type": "string"
+                                    },
+                                    "descripcion": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Creado exitosamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Prohibido"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/cp-tipos-solicitud/{id}": {
+            "get": {
+                "tags": [
+                    "CpTiposSolicitud"
+                ],
+                "summary": "Obtener tipo de solicitud",
+                "operationId": "5e2e5be8715e7bff9e5bed4c06848199",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Detalle",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No encontrado"
+                    },
+                    "403": {
+                        "description": "Prohibido"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "CpTiposSolicitud"
+                ],
+                "summary": "Actualizar tipo de solicitud",
+                "operationId": "e01c17de3e1dc3fb2203ed7a18978f9d",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "nombre": {
+                                        "type": "string"
+                                    },
+                                    "descripcion": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Actualizado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No encontrado"
+                    },
+                    "403": {
+                        "description": "Prohibido"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "CpTiposSolicitud"
+                ],
+                "summary": "Eliminar tipo de solicitud",
+                "operationId": "5943b532d90dab0356518cea042f19f6",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Eliminado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No encontrado"
+                    },
+                    "403": {
+                        "description": "Prohibido"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/dependencias-sedes": {
+            "get": {
+                "tags": [
+                    "DependenciasSedes"
+                ],
+                "summary": "Listar dependencias de sedes",
+                "operationId": "4ca5cf19a615cfbb20f38e9c9b79d7f0",
+                "responses": {
+                    "200": {
+                        "description": "Lista de dependencias",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Prohibido"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "DependenciasSedes"
+                ],
+                "summary": "Crear dependencia de sede",
+                "operationId": "1d461f300ea04d7ff15aada334b17a12",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "sede_id": {
+                                        "type": "integer"
+                                    },
+                                    "nombre": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Dependencia creada",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Prohibido"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/dependencias-sedes/{id}": {
+            "get": {
+                "tags": [
+                    "DependenciasSedes"
+                ],
+                "summary": "Obtener dependencia de sede",
+                "operationId": "716630d0593e8276747a4ea27023b53d",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Detalle de la dependencia",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No encontrado"
+                    },
+                    "403": {
+                        "description": "Prohibido"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "DependenciasSedes"
+                ],
+                "summary": "Actualizar dependencia de sede",
+                "operationId": "d2c28eefa78cf21011e2a624386be146",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "sede_id": {
+                                        "type": "integer"
+                                    },
+                                    "nombre": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Actualizada exitosamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No encontrado"
+                    },
+                    "403": {
+                        "description": "Prohibido"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "DependenciasSedes"
+                ],
+                "summary": "Eliminar dependencia de sede",
+                "operationId": "9a1271252046e1129d88b107afb6b2b8",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Eliminada exitosamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No encontrado"
+                    },
+                    "403": {
+                        "description": "Prohibido"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/inventario": {
+            "post": {
+                "tags": [
+                    "Inventario"
+                ],
+                "summary": "Crear item de inventario",
+                "description": "Crea un nuevo registro en el inventario. Requiere autenticación JWT. Permite pasar todos los campos definidos en el sistema.",
+                "operationId": "inventarioStore",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "codigo",
+                                    "nombre"
+                                ],
+                                "properties": {
+                                    "codigo": {
+                                        "type": "string",
+                                        "example": "INV-001"
+                                    },
+                                    "nombre": {
+                                        "type": "string",
+                                        "example": "Laptop Dell Latitude"
+                                    },
+                                    "dependencia": {
+                                        "type": "string",
+                                        "example": "Sistemas"
+                                    },
+                                    "responsable": {
+                                        "type": "string",
+                                        "example": "Juan Perez"
+                                    },
+                                    "responsable_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "coordinador_id": {
+                                        "type": "integer",
+                                        "example": 2
+                                    },
+                                    "marca": {
+                                        "type": "string",
+                                        "example": "Dell"
+                                    },
+                                    "modelo": {
+                                        "type": "string",
+                                        "example": "Latitude 5420"
+                                    },
+                                    "serial": {
+                                        "type": "string",
+                                        "example": "ABC123456"
+                                    },
+                                    "proceso_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "sede_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "codigo_barras": {
+                                        "type": "string",
+                                        "example": "123456789"
+                                    },
+                                    "num_factu": {
+                                        "type": "string",
+                                        "example": "FAC-001"
+                                    },
+                                    "grupo": {
+                                        "type": "string",
+                                        "example": "Equipos de Computo"
+                                    },
+                                    "vida_util": {
+                                        "type": "integer",
+                                        "example": 5
+                                    },
+                                    "vida_util_niff": {
+                                        "type": "integer",
+                                        "example": 5
+                                    },
+                                    "centro_costo": {
+                                        "type": "string",
+                                        "example": "CC-001"
+                                    },
+                                    "ubicacion": {
+                                        "type": "string",
+                                        "example": "Piso 2"
+                                    },
+                                    "proveedor": {
+                                        "type": "string",
+                                        "example": "Dell Colombia"
+                                    },
+                                    "fecha_compra": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2023-01-15"
+                                    },
+                                    "soporte": {
+                                        "type": "string",
+                                        "example": "Garantía 3 años"
+                                    },
+                                    "soporte_adjunto": {
+                                        "type": "string",
+                                        "example": "url/to/doc.pdf"
+                                    },
+                                    "descripcion": {
+                                        "type": "string",
+                                        "example": "Laptop asignada a sistemas"
+                                    },
+                                    "estado": {
+                                        "type": "string",
+                                        "example": "Bueno"
+                                    },
+                                    "escritura": {
+                                        "type": "string",
+                                        "example": "N/A"
+                                    },
+                                    "matricula": {
+                                        "type": "string",
+                                        "example": "MAT-01"
+                                    },
+                                    "valor_compra": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 1500
+                                    },
+                                    "salvamenta": {
+                                        "type": "string",
+                                        "example": "N/A"
+                                    },
+                                    "depreciacion": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 0
+                                    },
+                                    "depreciacion_niif": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 0
+                                    },
+                                    "meses": {
+                                        "type": "string",
+                                        "example": "60"
+                                    },
+                                    "meses_niif": {
+                                        "type": "string",
+                                        "example": "60"
+                                    },
+                                    "tipo_adquisicion": {
+                                        "type": "string",
+                                        "example": "Compra"
+                                    },
+                                    "calibrado": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2023-01-20"
+                                    },
+                                    "observaciones": {
+                                        "type": "string",
+                                        "example": "Ninguna"
+                                    },
+                                    "cuenta_inventario": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 1500
+                                    },
+                                    "cuenta_gasto": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 0
+                                    },
+                                    "cuenta_salida": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 0
+                                    },
+                                    "grupo_activos": {
+                                        "type": "string",
+                                        "example": "Activos Fijos"
+                                    },
+                                    "valor_actual": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 1500
+                                    },
+                                    "depreciacion_acumulada": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 0
+                                    },
+                                    "tipo_bien": {
+                                        "type": "string",
+                                        "example": "Mueble/Enser"
+                                    },
+                                    "tiene_accesorio": {
+                                        "type": "string",
+                                        "example": "No"
+                                    },
+                                    "descripcion_accesorio": {
+                                        "type": "string",
+                                        "example": ""
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Inventario creado exitosamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Error de validación",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/inventario/{id}": {
+            "put": {
+                "tags": [
+                    "Inventario"
+                ],
+                "summary": "Actualizar item de inventario",
+                "description": "Actualiza un registro existente en el inventario. Requiere autenticación JWT y permiso inventario.update.",
+                "operationId": "9ebf84fcd85e22cf079c0ae00494093b",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "nombre": {
+                                        "type": "string",
+                                        "example": "Laptop Updated"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Inventario actualizado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Inventario no encontrado"
+                    },
+                    "403": {
+                        "description": "Prohibido"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Inventario"
+                ],
+                "summary": "Eliminar item de inventario",
+                "description": "Elimina un registro del inventario. Requiere autenticación JWT y permiso inventario.delete.",
+                "operationId": "25bebe75b2f22ac5cf43bab7a37158d6",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Inventario eliminado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Inventario no encontrado"
+                    },
+                    "403": {
+                        "description": "Prohibido"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/p-cargos": {
+            "get": {
+                "tags": [
+                    "PCargos"
+                ],
+                "summary": "Listar cargos",
+                "operationId": "731efd30214a37d000113a1793e49a66",
+                "responses": {
+                    "200": {
+                        "description": "Lista de cargos",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Prohibido"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "PCargos"
+                ],
+                "summary": "Crear cargo",
+                "operationId": "d76d41959ca6ee0cee0978700645ab5d",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "nombre": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Cargo creado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Prohibido"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/p-cargos/{id}": {
+            "get": {
+                "tags": [
+                    "PCargos"
+                ],
+                "summary": "Obtener cargo",
+                "operationId": "0e70494dddc6cc6547f90eab03cc7583",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Detalle del cargo",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No encontrado"
+                    },
+                    "403": {
+                        "description": "Prohibido"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "PCargos"
+                ],
+                "summary": "Actualizar cargo",
+                "operationId": "7aa88fe596b94ba36da89135881d5d65",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "nombre": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Actualizado exitosamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No encontrado"
+                    },
+                    "403": {
+                        "description": "Prohibido"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "PCargos"
+                ],
+                "summary": "Eliminar cargo",
+                "operationId": "35c9db6351adc3b219f0bdcf674c276f",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Eliminado exitosamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No encontrado"
+                    },
+                    "403": {
+                        "description": "Prohibido"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/personal": {
+            "get": {
+                "tags": [
+                    "Personal"
+                ],
+                "summary": "Listar personal",
+                "operationId": "b06eb1dcbe33c370fd8757aa138dbec7",
+                "responses": {
+                    "200": {
+                        "description": "Lista de personal",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Prohibido"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Personal"
+                ],
+                "summary": "Crear personal",
+                "operationId": "af3f4872a7d605eba5bb92df50691518",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "nombre": {
+                                        "type": "string"
+                                    },
+                                    "cedula": {
+                                        "type": "string"
+                                    },
+                                    "telefono": {
+                                        "type": "string"
+                                    },
+                                    "cargo_id": {
+                                        "type": "integer"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Personal creado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Prohibido"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/personal/{id}": {
+            "get": {
+                "tags": [
+                    "Personal"
+                ],
+                "summary": "Obtener personal",
+                "operationId": "88bd006eb75fd8592457a34b363e0c77",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Detalle del personal",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No encontrado"
+                    },
+                    "403": {
+                        "description": "Prohibido"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Personal"
+                ],
+                "summary": "Actualizar personal",
+                "operationId": "c1591b29f8695dd29d077f815e3304eb",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "nombre": {
+                                        "type": "string"
+                                    },
+                                    "cedula": {
+                                        "type": "string"
+                                    },
+                                    "telefono": {
+                                        "type": "string"
+                                    },
+                                    "cargo_id": {
+                                        "type": "integer"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Actualizado exitosamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No encontrado"
+                    },
+                    "403": {
+                        "description": "Prohibido"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Personal"
+                ],
+                "summary": "Eliminar personal",
+                "operationId": "7a6119e00ca786bb540f3c9c6787026b",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Eliminado exitosamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No encontrado"
+                    },
+                    "403": {
+                        "description": "Prohibido"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/roles": {
+            "get": {
+                "tags": [
+                    "Roles"
+                ],
+                "summary": "Listar roles",
+                "description": "Obtiene la lista de roles. Requiere permiso rol.read.",
+                "operationId": "bf78d43aa8b5c576b78b08b73c404cb6",
+                "responses": {
+                    "200": {
+                        "description": "Lista de roles",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Prohibido"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Roles"
+                ],
+                "summary": "Crear rol",
+                "description": "Crea un nuevo rol. Requiere permiso rol.create.",
+                "operationId": "19029466a195a478441990551cb1e8c9",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "nombre": {
+                                        "type": "string",
+                                        "example": "Editor"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Rol creado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Prohibido"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/roles/{id}": {
+            "get": {
+                "tags": [
+                    "Roles"
+                ],
+                "summary": "Obtener rol",
+                "description": "Obtiene los detalles de un rol. Requiere permiso rol.read.",
+                "operationId": "bcca3423f39b15abd0d0214dd6169f3c",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Detalles del rol",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Rol no encontrado"
+                    },
+                    "403": {
+                        "description": "Prohibido"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Roles"
+                ],
+                "summary": "Actualizar rol",
+                "description": "Actualiza un rol existente. Requiere permiso rol.update.",
+                "operationId": "0444e2e7859bbaa81749d090c06415a1",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "nombre": {
+                                        "type": "string",
+                                        "example": "Editor Senior"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Rol actualizado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Rol no encontrado"
+                    },
+                    "403": {
+                        "description": "Prohibido"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Roles"
+                ],
+                "summary": "Eliminar rol",
+                "description": "Elimina un rol. Requiere permiso rol.delete.",
+                "operationId": "de55f66883ee7b0d98d50e5e82e94f7e",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Rol eliminado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Rol no encontrado"
+                    },
+                    "403": {
+                        "description": "Prohibido"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/roles/{id}/permissions": {
+            "put": {
+                "tags": [
+                    "Roles"
+                ],
+                "summary": "Asignar permisos",
+                "description": "Sincroniza los permisos de un rol. Requiere permiso rol.assign_permission.",
+                "operationId": "aa6be97c163f64eddd7395a957b3e85a",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "permisos": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer"
+                                        },
+                                        "example": [
+                                            1,
+                                            2,
+                                            3
+                                        ]
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Permisos asignados",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Prohibido"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/sedes": {
+            "get": {
+                "tags": [
+                    "Sedes"
+                ],
+                "summary": "Listar sedes",
+                "operationId": "e4e3579a5f07c28ca6d4f8662557c1ac",
+                "responses": {
+                    "200": {
+                        "description": "Lista de sedes",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Prohibido"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Sedes"
+                ],
+                "summary": "Crear sede",
+                "operationId": "b65b9ad748fb1b213e4d3632c89a69d6",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "nombre": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Sede creada",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Prohibido"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/sedes/{id}": {
+            "get": {
+                "tags": [
+                    "Sedes"
+                ],
+                "summary": "Obtener sede",
+                "operationId": "54af3cc6d9cb62beac430923ef029a4a",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Detalle de la sede",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No encontrado"
+                    },
+                    "403": {
+                        "description": "Prohibido"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Sedes"
+                ],
+                "summary": "Actualizar sede",
+                "operationId": "4c9404e2c1412f3c08b3b6de158c1ff7",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "nombre": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Actualizada exitosamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No encontrado"
+                    },
+                    "403": {
+                        "description": "Prohibido"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Sedes"
+                ],
+                "summary": "Eliminar sede",
+                "operationId": "a214fda0cf8f1a889da2535929ebcb33",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Eliminada exitosamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No encontrado"
+                    },
+                    "403": {
+                        "description": "Prohibido"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/usuarios": {
+            "get": {
+                "tags": [
+                    "Usuarios"
+                ],
+                "summary": "Listar usuarios",
+                "description": "Obtiene una lista de todos los usuarios registrados.",
+                "operationId": "usuariosIndex",
+                "responses": {
+                    "200": {
+                        "description": "Lista de usuarios",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                },
+                                "example": {
+                                    "mensaje": "Lista de usuarios obtenida exitosamente",
+                                    "objeto": [
+                                        {
+                                            "id": 1,
+                                            "usuario": "admin",
+                                            "rol": []
+                                        }
+                                    ],
+                                    "status": 200
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Usuarios"
+                ],
+                "summary": "Crear usuario",
+                "description": "Registra un nuevo usuario en el sistema.",
+                "operationId": "usuariosStore",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "usuario",
+                                    "contrasena"
+                                ],
+                                "properties": {
+                                    "nombre_completo": {
+                                        "type": "string",
+                                        "example": "Juan Perez"
+                                    },
+                                    "usuario": {
+                                        "type": "string",
+                                        "example": "juan.perez"
+                                    },
+                                    "contrasena": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "secret123"
+                                    },
+                                    "correo": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "juan@example.com"
+                                    },
+                                    "rol_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "sede_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Usuario creado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Error de validación",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "ApiResponse": {
+                "title": "Respuesta Estándar",
+                "description": "Estructura de respuesta estándar para la API",
+                "properties": {
+                    "mensaje": {
+                        "type": "string",
+                        "example": "Operación exitosa"
+                    },
+                    "objeto": {
+                        "type": "object",
+                        "example": []
+                    },
+                    "status": {
+                        "type": "integer",
+                        "example": 200
+                    }
+                },
+                "type": "object"
+            }
+        },
+        "securitySchemes": {
+            "bearerAuth": {
+                "type": "http",
+                "description": "Ingrese el token JWT en el formato: Bearer {token}",
+                "name": "Authorization",
+                "in": "header",
+                "bearerFormat": "JWT",
+                "scheme": "bearer"
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Autenticación",
+            "description": "Autenticación"
+        },
+        {
+            "name": "CpProductos",
+            "description": "CpProductos"
+        },
+        {
+            "name": "CpProductosServicios",
+            "description": "CpProductosServicios"
+        },
+        {
+            "name": "CpProveedores",
+            "description": "CpProveedores"
+        },
+        {
+            "name": "CpTiposSolicitud",
+            "description": "CpTiposSolicitud"
+        },
+        {
+            "name": "DependenciasSedes",
+            "description": "DependenciasSedes"
+        },
+        {
+            "name": "Inventario",
+            "description": "Inventario"
+        },
+        {
+            "name": "PCargos",
+            "description": "PCargos"
+        },
+        {
+            "name": "Personal",
+            "description": "Personal"
+        },
+        {
+            "name": "Roles",
+            "description": "Roles"
+        },
+        {
+            "name": "Sedes",
+            "description": "Sedes"
+        },
+        {
+            "name": "Usuarios",
+            "description": "Usuarios"
+        }
+    ]
+}
