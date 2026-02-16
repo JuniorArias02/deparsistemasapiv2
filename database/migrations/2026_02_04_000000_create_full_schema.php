@@ -322,6 +322,8 @@ return new class extends Migration
         Schema::create('inventario', function (Blueprint $table) {
             $table->id('id');
             $table->string('codigo', 50);
+            $table->string('codigo2', 50);
+            $table->string('activo', 1);
             $table->string('nombre', 100);
             $table->string('dependencia', 100)->nullable();
             $table->string('responsable', 100)->nullable();

@@ -6,9 +6,14 @@ use App\Models\Personal;
 
 class PersonalService
 {
-    public function getAll()
+    public function getAll($search = null)
     {
-        return Personal::with('cargo')->get();
+        $query = Personal::with('cargo');
+        if ($search) {
+            $query->where('cedula', 'like', "%{$search}%")
+                  ->orWhere('nombre', 'like', "%{$search}%");
+        }
+        return $query->limit(20)->get();
     }
 
     public function create(array $data)

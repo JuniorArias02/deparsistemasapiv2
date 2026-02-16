@@ -6,9 +6,13 @@ use App\Models\DependenciaSede;
 
 class DependenciaSedeService
 {
-    public function getAll()
+    public function getAll($sede_id = null)
     {
-        return DependenciaSede::with('sede')->get();
+        $query = DependenciaSede::with('sede');
+        if ($sede_id) {
+            $query->where('sede_id', $sede_id);
+        }
+        return $query->get();
     }
 
     public function create(array $data)

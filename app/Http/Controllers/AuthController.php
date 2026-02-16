@@ -7,6 +7,9 @@ use App\Services\AuthService;
 use App\Responses\ApiResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log; // For error logging
+use App\Mail\LoginAlertMail;
 use App\Http\Controllers\Controller;
 use OpenApi\Attributes as OA;
 
@@ -77,6 +80,17 @@ class AuthController extends Controller
             return ApiResponse::error('Credenciales inválidas', 401);
         }
 
+        if ($result) {
+            try {
+                $user = auth('api')->user();
+                if ($user && $user->email) {
+                    Mail::to($user->email)->send(new LoginAlertMail($user, $request));
+                }
+            } catch (\Exception $e) {
+                Log::error('Error sending login alert email: ' . $e->getMessage());
+            }
+        }
+
         return ApiResponse::success($result, 'Login exitoso');
     }
 
@@ -109,5 +123,65 @@ class AuthController extends Controller
     {
         $this->authService->logout();
         return ApiResponse::success([], 'Sesión cerrada exitosamente');
+    }
+
+    public function sendResetCode(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'usuario' => 'required|string',
+        ]);
+
+        if ($validator->fails()) {
+            return ApiResponse::error('Error de validación', 422, $validator->errors());
+        }
+
+        $result = $this->authService->sendResetCode($request->usuario);
+
+        if (!$result['success']) {
+            return ApiResponse::error($result['message'], 404);
+        }
+
+        return ApiResponse::success([], $result['message']);
+    }
+
+    public function verifyResetCode(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'usuario' => 'required|string',
+            'codigo' => 'required|string',
+        ]);
+
+        if ($validator->fails()) {
+            return ApiResponse::error('Error de validación', 422, $validator->errors());
+        }
+
+        $result = $this->authService->verifyResetCode($request->usuario, $request->codigo);
+
+        if (!$result['success']) {
+            return ApiResponse::error($result['message'], 400);
+        }
+
+        return ApiResponse::success([], $result['message']);
+    }
+
+    public function resetPassword(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'usuario' => 'required|string',
+            'codigo' => 'required|string',
+            'password' => 'required|string|min:6|confirmed',
+        ]);
+
+        if ($validator->fails()) {
+            return ApiResponse::error('Error de validación', 422, $validator->errors());
+        }
+
+        $result = $this->authService->resetPassword($request->usuario, $request->codigo, $request->password);
+
+        if (!$result['success']) {
+            return ApiResponse::error($result['message'], 400);
+        }
+
+        return ApiResponse::success([], $result['message']);
     }
 }

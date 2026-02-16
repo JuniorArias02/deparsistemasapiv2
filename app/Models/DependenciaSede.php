@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class DependenciaSede extends Model
 {
     protected $table = 'dependencias_sedes';
-    public $timestamps = false; // dependencias_sedes table in migration does not have timestamps
+    public $timestamps = false; 
 
     protected $fillable = [
         'sede_id',

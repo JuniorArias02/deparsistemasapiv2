@@ -6,9 +6,14 @@ use App\Models\CpProductoServicio;
 
 class CpProductoServicioService
 {
-    public function getAll()
+    public function getAll($search = null)
     {
-        return CpProductoServicio::all();
+        $query = CpProductoServicio::query();
+        if ($search) {
+            $query->where('codigo_producto', 'like', "%{$search}%")
+                  ->orWhere('nombre', 'like', "%{$search}%");
+        }
+        return $query->limit(20)->get();
     }
 
     public function create(array $data)

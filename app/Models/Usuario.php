@@ -3,12 +3,13 @@
 namespace App\Models;
 
 use Tymon\JWTAuth\Contracts\JWTSubject;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
 class Usuario extends Authenticatable implements JWTSubject
 {
-    use Notifiable;
+    use HasFactory, Notifiable;
 
     protected $table = 'usuarios';
 
@@ -24,6 +25,9 @@ class Usuario extends Authenticatable implements JWTSubject
         'estado',
         'sede_id',
         'firma_digital',
+        'codigo_verificacion',
+        'codigo_verificacion_expira_at',
+        'foto_usuario',
     ];
 
     protected $hidden = [

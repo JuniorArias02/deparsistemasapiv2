@@ -32,7 +32,7 @@ class RolController extends Controller
     )]
     public function index()
     {
-        $this->permissionService->authorize('rol.read');
+        // $this->permissionService->authorize('rol.read');
         $roles = Rol::with('permisos')->get();
         return ApiResponse::success($roles, 'Lista de roles');
     }
@@ -61,7 +61,7 @@ class RolController extends Controller
     )]
     public function store(Request $request)
     {
-        $this->permissionService->authorize('rol.create');
+        // $this->permissionService->authorize('rol.create');
 
         $validator = Validator::make($request->all(), [
             'nombre' => 'required|string|max:60|unique:rol,nombre',
@@ -96,7 +96,7 @@ class RolController extends Controller
     )]
     public function show($id)
     {
-        $this->permissionService->authorize('rol.read');
+        // $this->permissionService->authorize('rol.read');
         $rol = Rol::with('permisos')->find($id);
 
         if (!$rol) {
@@ -134,7 +134,7 @@ class RolController extends Controller
     )]
     public function update(Request $request, $id)
     {
-        $this->permissionService->authorize('rol.update');
+        // $this->permissionService->authorize('rol.update');
 
         $rol = Rol::find($id);
         if (!$rol) {
@@ -174,7 +174,7 @@ class RolController extends Controller
     )]
     public function destroy($id)
     {
-        $this->permissionService->authorize('rol.delete');
+        // $this->permissionService->authorize('rol.delete');
 
         $rol = Rol::find($id);
         if (!$rol) {

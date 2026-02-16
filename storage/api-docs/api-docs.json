@@ -15,6 +15,229 @@
         }
     ],
     "paths": {
+        "/api/areas": {
+            "get": {
+                "tags": [
+                    "Areas"
+                ],
+                "summary": "Listar areas",
+                "description": "Obtiene la lista de areas. Requiere permiso area.read.",
+                "operationId": "f16518e18a005a2f966b63c0e1745342",
+                "responses": {
+                    "200": {
+                        "description": "Lista de areas",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Prohibido"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Areas"
+                ],
+                "summary": "Crear area",
+                "description": "Crea una nueva area. Requiere permiso area.create.",
+                "operationId": "beeb06a4f56c4e31c8448c405163bed9",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "nombre": {
+                                        "type": "string",
+                                        "example": "Recursos Humanos"
+                                    },
+                                    "sede_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Area creada",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Prohibido"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/areas/{id}": {
+            "get": {
+                "tags": [
+                    "Areas"
+                ],
+                "summary": "Obtener area",
+                "description": "Obtiene los detalles de una area. Requiere permiso area.read.",
+                "operationId": "d45f3822a5bdba2f44520ac32857bfb4",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Detalles del area",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Area no encontrada"
+                    },
+                    "403": {
+                        "description": "Prohibido"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Areas"
+                ],
+                "summary": "Actualizar area",
+                "description": "Actualiza una area existente. Requiere permiso area.update.",
+                "operationId": "cc20a1af054acc1ea386968c8d9ba095",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "nombre": {
+                                        "type": "string",
+                                        "example": "Recursos Humanos Actualizado"
+                                    },
+                                    "sede_id": {
+                                        "type": "integer",
+                                        "example": 2
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Area actualizada",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Area no encontrada"
+                    },
+                    "403": {
+                        "description": "Prohibido"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Areas"
+                ],
+                "summary": "Eliminar area",
+                "description": "Elimina una area. Requiere permiso area.delete.",
+                "operationId": "820be3b502aa09c30f43b877c1c4527e",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Area eliminada",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Area no encontrada"
+                    },
+                    "403": {
+                        "description": "Prohibido"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/auth/login": {
             "post": {
                 "tags": [
@@ -109,6 +332,1092 @@
                                 }
                             }
                         }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/cp-centro-costos": {
+            "get": {
+                "tags": [
+                    "CP Centro Costos"
+                ],
+                "summary": "Listar centros de costo",
+                "description": "Obtiene la lista de centros de costo. Requiere permiso cp_centro_costo.read.",
+                "operationId": "09e6eeb574917e31ba91a394c493ff58",
+                "responses": {
+                    "200": {
+                        "description": "Lista de centros de costo",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Prohibido"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "CP Centro Costos"
+                ],
+                "summary": "Crear centro de costo",
+                "description": "Crea un nuevo centro de costo. Requiere permiso cp_centro_costo.create.",
+                "operationId": "ac0ca0d1fadf7f565e48985bfcac65f1",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "codigo": {
+                                        "type": "integer",
+                                        "example": 101
+                                    },
+                                    "nombre": {
+                                        "type": "string",
+                                        "example": "Recursos Humanos"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Centro de costo creado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Prohibido"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/cp-centro-costos/{id}": {
+            "get": {
+                "tags": [
+                    "CP Centro Costos"
+                ],
+                "summary": "Obtener centro de costo",
+                "description": "Obtiene los detalles de un centro de costo. Requiere permiso cp_centro_costo.read.",
+                "operationId": "f4f19dd460fbc8eabf40874ebbeb058e",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Detalles del centro de costo",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Centro de costo no encontrado"
+                    },
+                    "403": {
+                        "description": "Prohibido"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "CP Centro Costos"
+                ],
+                "summary": "Actualizar centro de costo",
+                "description": "Actualiza un centro de costo existente. Requiere permiso cp_centro_costo.update.",
+                "operationId": "638e29e0a9244c02a8778e0592b08c75",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "codigo": {
+                                        "type": "integer",
+                                        "example": 102
+                                    },
+                                    "nombre": {
+                                        "type": "string",
+                                        "example": "Recursos Humanos Updated"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Centro de costo actualizado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Centro de costo no encontrado"
+                    },
+                    "403": {
+                        "description": "Prohibido"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "CP Centro Costos"
+                ],
+                "summary": "Eliminar centro de costo",
+                "description": "Elimina un centro de costo. Requiere permiso cp_centro_costo.delete.",
+                "operationId": "9a96642ae827e0dee14c72967c1e27d3",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Centro de costo eliminado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Centro de costo no encontrado"
+                    },
+                    "403": {
+                        "description": "Prohibido"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/cp-dependencias": {
+            "get": {
+                "tags": [
+                    "CP Dependencias"
+                ],
+                "summary": "Listar dependencias",
+                "description": "Obtiene la lista de dependencias. Requiere permiso cp_dependencia.read.",
+                "operationId": "a41556a014f9f7c96357bc0cab7edf09",
+                "responses": {
+                    "200": {
+                        "description": "Lista de dependencias",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Prohibido"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "CP Dependencias"
+                ],
+                "summary": "Crear dependencia",
+                "description": "Crea una nueva dependencia. Requiere permiso cp_dependencia.create.",
+                "operationId": "9ca688b3f54e1521bccd546f3e16b518",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "codigo": {
+                                        "type": "integer",
+                                        "example": 123
+                                    },
+                                    "nombre": {
+                                        "type": "string",
+                                        "example": "Dirección General"
+                                    },
+                                    "sede_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Dependencia creada",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Prohibido"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/cp-dependencias/{id}": {
+            "get": {
+                "tags": [
+                    "CP Dependencias"
+                ],
+                "summary": "Obtener dependencia",
+                "description": "Obtiene los detalles de una dependencia. Requiere permiso cp_dependencia.read.",
+                "operationId": "a24915b848bd362fce73d3e2c76689fa",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Detalles de la dependencia",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Dependencia no encontrada"
+                    },
+                    "403": {
+                        "description": "Prohibido"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "CP Dependencias"
+                ],
+                "summary": "Actualizar dependencia",
+                "description": "Actualiza una dependencia existente. Requiere permiso cp_dependencia.update.",
+                "operationId": "0f3b09198362f30b2285de28dce3ddb6",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "codigo": {
+                                        "type": "integer",
+                                        "example": 124
+                                    },
+                                    "nombre": {
+                                        "type": "string",
+                                        "example": "Dirección General Actualizada"
+                                    },
+                                    "sede_id": {
+                                        "type": "integer",
+                                        "example": 2
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Dependencia actualizada",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Dependencia no encontrada"
+                    },
+                    "403": {
+                        "description": "Prohibido"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "CP Dependencias"
+                ],
+                "summary": "Eliminar dependencia",
+                "description": "Elimina una dependencia. Requiere permiso cp_dependencia.delete.",
+                "operationId": "ff45f7cdde7406543f79a5650c59ac1b",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Dependencia eliminada",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Dependencia no encontrada"
+                    },
+                    "403": {
+                        "description": "Prohibido"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/cp-entrega-activos-fijos": {
+            "get": {
+                "tags": [
+                    "Entrega de Activos Fijos"
+                ],
+                "summary": "Listar entregas de activos fijos",
+                "description": "Obtiene la lista de entregas de activos fijos con sus relaciones.",
+                "operationId": "ea8055126bf17a5fad19af881604fd1c",
+                "responses": {
+                    "200": {
+                        "description": "Lista de entregas"
+                    },
+                    "403": {
+                        "description": "Prohibido"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Entrega de Activos Fijos"
+                ],
+                "summary": "Crear entrega de activos fijos",
+                "description": "Crea una nueva entrega de activos fijos con sus items.",
+                "operationId": "f87cc2ee92e1961ceb5eb36d854faf90",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "personal_id",
+                                    "sede_id",
+                                    "proceso_solicitante",
+                                    "coordinador_id",
+                                    "fecha_entrega",
+                                    "items"
+                                ],
+                                "properties": {
+                                    "personal_id": {
+                                        "description": "ID del personal que recibe",
+                                        "type": "integer"
+                                    },
+                                    "sede_id": {
+                                        "description": "ID de la sede",
+                                        "type": "integer"
+                                    },
+                                    "proceso_solicitante": {
+                                        "description": "ID del proceso solicitante",
+                                        "type": "integer"
+                                    },
+                                    "coordinador_id": {
+                                        "description": "ID del coordinador",
+                                        "type": "integer"
+                                    },
+                                    "fecha_entrega": {
+                                        "description": "Fecha de entrega",
+                                        "type": "string",
+                                        "format": "date"
+                                    },
+                                    "firma_quien_entrega": {
+                                        "description": "Firma de quien entrega",
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "firma_quien_recibe": {
+                                        "description": "Firma de quien recibe",
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "items": {
+                                        "description": "Lista de items a entregar",
+                                        "type": "array",
+                                        "items": {
+                                            "required": [
+                                                "item_id"
+                                            ],
+                                            "properties": {
+                                                "item_id": {
+                                                    "description": "ID del item de inventario",
+                                                    "type": "integer"
+                                                },
+                                                "es_accesorio": {
+                                                    "description": "Si es un accesorio",
+                                                    "type": "boolean"
+                                                },
+                                                "accesorio_descripcion": {
+                                                    "description": "Descripción del accesorio",
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Entrega creada exitosamente"
+                    },
+                    "422": {
+                        "description": "Error de validación"
+                    },
+                    "500": {
+                        "description": "Error del servidor"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/cp-entrega-activos-fijos/{id}": {
+            "get": {
+                "tags": [
+                    "Entrega de Activos Fijos"
+                ],
+                "summary": "Obtener entrega específica",
+                "description": "Display the specified resource.",
+                "operationId": "4ee9e73ca569ad8443947934456815d2",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Entrega encontrada"
+                    },
+                    "404": {
+                        "description": "Entrega no encontrada"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Entrega de Activos Fijos"
+                ],
+                "summary": "Actualizar entrega",
+                "description": "Update the specified resource in storage.",
+                "operationId": "286ede7f163aa7991e4dd4fc5e4118c6",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Entrega actualizada"
+                    },
+                    "404": {
+                        "description": "Entrega no encontrada"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Entrega de Activos Fijos"
+                ],
+                "summary": "Eliminar entrega",
+                "description": "Remove the specified resource from storage.",
+                "operationId": "b127878c874541a665ee0951a713ccba",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Entrega eliminada"
+                    },
+                    "404": {
+                        "description": "Entrega no encontrada"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/cp-pedidos": {
+            "get": {
+                "tags": [
+                    "Pedidos de Compra"
+                ],
+                "summary": "Listar pedidos de compra",
+                "description": "Obtiene la lista de pedidos de compra con sus relaciones.",
+                "operationId": "ccd36ef583f8abbbb28e84685ca776ac",
+                "responses": {
+                    "200": {
+                        "description": "Lista de pedidos",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/CpPedido"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Prohibido"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Pedidos de Compra"
+                ],
+                "summary": "Crear pedido de compra",
+                "description": "Crea un nuevo pedido de compra con sus items.",
+                "operationId": "3f1b7c7b252ca3900066e4931c617fb9",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "proceso_solicitante",
+                                    "tipo_solicitud",
+                                    "consecutivo",
+                                    "sede_id",
+                                    "elaborado_por",
+                                    "elaborado_por_firma",
+                                    "items"
+                                ],
+                                "properties": {
+                                    "proceso_solicitante": {
+                                        "description": "ID de la dependencia solicitante",
+                                        "type": "integer"
+                                    },
+                                    "tipo_solicitud": {
+                                        "description": "ID del tipo de solicitud",
+                                        "type": "integer"
+                                    },
+                                    "consecutivo": {
+                                        "description": "Número consecutivo único",
+                                        "type": "integer"
+                                    },
+                                    "observacion": {
+                                        "description": "Observaciones generales",
+                                        "type": "string"
+                                    },
+                                    "sede_id": {
+                                        "description": "ID de la sede",
+                                        "type": "integer"
+                                    },
+                                    "elaborado_por": {
+                                        "description": "ID del usuario que elabora",
+                                        "type": "integer"
+                                    },
+                                    "elaborado_por_firma": {
+                                        "description": "Archivo de firma (PNG < 1MB)",
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "items": {
+                                        "description": "Lista de items del pedido",
+                                        "type": "array",
+                                        "items": {
+                                            "required": [
+                                                "nombre",
+                                                "cantidad",
+                                                "unidad_medida",
+                                                "productos_id"
+                                            ],
+                                            "properties": {
+                                                "nombre": {
+                                                    "type": "string"
+                                                },
+                                                "cantidad": {
+                                                    "type": "integer"
+                                                },
+                                                "unidad_medida": {
+                                                    "type": "string"
+                                                },
+                                                "referencia_items": {
+                                                    "type": "string"
+                                                },
+                                                "productos_id": {
+                                                    "type": "integer"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Pedido creado exitosamente"
+                    },
+                    "422": {
+                        "description": "Error de validación"
+                    },
+                    "500": {
+                        "description": "Error del servidor"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/cp-pedidos/{id}": {
+            "get": {
+                "tags": [
+                    "Pedidos de Compra"
+                ],
+                "summary": "Obtener pedido de compra",
+                "description": "Obtiene los detalles de un pedido específico.",
+                "operationId": "fa8c8c2f8dbb9c2f3ffc6b2c80fff71d",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Detalles del pedido",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CpPedido"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Pedido no encontrado"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Pedidos de Compra"
+                ],
+                "summary": "Eliminar pedido de compra",
+                "description": "Elimina un pedido y sus items asociados.",
+                "operationId": "83cfa46b55f5cdb29ae5fe2ba92fd98f",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Pedido eliminado"
+                    },
+                    "404": {
+                        "description": "Pedido no encontrado"
+                    },
+                    "500": {
+                        "description": "Error del servidor"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/cp-pedidos/{id}/aprobar-compras": {
+            "post": {
+                "tags": [
+                    "Pedidos de Compra"
+                ],
+                "summary": "Aprobar pedido (Compras)",
+                "description": "Aprueba un pedido por parte del área de compras.",
+                "operationId": "ab774051aae2e84b89d143819c77c317",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "proceso_compra_firma"
+                                ],
+                                "properties": {
+                                    "motivo_aprobacion": {
+                                        "description": "Motivo de la aprobación (opcional)",
+                                        "type": "string"
+                                    },
+                                    "proceso_compra_firma": {
+                                        "description": "Archivo de firma (PNG < 1MB)",
+                                        "type": "string",
+                                        "format": "binary"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Pedido aprobado"
+                    },
+                    "404": {
+                        "description": "Pedido no encontrado"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/cp-pedidos/{id}/rechazar-compras": {
+            "post": {
+                "tags": [
+                    "Pedidos de Compra"
+                ],
+                "summary": "Rechazar pedido (Compras)",
+                "description": "Rechaza un pedido por parte del área de compras.",
+                "operationId": "773b0d9c618a78c105e0f10215022a00",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "motivo": {
+                                        "description": "Motivo del rechazo",
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Pedido rechazado"
+                    },
+                    "404": {
+                        "description": "Pedido no encontrado"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/cp-pedidos/{id}/aprobar-gerencia": {
+            "post": {
+                "tags": [
+                    "Pedidos de Compra"
+                ],
+                "summary": "Aprobar pedido (Gerencia)",
+                "description": "Aprueba un pedido por parte de la gerencia.",
+                "operationId": "d20a5a5f06554a1a1d230ced8c74a5d3",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": false,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "observacion_gerencia": {
+                                        "description": "Observación de gerencia (opcional)",
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Pedido aprobado"
+                    },
+                    "404": {
+                        "description": "Pedido no encontrado"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/cp-pedidos/{id}/rechazar-gerencia": {
+            "post": {
+                "tags": [
+                    "Pedidos de Compra"
+                ],
+                "summary": "Rechazar pedido (Gerencia)",
+                "description": "Rechaza un pedido por parte de la gerencia.",
+                "operationId": "597ace56f2128b6945cbb49e887e2083",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "observacion_gerencia": {
+                                        "description": "Observación de gerencia (obligatoria)",
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Pedido rechazado"
+                    },
+                    "404": {
+                        "description": "Pedido no encontrado"
                     }
                 },
                 "security": [
@@ -977,6 +2286,217 @@
                 ]
             }
         },
+        "/api/datos-empresa": {
+            "get": {
+                "tags": [
+                    "DatosEmpresa"
+                ],
+                "summary": "Listar datos de empresas",
+                "operationId": "baab60db567af6979c8bdf8390a152bc",
+                "responses": {
+                    "200": {
+                        "description": "Lista obtenida",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Prohibido"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "DatosEmpresa"
+                ],
+                "summary": "Registrar empresa",
+                "operationId": "89a84dbd38e27f1d49d0cdcb477fa8f8",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "nombre": {
+                                        "type": "string"
+                                    },
+                                    "nit": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Creado exitosamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Prohibido"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/datos-empresa/{id}": {
+            "get": {
+                "tags": [
+                    "DatosEmpresa"
+                ],
+                "summary": "Obtener empresa",
+                "operationId": "d67c6245356efac6253b004b49f7dd0f",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Detalle",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No encontrado"
+                    },
+                    "403": {
+                        "description": "Prohibido"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "DatosEmpresa"
+                ],
+                "summary": "Actualizar empresa",
+                "operationId": "d07e98f66669c8a999f88c1285e91260",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "nombre": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Actualizado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No encontrado"
+                    },
+                    "403": {
+                        "description": "Prohibido"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "DatosEmpresa"
+                ],
+                "summary": "Eliminar empresa",
+                "operationId": "6257defc8ca4ad02dfcdd6ae91a98a02",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Eliminado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No encontrado"
+                    },
+                    "403": {
+                        "description": "Prohibido"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/dependencias-sedes": {
             "get": {
                 "tags": [
@@ -1192,6 +2712,47 @@
             }
         },
         "/api/inventario": {
+            "get": {
+                "tags": [
+                    "Inventario"
+                ],
+                "summary": "Listar todos los items de inventario",
+                "description": "Obtiene la lista completa de items en el inventario. Requiere autenticación JWT.",
+                "operationId": "03139d0b0bc3caa503ea7d4c66054829",
+                "responses": {
+                    "200": {
+                        "description": "Lista de items de inventario",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "mensaje": {
+                                            "type": "string",
+                                            "example": "Lista de inventario"
+                                        },
+                                        "objeto": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object"
+                                            }
+                                        },
+                                        "status": {
+                                            "type": "integer",
+                                            "example": 200
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
             "post": {
                 "tags": [
                     "Inventario"
@@ -1729,6 +3290,1671 @@
                     },
                     "403": {
                         "description": "Prohibido"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/pc-caracteristicas-tecnicas": {
+            "get": {
+                "tags": [
+                    "PcCaracteristicasTecnicas"
+                ],
+                "summary": "Listar características técnicas",
+                "operationId": "952ddc7986ddf10ca25607c3ad628d50",
+                "responses": {
+                    "200": {
+                        "description": "Lista obtenida",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Prohibido"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "PcCaracteristicasTecnicas"
+                ],
+                "summary": "Crear características técnicas",
+                "operationId": "2da779f614256631e1aa68b8679790ad",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "equipo_id": {
+                                        "type": "integer"
+                                    },
+                                    "procesador": {
+                                        "type": "string"
+                                    },
+                                    "memoria_ram": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Creado exitosamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Prohibido"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/pc-caracteristicas-tecnicas/{id}": {
+            "get": {
+                "tags": [
+                    "PcCaracteristicasTecnicas"
+                ],
+                "summary": "Obtener por ID",
+                "operationId": "0bbe8af0969c9a26eb7211f7d4a48347",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Detalle",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No encontrado"
+                    },
+                    "403": {
+                        "description": "Prohibido"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "PcCaracteristicasTecnicas"
+                ],
+                "summary": "Actualizar características",
+                "operationId": "50cfb964096e335853c11cd79c791465",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "procesador": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Actualizado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No encontrado"
+                    },
+                    "403": {
+                        "description": "Prohibido"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "PcCaracteristicasTecnicas"
+                ],
+                "summary": "Eliminar características",
+                "operationId": "e9662ffb4069cdc7a9ec9814570f2d97",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Eliminado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No encontrado"
+                    },
+                    "403": {
+                        "description": "Prohibido"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/pc-caracteristicas-tecnicas/equipo/{equipo_id}": {
+            "get": {
+                "tags": [
+                    "PcCaracteristicasTecnicas"
+                ],
+                "summary": "Obtener por ID de Equipo",
+                "operationId": "3f8c8f8ab9ab3e9920912e2359dc14ca",
+                "parameters": [
+                    {
+                        "name": "equipo_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Detalle",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No encontrado"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/pc-devueltos": {
+            "get": {
+                "tags": [
+                    "PcDevueltos"
+                ],
+                "summary": "Listar devoluciones",
+                "operationId": "0b53234d4ab63e3a18fbb8238cc9dd41",
+                "responses": {
+                    "200": {
+                        "description": "Lista obtenida",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Prohibido"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "PcDevueltos"
+                ],
+                "summary": "Registrar devolución",
+                "operationId": "53b5baaa05e368ce760a75243cc6d746",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "entrega_id": {
+                                        "type": "integer"
+                                    },
+                                    "firma_entrega": {
+                                        "type": "string"
+                                    },
+                                    "firma_recibe": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Creado exitosamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Prohibido"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/pc-devueltos/{id}": {
+            "get": {
+                "tags": [
+                    "PcDevueltos"
+                ],
+                "summary": "Obtener devolución",
+                "operationId": "c61257ef59cb4691452d2a7713b04bd0",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Detalle",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No encontrado"
+                    },
+                    "403": {
+                        "description": "Prohibido"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "PcDevueltos"
+                ],
+                "summary": "Actualizar devolución",
+                "operationId": "5cb7aca57f2386f384502d6b45297bd0",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "observaciones": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Actualizado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No encontrado"
+                    },
+                    "403": {
+                        "description": "Prohibido"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "PcDevueltos"
+                ],
+                "summary": "Eliminar devolución",
+                "operationId": "dc09f34d14b70a25cc1c1f77546951ad",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Eliminado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No encontrado"
+                    },
+                    "403": {
+                        "description": "Prohibido"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/pc-entregas": {
+            "get": {
+                "tags": [
+                    "PcEntregas"
+                ],
+                "summary": "Listar entregas",
+                "operationId": "e6e77d3e779ee5a278944e4225bc2a11",
+                "responses": {
+                    "200": {
+                        "description": "Lista obtenida",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Prohibido"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "PcEntregas"
+                ],
+                "summary": "Crear entrega",
+                "operationId": "45457692938187bdd5293bf7e48c1f07",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "equipo_id": {
+                                        "type": "integer"
+                                    },
+                                    "funcionario_id": {
+                                        "type": "integer"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Creado exitosamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Prohibido"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/pc-entregas/{id}": {
+            "get": {
+                "tags": [
+                    "PcEntregas"
+                ],
+                "summary": "Obtener entrega",
+                "operationId": "91259bd2a244bf5e6cdc815d2a659836",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Detalle",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No encontrado"
+                    },
+                    "403": {
+                        "description": "Prohibido"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "PcEntregas"
+                ],
+                "summary": "Actualizar entrega",
+                "operationId": "9a125d01447f80a0b55a7bf6fe8556f2",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "estado": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Actualizado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No encontrado"
+                    },
+                    "403": {
+                        "description": "Prohibido"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "PcEntregas"
+                ],
+                "summary": "Eliminar entrega",
+                "operationId": "45bae994f4961e22211965df220dd091",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Eliminado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No encontrado"
+                    },
+                    "403": {
+                        "description": "Prohibido"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/pc-equipos": {
+            "get": {
+                "tags": [
+                    "PcEquipos"
+                ],
+                "summary": "Listar equipos de PC",
+                "operationId": "cd7eaf96715131affc08f86af405f038",
+                "responses": {
+                    "200": {
+                        "description": "Lista de equipos",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Prohibido"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "PcEquipos"
+                ],
+                "summary": "Crear equipo de PC",
+                "operationId": "3118439ed9110505c8612b0c6bc7d0e0",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "serial": {
+                                        "type": "string"
+                                    },
+                                    "nombre_equipo": {
+                                        "type": "string"
+                                    },
+                                    "sede_id": {
+                                        "type": "integer"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Creado exitosamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Prohibido"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/pc-equipos/{id}": {
+            "get": {
+                "tags": [
+                    "PcEquipos"
+                ],
+                "summary": "Obtener detalle de equipo",
+                "operationId": "6da2c33b523691d67b24a3d985605651",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Detalle",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No encontrado"
+                    },
+                    "403": {
+                        "description": "Prohibido"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "PcEquipos"
+                ],
+                "summary": "Actualizar equipo",
+                "operationId": "6d3158750bb4cb9f2a9c1f16403ba567",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "nombre_equipo": {
+                                        "type": "string"
+                                    },
+                                    "marca": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Actualizado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No encontrado"
+                    },
+                    "403": {
+                        "description": "Prohibido"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "PcEquipos"
+                ],
+                "summary": "Eliminar equipo",
+                "operationId": "03ff57569c6a21884a5b719482648980",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Eliminado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No encontrado"
+                    },
+                    "403": {
+                        "description": "Prohibido"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/pc-licencias-software": {
+            "get": {
+                "tags": [
+                    "PcLicenciasSoftware"
+                ],
+                "summary": "Listar licencias",
+                "operationId": "b27fa2e24578141aafb6eb59481272eb",
+                "responses": {
+                    "200": {
+                        "description": "Lista obtenida",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Prohibido"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "PcLicenciasSoftware"
+                ],
+                "summary": "Registrar licencia",
+                "operationId": "99e2032e4d62ef334ce1b2374fee83e4",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "equipo_id": {
+                                        "type": "integer"
+                                    },
+                                    "windows": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Creado exitosamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Prohibido"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/pc-licencias-software/{id}": {
+            "get": {
+                "tags": [
+                    "PcLicenciasSoftware"
+                ],
+                "summary": "Obtener licencia",
+                "operationId": "e5dd2ddf456fcf01d016465b784910cb",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Detalle",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No encontrado"
+                    },
+                    "403": {
+                        "description": "Prohibido"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "PcLicenciasSoftware"
+                ],
+                "summary": "Actualizar licencia",
+                "operationId": "f957eed5eb0a9294dbd6a99f8e5bd894",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "windows": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Actualizado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No encontrado"
+                    },
+                    "403": {
+                        "description": "Prohibido"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "PcLicenciasSoftware"
+                ],
+                "summary": "Eliminar licencia",
+                "operationId": "e2adaaa0a8c5c6dd8b73a74f74378a7b",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Eliminado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No encontrado"
+                    },
+                    "403": {
+                        "description": "Prohibido"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/pc-licencias-software/equipo/{equipo_id}": {
+            "get": {
+                "tags": [
+                    "PcLicenciasSoftware"
+                ],
+                "summary": "Obtener licencia por equipo",
+                "operationId": "9a996836aa706b7f2fba3ed43b69576d",
+                "parameters": [
+                    {
+                        "name": "equipo_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Detalle",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No encontrado"
+                    },
+                    "403": {
+                        "description": "Prohibido"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/pc-mantenimientos": {
+            "get": {
+                "tags": [
+                    "PcMantenimientos"
+                ],
+                "summary": "Listar mantenimientos",
+                "operationId": "75bbfb577071b880ac58bff8cda5326d",
+                "responses": {
+                    "200": {
+                        "description": "Lista obtenida",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Prohibido"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "PcMantenimientos"
+                ],
+                "summary": "Crear mantenimiento",
+                "operationId": "f3fe73fd62bcf56812459046018a5c2e",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "equipo_id": {
+                                        "type": "integer"
+                                    },
+                                    "tipo_mantenimiento": {
+                                        "type": "string",
+                                        "enum": [
+                                            "preventivo",
+                                            "correctivo"
+                                        ]
+                                    },
+                                    "descripcion": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Creado exitosamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Prohibido"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/pc-mantenimientos/{id}": {
+            "get": {
+                "tags": [
+                    "PcMantenimientos"
+                ],
+                "summary": "Obtener mantenimiento",
+                "operationId": "58f868f5a30dc0246d7540750557ea3d",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Detalle",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No encontrado"
+                    },
+                    "403": {
+                        "description": "Prohibido"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "PcMantenimientos"
+                ],
+                "summary": "Actualizar mantenimiento",
+                "operationId": "d9eb6c9d7ac7098a0d373439818cb7fe",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "descripcion": {
+                                        "type": "string"
+                                    },
+                                    "estado": {
+                                        "type": "string",
+                                        "enum": [
+                                            "completado",
+                                            "pendiente"
+                                        ]
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Actualizado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No encontrado"
+                    },
+                    "403": {
+                        "description": "Prohibido"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "PcMantenimientos"
+                ],
+                "summary": "Eliminar mantenimiento",
+                "operationId": "31012178d4dededac55cb4ef5ea5992c",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Eliminado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No encontrado"
+                    },
+                    "403": {
+                        "description": "Prohibido"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/pc-mantenimientos/equipo/{equipo_id}": {
+            "get": {
+                "tags": [
+                    "PcMantenimientos"
+                ],
+                "summary": "Listar mantenimientos por equipo",
+                "operationId": "d00a986454fb5afd573570d5152f2977",
+                "parameters": [
+                    {
+                        "name": "equipo_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Lista obtenida",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No encontrado"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/pc-perifericos-entregados": {
+            "get": {
+                "tags": [
+                    "PcPerifericosEntregados"
+                ],
+                "summary": "Listar periféricos entregados",
+                "operationId": "5adf5b8dd3c3ed403c7fb71f55f44439",
+                "responses": {
+                    "200": {
+                        "description": "Lista obtenida",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Prohibido"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "PcPerifericosEntregados"
+                ],
+                "summary": "Registrar periférico en entrega",
+                "operationId": "07336643e3cf6635e44e980841e7cf0e",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "entrega_id": {
+                                        "type": "integer"
+                                    },
+                                    "inventario_id": {
+                                        "type": "integer"
+                                    },
+                                    "cantidad": {
+                                        "type": "integer"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Creado exitosamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Prohibido"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/pc-perifericos-entregados/{id}": {
+            "get": {
+                "tags": [
+                    "PcPerifericosEntregados"
+                ],
+                "summary": "Obtener periférico entregado",
+                "operationId": "acc8611f8081fd1edeb4fe3475ce454e",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Detalle",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No encontrado"
+                    },
+                    "403": {
+                        "description": "Prohibido"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "PcPerifericosEntregados"
+                ],
+                "summary": "Actualizar registro",
+                "operationId": "1c2bb3c1807f26a7c1fc0376e795120d",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "cantidad": {
+                                        "type": "integer"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Actualizado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No encontrado"
+                    },
+                    "403": {
+                        "description": "Prohibido"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "PcPerifericosEntregados"
+                ],
+                "summary": "Eliminar registro",
+                "operationId": "b1312e3b15b0cc87cae93c3f8be119ba",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Eliminado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No encontrado"
+                    },
+                    "403": {
+                        "description": "Prohibido"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/pc-perifericos-entregados/entrega/{entrega_id}": {
+            "get": {
+                "tags": [
+                    "PcPerifericosEntregados"
+                ],
+                "summary": "Listar por Entrega",
+                "operationId": "dcd58f5a45441f289847d45bfd21898e",
+                "parameters": [
+                    {
+                        "name": "entrega_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Lista obtenida",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No encontrado"
                     }
                 },
                 "security": [
@@ -2596,6 +5822,93 @@
                     }
                 },
                 "type": "object"
+            },
+            "CpPedido": {
+                "description": "Modelo de Pedido de Compra",
+                "required": [
+                    "id",
+                    "estado_compras",
+                    "fecha_solicitud",
+                    "proceso_solicitante",
+                    "tipo_solicitud",
+                    "consecutivo",
+                    "sede_id",
+                    "elaborado_por"
+                ],
+                "properties": {
+                    "id": {
+                        "description": "ID del pedido",
+                        "type": "integer"
+                    },
+                    "estado_compras": {
+                        "description": "Estado de compras",
+                        "type": "string",
+                        "enum": [
+                            "pendiente",
+                            "aprobado",
+                            "rechazado",
+                            "en proceso"
+                        ]
+                    },
+                    "fecha_solicitud": {
+                        "description": "Fecha de solicitud",
+                        "type": "string",
+                        "format": "date"
+                    },
+                    "proceso_solicitante": {
+                        "description": "ID de la dependencia solicitante",
+                        "type": "integer"
+                    },
+                    "tipo_solicitud": {
+                        "description": "ID del tipo de solicitud",
+                        "type": "integer"
+                    },
+                    "consecutivo": {
+                        "description": "Consecutivo único",
+                        "type": "integer"
+                    },
+                    "observacion": {
+                        "description": "Observaciones",
+                        "type": "string"
+                    },
+                    "sede_id": {
+                        "description": "ID de la sede",
+                        "type": "integer"
+                    },
+                    "elaborado_por": {
+                        "description": "ID del usuario que elaboró",
+                        "type": "integer"
+                    },
+                    "elaborado_por_firma": {
+                        "description": "Ruta de la firma",
+                        "type": "string"
+                    },
+                    "items": {
+                        "description": "Items del pedido",
+                        "type": "array",
+                        "items": {
+                            "properties": {
+                                "id": {
+                                    "type": "integer"
+                                },
+                                "nombre": {
+                                    "type": "string"
+                                },
+                                "cantidad": {
+                                    "type": "integer"
+                                },
+                                "unidad_medida": {
+                                    "type": "string"
+                                },
+                                "comprado": {
+                                    "type": "integer"
+                                }
+                            },
+                            "type": "object"
+                        }
+                    }
+                },
+                "type": "object"
             }
         },
         "securitySchemes": {
@@ -2611,8 +5924,28 @@
     },
     "tags": [
         {
+            "name": "Areas",
+            "description": "Areas"
+        },
+        {
             "name": "Autenticación",
             "description": "Autenticación"
+        },
+        {
+            "name": "CP Centro Costos",
+            "description": "CP Centro Costos"
+        },
+        {
+            "name": "CP Dependencias",
+            "description": "CP Dependencias"
+        },
+        {
+            "name": "Entrega de Activos Fijos",
+            "description": "Entrega de Activos Fijos"
+        },
+        {
+            "name": "Pedidos de Compra",
+            "description": "Pedidos de Compra"
         },
         {
             "name": "CpProductos",
@@ -2631,6 +5964,10 @@
             "description": "CpTiposSolicitud"
         },
         {
+            "name": "DatosEmpresa",
+            "description": "DatosEmpresa"
+        },
+        {
             "name": "DependenciasSedes",
             "description": "DependenciasSedes"
         },
@@ -2641,6 +5978,34 @@
         {
             "name": "PCargos",
             "description": "PCargos"
+        },
+        {
+            "name": "PcCaracteristicasTecnicas",
+            "description": "PcCaracteristicasTecnicas"
+        },
+        {
+            "name": "PcDevueltos",
+            "description": "PcDevueltos"
+        },
+        {
+            "name": "PcEntregas",
+            "description": "PcEntregas"
+        },
+        {
+            "name": "PcEquipos",
+            "description": "PcEquipos"
+        },
+        {
+            "name": "PcLicenciasSoftware",
+            "description": "PcLicenciasSoftware"
+        },
+        {
+            "name": "PcMantenimientos",
+            "description": "PcMantenimientos"
+        },
+        {
+            "name": "PcPerifericosEntregados",
+            "description": "PcPerifericosEntregados"
         },
         {
             "name": "Personal",

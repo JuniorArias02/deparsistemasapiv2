@@ -27,7 +27,8 @@ class SedeController extends Controller
     )]
     public function index()
     {
-        return ApiResponse::success($this->service->getAll(), 'Lista de sedes');
+        $sedes = $this->service->getAll();
+        return ApiResponse::success($sedes, 'Lista de sedes');
     }
 
     #[OA\Post(

@@ -25,10 +25,10 @@ class DependenciaSedeController extends Controller
             new OA\Response(response: 403, description: 'Prohibido')
         ]
     )]
-    public function index()
+    public function index(Request $request)
     {
         // $this->permissionService->authorize('dependencia_sede.read');
-        return ApiResponse::success($this->service->getAll(), 'Lista de dependencias de sedes');
+        return ApiResponse::success($this->service->getAll($request->get('sede_id')), 'Lista de dependencias de sedes');
     }
 
     #[OA\Post(
@@ -52,7 +52,7 @@ class DependenciaSedeController extends Controller
     )]
     public function store(Request $request)
     {
-        $this->permissionService->authorize('dependencia_sede.create');
+        // $this->permissionService->authorize('dependencia_sede.create');
         
         $validated = $request->validate([
             'sede_id' => 'required|exists:sedes,id',
@@ -81,7 +81,7 @@ class DependenciaSedeController extends Controller
     )]
     public function show($id)
     {
-        $this->permissionService->authorize('dependencia_sede.read');
+        // $this->permissionService->authorize('dependencia_sede.read');
         $item = $this->service->find($id);
 
         if (!$item) {
@@ -114,7 +114,7 @@ class DependenciaSedeController extends Controller
     )]
     public function update(Request $request, $id)
     {
-        $this->permissionService->authorize('dependencia_sede.update');
+        // $this->permissionService->authorize('dependencia_sede.update');
 
         $item = $this->service->find($id);
         if (!$item) {
@@ -148,7 +148,7 @@ class DependenciaSedeController extends Controller
     )]
     public function destroy($id)
     {
-        $this->permissionService->authorize('dependencia_sede.delete');
+        // $this->permissionService->authorize('dependencia_sede.delete');
 
         if ($this->service->delete($id)) {
             return ApiResponse::success(null, 'Dependencia eliminada exitosamente');

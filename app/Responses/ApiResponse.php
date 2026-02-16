@@ -39,4 +39,16 @@ class ApiResponse
             'status' => $statusCode
         ], $statusCode);
     }
+
+    /**
+     * Send a created response.
+     *
+     * @param mixed $data
+     * @param string $message
+     * @return JsonResponse
+     */
+    public static function created($data = [], $message = 'Recurso creado exitosamente'): JsonResponse
+    {
+        return self::success($data, $message, 201);
+    }
 }

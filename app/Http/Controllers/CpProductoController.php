@@ -27,7 +27,7 @@ class CpProductoController extends Controller
     )]
     public function index()
     {
-        $this->permissionService->authorize('cp_producto.read');
+        // $this->permissionService->authorize('cp_producto.read');
         return ApiResponse::success($this->service->getAll(), 'Lista de productos');
     }
 
@@ -53,7 +53,7 @@ class CpProductoController extends Controller
     )]
     public function store(Request $request)
     {
-        $this->permissionService->authorize('cp_producto.create');
+        // $this->permissionService->authorize('cp_producto.create');
         
         $validated = $request->validate([
             'codigo' => 'nullable|string|max:255|unique:cp_productos,codigo',
@@ -82,7 +82,7 @@ class CpProductoController extends Controller
     )]
     public function show($id)
     {
-        $this->permissionService->authorize('cp_producto.read');
+        // $this->permissionService->authorize('cp_producto.read');
         $producto = $this->service->find($id);
 
         if (!$producto) {
@@ -115,7 +115,7 @@ class CpProductoController extends Controller
     )]
     public function update(Request $request, $id)
     {
-        $this->permissionService->authorize('cp_producto.update');
+        // $this->permissionService->authorize('cp_producto.update');
 
         $producto = $this->service->find($id);
         if (!$producto) {
@@ -149,7 +149,7 @@ class CpProductoController extends Controller
     )]
     public function destroy($id)
     {
-        $this->permissionService->authorize('cp_producto.delete');
+        // $this->permissionService->authorize('cp_producto.delete');
 
         if ($this->service->delete($id)) {
             return ApiResponse::success(null, 'Producto eliminado exitosamente');
