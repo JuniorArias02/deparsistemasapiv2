@@ -27,7 +27,6 @@ class PCargoController extends Controller
     )]
     public function index()
     {
-        // $this->permissionService->authorize('p_cargo.read');
         return ApiResponse::success($this->service->getAll(), 'Lista de cargos');
     }
 
@@ -51,7 +50,7 @@ class PCargoController extends Controller
     )]
     public function store(Request $request)
     {
-        // $this->permissionService->authorize('p_cargo.create');
+        $this->permissionService->authorize('p_cargo.crear');
         
         $validated = $request->validate([
             'nombre' => 'required|string|max:60',
@@ -79,7 +78,6 @@ class PCargoController extends Controller
     )]
     public function show($id)
     {
-        // $this->permissionService->authorize('p_cargo.read');
         $cargo = $this->service->find($id);
 
         if (!$cargo) {
@@ -111,7 +109,7 @@ class PCargoController extends Controller
     )]
     public function update(Request $request, $id)
     {
-        // $this->permissionService->authorize('p_cargo.update');
+        $this->permissionService->authorize('p_cargo.actualizar');
 
         $cargo = $this->service->find($id);
         if (!$cargo) {
@@ -144,7 +142,7 @@ class PCargoController extends Controller
     )]
     public function destroy($id)
     {
-        // $this->permissionService->authorize('p_cargo.delete');
+        $this->permissionService->authorize('p_cargo.eliminar');
 
         if ($this->service->delete($id)) {
             return ApiResponse::success(null, 'Cargo eliminado exitosamente');

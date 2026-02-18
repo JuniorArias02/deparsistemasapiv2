@@ -4,13 +4,15 @@ namespace App\Http\Controllers;
 
 use App\Services\PcPerifericoEntregadoService;
 use App\Responses\ApiResponse;
+use App\Services\PermissionService;
 use Illuminate\Http\Request;
 use OpenApi\Attributes as OA;
 
 class PcPerifericoEntregadoController extends Controller
 {
     public function __construct(
-        protected PcPerifericoEntregadoService $service
+        protected PcPerifericoEntregadoService $service,
+        protected PermissionService $permissionService
     ) {}
 
     #[OA\Get(
@@ -51,6 +53,7 @@ class PcPerifericoEntregadoController extends Controller
     )]
     public function store(Request $request)
     {
+        $this->permissionService->authorize("pc_periferico_entregado.crud");
         $validated = $request->validate([
             'entrega_id' => 'required|integer|exists:pc_entregas,id',
             'inventario_id' => 'required|integer|exists:inventario,id',
@@ -128,6 +131,7 @@ class PcPerifericoEntregadoController extends Controller
     )]
     public function update(Request $request, $id)
     {
+        $this->permissionService->authorize("pc_periferico_entregado.crud");
         $item = $this->service->find($id);
         if (!$item) {
             return ApiResponse::error('Registro no encontrado', 404);

@@ -66,8 +66,8 @@ class CpDependenciaController extends Controller
     )]
     public function store(Request $request)
     {
-        // $this->permissionService->authorize('cp_dependencia.create');
-        
+        $this->permissionService->authorize('cp_dependencia.crear');
+
         $validated = $request->validate([
             'codigo' => 'sometimes|integer',
             'nombre' => 'required|string|max:160',
@@ -97,7 +97,6 @@ class CpDependenciaController extends Controller
     )]
     public function show($id)
     {
-        // $this->permissionService->authorize('cp_dependencia.read');
         return ApiResponse::success($this->service->update($id, []), 'Detalle de dependencia');
     }
 
@@ -131,7 +130,7 @@ class CpDependenciaController extends Controller
     )]
     public function update(Request $request, $id)
     {
-        // $this->permissionService->authorize('cp_dependencia.update');
+        $this->permissionService->authorize('cp_dependencia.actualizar');
 
         $validated = $request->validate([
             'codigo' => 'sometimes|integer',
@@ -149,7 +148,7 @@ class CpDependenciaController extends Controller
         path: '/api/cp-dependencias/{id}',
         tags: ['CP Dependencias'],
         summary: 'Eliminar dependencia',
-        description: 'Elimina una dependencia. Requiere permiso cp_dependencia.delete.',
+        description: 'Elimina una dependencia. Requiere permiso cp_dependencia.eliminar.',
         security: [['bearerAuth' => []]],
         parameters: [
             new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer'))
@@ -162,7 +161,7 @@ class CpDependenciaController extends Controller
     )]
     public function destroy($id)
     {
-        // $this->permissionService->authorize('cp_dependencia.delete');
+        $this->permissionService->authorize('cp_dependencia.eliminar');
         $this->service->delete($id);
         return ApiResponse::success(null, 'Dependencia eliminada exitosamente');
     }

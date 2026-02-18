@@ -4,13 +4,15 @@ namespace App\Http\Controllers;
 
 use App\Services\PcCaracteristicasTecnicasService;
 use App\Responses\ApiResponse;
+use App\Services\PermissionService;
 use Illuminate\Http\Request;
 use OpenApi\Attributes as OA;
 
 class PcCaracteristicasTecnicasController extends Controller
 {
     public function __construct(
-        protected PcCaracteristicasTecnicasService $service
+        protected PcCaracteristicasTecnicasService $service,
+        protected PermissionService $permissionService
     ) {}
 
     #[OA\Get(
@@ -20,7 +22,7 @@ class PcCaracteristicasTecnicasController extends Controller
         security: [['bearerAuth' => []]],
         responses: [
             new OA\Response(response: 200, description: 'Lista obtenida', content: new OA\JsonContent(ref: '#/components/schemas/ApiResponse')),
-            new OA\Response(response: 403, description: 'Prohibido')
+            new OA\Response(response: 403, description: 'Prohib000000.0ido')
         ]
     )]
     public function index()
@@ -51,6 +53,7 @@ class PcCaracteristicasTecnicasController extends Controller
     )]
     public function store(Request $request)
     {
+        $this->permissionService->authorize("pc_caracteristicas_tecnicas.crear");
         $validated = $request->validate([
             'equipo_id' => 'required|integer|exists:pc_equipos,id',
             'procesador' => 'nullable|string|max:255',
@@ -199,6 +202,7 @@ class PcCaracteristicasTecnicasController extends Controller
     )]
     public function destroy($id)
     {
+        $this->permissionService->authorize("pc_caracteristicas_tecnicas.eliminar");
         if ($this->service->delete($id)) {
             return ApiResponse::success(null, 'Registro eliminado exitosamente');
         }

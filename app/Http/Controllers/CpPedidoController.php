@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\CpPedido;
 use App\Models\CpItemPedido;
+use App\Services\PermissionService;
+use App\Responses\ApiResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -12,6 +14,12 @@ use OpenApi\Attributes as OA;
 
 class CpPedidoController extends Controller
 {
+    protected $permissionService;
+
+    public function __construct(PermissionService $permissionService)
+    {
+        $this->permissionService = $permissionService;
+    }
     /**
      * Display a listing of the resource.
      */
@@ -26,10 +34,27 @@ class CpPedidoController extends Controller
             new OA\Response(response: 403, description: 'Prohibido')
         ]
     )]
-    public function index() // Optional, but good to have
+    public function index()
     {
-        // Add filtering logic here if needed
-        return CpPedido::with(['items', 'solicitante', 'tipoSolicitud', 'sede', 'elaboradoPor', 'procesoCompra', 'responsableAprobacion', 'creador'])->get();
+        try {
+            $user = auth('api')->user();
+            $query = CpPedido::with(['items', 'solicitante', 'tipoSolicitud', 'sede', 'elaboradoPor', 'procesoCompra', 'responsableAprobacion', 'creador'])
+                ->orderBy('id', 'desc');
+
+            if ($this->permissionService->check($user, 'cp_pedido.listar.compras')) {
+                $pedidos = $query->get();
+            } elseif ($this->permissionService->check($user, 'cp_pedido.listar.responsable')) {
+                $pedidos = $query->where('estado_compras', 'aprobado')->get();
+            } else {
+                $this->permissionService->authorize('cp_pedido.listar');
+                $pedidos = $query->where('creador_por', $user->id)->get();
+            }
+
+            return ApiResponse::success($pedidos, 'Listado de pedidos obtenido correctamente');
+        } catch (\Exception $e) {
+            $status = $e->getCode() === 403 ? 403 : 500;
+            return ApiResponse::error('Error obteniendo pedidos: ' . $e->getMessage(), $status);
+        }
     }
 
     /**
@@ -46,7 +71,7 @@ class CpPedidoController extends Controller
             content: new OA\MediaType(
                 mediaType: 'multipart/form-data',
                 schema: new OA\Schema(
-                    required: ['proceso_solicitante', 'tipo_solicitud', 'consecutivo', 'sede_id', 'elaborado_por', 'elaborado_por_firma', 'items'],
+                    required: ['proceso_solicitante', 'tipo_solicitud', 'consecutivo', 'sede_id', 'elaborado_por', 'items'],
                     properties: [
                         new OA\Property(property: 'proceso_solicitante', type: 'integer', description: 'ID de la dependencia solicitante'),
                         new OA\Property(property: 'tipo_solicitud', type: 'integer', description: 'ID del tipo de solicitud'),
@@ -55,6 +80,7 @@ class CpPedidoController extends Controller
                         new OA\Property(property: 'sede_id', type: 'integer', description: 'ID de la sede'),
                         new OA\Property(property: 'elaborado_por', type: 'integer', description: 'ID del usuario que elabora'),
                         new OA\Property(property: 'elaborado_por_firma', type: 'string', format: 'binary', description: 'Archivo de firma (PNG < 1MB)'),
+                        new OA\Property(property: 'use_stored_signature', type: 'boolean', description: 'Usar firma guardada del usuario'),
                         new OA\Property(
                             property: 'items',
                             type: 'array',
@@ -83,30 +109,51 @@ class CpPedidoController extends Controller
     )]
     public function store(Request $request)
     {
+        $this->permissionService->authorize('cp_pedido.crear');
         $validated = $request->validate([
             'proceso_solicitante' => 'required|exists:dependencias_sedes,id',
             'tipo_solicitud' => 'required|exists:cp_tipo_solicitud,id',
-            // 'consecutivo' => 'required|integer|unique:cp_pedidos,consecutivo', // Auto-generated
             'observacion' => 'nullable|string',
             'sede_id' => 'required|exists:sedes,id',
-            // 'elaborado_por' => 'required|exists:usuarios,id', // Can be derived from auth user or passed explicitly? Requirement says 'creador_por' from token. 'elaborado_por' seems to be a field to fill. Let's assume passed or same as creator.
             'elaborado_por' => 'required|exists:usuarios,id',
-            'elaborado_por_firma' => 'required|file|image|max:1024', // PNG < 1MB
+            'use_stored_signature' => 'nullable|boolean',
+            'elaborado_por_firma' => 'nullable|file|image|max:1024',
             'items' => 'required|array|min:1',
             'items.*.nombre' => 'required|string|max:255',
             'items.*.cantidad' => 'required|integer|min:1',
             'items.*.unidad_medida' => 'required|string|max:60',
-            // 'items.*.referencia_items' => 'nullable|string',
             'items.*.productos_id' => 'required|exists:cp_productos,id',
         ]);
+
+        if (!$request->hasFile('elaborado_por_firma') && !$request->boolean('use_stored_signature')) {
+            return response()->json(['error' => 'Debe proporcionar una firma o usar la guardada.'], 400);
+        }
 
         DB::beginTransaction();
 
         try {
             $path = null;
-            if ($request->hasFile('elaborado_por_firma')) {
+
+            if ($request->boolean('use_stored_signature')) {
+                $user = auth()->user();
+                // Get raw attribute to avoid accessor URL transform
+                $originalPath = $user->getAttributes()['firma_digital'] ?? null;
+
+                if (!$originalPath || !Storage::disk('public')->exists($originalPath)) {
+                    throw new Exception('No se encontró una firma digital guardada en su perfil.');
+                }
+
+                // Generate new filename for this specific approval
+                $extension = pathinfo($originalPath, PATHINFO_EXTENSION);
+                $filename = 'elaboracion_' . time() . '_stored.' . $extension;
+                $newPath = 'pedidos_firma/' . $filename;
+
+                // Copy file
+                Storage::disk('public')->copy($originalPath, $newPath);
+                $path = $newPath;
+            } elseif ($request->hasFile('elaborado_por_firma')) {
                 $file = $request->file('elaborado_por_firma');
-                $filename = time() . '_' . $file->getClientOriginalName();
+                $filename = 'elaboracion_' . time() . '_' . $file->getClientOriginalName();
                 $path = $file->storeAs('pedidos_firma', $filename, 'public');
             }
 
@@ -144,11 +191,25 @@ class CpPedidoController extends Controller
 
             DB::commit();
 
+            // Send Email Notification to Compras Users
+            try {
+                // Find users with 'cp_pedido.listar.compras' permission
+                $comprasUsers = \App\Models\Usuario::whereHas('rol.permisos', function ($query) {
+                    $query->where('nombre', 'cp_pedido.listar.compras');
+                })->whereNotNull('correo')->get();
+
+                foreach ($comprasUsers as $user) {
+                    \Illuminate\Support\Facades\Mail::to($user->correo)
+                        ->send(new \App\Mail\NewOrderNotification($pedido));
+                }
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::error('Error enviando correo de nuevo pedido a compras: ' . $e->getMessage());
+            }
+
             return response()->json([
                 'message' => 'Pedido creado exitosamente',
                 'pedido' => $pedido->load('items'),
             ], 201);
-
         } catch (Exception $e) {
             DB::rollBack();
             if (isset($path)) {
@@ -177,6 +238,7 @@ class CpPedidoController extends Controller
     )]
     public function show($id)
     {
+        $this->permissionService->authorize('cp_pedido.listar');
         $pedido = CpPedido::with(['items', 'solicitante', 'tipoSolicitud', 'sede', 'elaboradoPor', 'procesoCompra', 'responsableAprobacion', 'creador'])->find($id);
 
         if (!$pedido) {
@@ -206,23 +268,20 @@ class CpPedidoController extends Controller
     )]
     public function destroy($id)
     {
+        $this->permissionService->authorize('cp_pedido.eliminar');
         $pedido = CpPedido::find($id);
 
         if (!$pedido) {
             return response()->json(['error' => 'Pedido no encontrado'], 404);
         }
 
-        // Check permissions if needed (e.g., only creator or admin)
-        
+
+
         DB::beginTransaction();
         try {
-            // Items are deleted via cascade if configured in DB, but let's be safe or if not configured
-            // Logic says "Items asociados en cp_items_pedidos"
-            // If DB cascade is ON, $pedido->delete() is enough. 
-            // If not, delete items first.
-            $pedido->items()->delete(); 
+            $pedido->items()->delete();
             $pedido->delete();
-            
+
             DB::commit();
             return response()->json(['message' => 'Pedido eliminado exitosamente']);
         } catch (Exception $e) {
@@ -230,8 +289,6 @@ class CpPedidoController extends Controller
             return response()->json(['error' => 'Error al eliminar el pedido: ' . $e->getMessage()], 500);
         }
     }
-
-    // Custom Methods for Approvals/Rejections
 
     #[OA\Post(
         path: '/api/cp-pedidos/{id}/aprobar-compras',
@@ -247,31 +304,59 @@ class CpPedidoController extends Controller
             content: new OA\MediaType(
                 mediaType: 'multipart/form-data',
                 schema: new OA\Schema(
-                    required: ['proceso_compra_firma'],
+                    required: [],
                     properties: [
                         new OA\Property(property: 'motivo_aprobacion', type: 'string', description: 'Motivo de la aprobación (opcional)'),
-                        new OA\Property(property: 'proceso_compra_firma', type: 'string', format: 'binary', description: 'Archivo de firma (PNG < 1MB)')
+                        new OA\Property(property: 'proceso_compra_firma', type: 'string', format: 'binary', description: 'Archivo de firma (PNG < 1MB)'),
+                        new OA\Property(property: 'use_stored_signature', type: 'boolean', description: 'Usar firma guardada del usuario')
                     ]
                 )
             )
         ),
         responses: [
             new OA\Response(response: 200, description: 'Pedido aprobado'),
-            new OA\Response(response: 404, description: 'Pedido no encontrado')
+            new OA\Response(response: 404, description: 'Pedido no encontrado'),
+            new OA\Response(response: 400, description: 'Error de validación o falta de firma')
         ]
     )]
     public function aprobarCompras(Request $request, $id)
     {
+        $this->permissionService->authorize('cp_pedido.aprobar_compras');
         $request->validate([
-             'motivo_aprobacion' => 'nullable|string',
-             'proceso_compra_firma' => 'required|file|image|max:1024',
+            'motivo_aprobacion' => 'nullable|string',
+            'use_stored_signature' => 'nullable|boolean',
+            'proceso_compra_firma' => 'nullable|file|image|max:1024',
+            'items_comprados' => 'nullable|array',
+            'items_comprados.*' => 'exists:cp_items_pedidos,id'
         ]);
+
+        if (!$request->hasFile('proceso_compra_firma') && !$request->boolean('use_stored_signature')) {
+            return response()->json(['error' => 'Debe proporcionar una firma o usar la guardada.'], 400);
+        }
 
         $pedido = CpPedido::find($id);
         if (!$pedido) return response()->json(['error' => 'Pedido no encontrado'], 404);
 
         $path = null;
-        if ($request->hasFile('proceso_compra_firma')) {
+
+        if ($request->boolean('use_stored_signature')) {
+            $user = auth()->user();
+            // Get raw attribute to avoid accessor URL transform
+            $originalPath = $user->getAttributes()['firma_digital'] ?? null;
+
+            if (!$originalPath || !Storage::disk('public')->exists($originalPath)) {
+                return response()->json(['error' => 'No se encontró una firma digital guardada en su perfil.'], 400);
+            }
+
+            // Generate new filename for this specific approval
+            $extension = pathinfo($originalPath, PATHINFO_EXTENSION);
+            $filename = 'compra_' . time() . '_stored.' . $extension;
+            $newPath = 'pedidos_firma/' . $filename;
+
+            // Copy file
+            Storage::disk('public')->copy($originalPath, $newPath);
+            $path = $newPath;
+        } elseif ($request->hasFile('proceso_compra_firma')) {
             $file = $request->file('proceso_compra_firma');
             $filename = 'compra_' . time() . '_' . $file->getClientOriginalName();
             $path = $file->storeAs('pedidos_firma', $filename, 'public');
@@ -281,12 +366,27 @@ class CpPedidoController extends Controller
         $pedido->update([
             'estado_compras' => 'aprobado',
             'proceso_compra' => auth()->id(),
-            'proceso_compra_firma' => $path ? 'storage/' . $path : null,
+            'proceso_compra_firma' => $path ? 'storage/' . $path : null, // Store relative path like store()
             'motivo_aprobacion' => $request->motivo_aprobacion,
             'fecha_compra' => now(),
         ]);
 
-        return response()->json(['message' => 'Pedido aprobado por compras', 'pedido' => $pedido]);
+        // Update items status
+        if ($request->has('items_comprados')) {
+            CpItemPedido::whereIn('id', $request->items_comprados)->update(['comprado' => 1]);
+        }
+
+        // Send Email Notification to Creator
+        try {
+            if ($pedido->creador && $pedido->creador->correo) {
+                \Illuminate\Support\Facades\Mail::to($pedido->creador->correo)
+                    ->send(new \App\Mail\OrderApprovedNotification($pedido));
+            }
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Error enviando correo de aprobación de pedido: ' . $e->getMessage());
+        }
+
+        return response()->json(['message' => 'Pedido aprobado por compras', 'pedido' => $pedido->load('items')]);
     }
 
     #[OA\Post(
@@ -313,8 +413,9 @@ class CpPedidoController extends Controller
     )]
     public function rechazarCompras(Request $request, $id)
     {
+        $this->permissionService->authorize('cp_pedido.rechazar_compras');
         $request->validate([
-            'motivo' => 'nullable|string', // "Puede registrar observación/motivo" - mapping to a field? 'observaciones_pedidos' or just 'observacion'? Let's use 'observaciones_pedidos' for this status flow usually
+            'motivo' => 'nullable|string',
         ]);
 
         $pedido = CpPedido::find($id);
@@ -322,8 +423,18 @@ class CpPedidoController extends Controller
 
         $pedido->update([
             'estado_compras' => 'rechazado',
-            'observaciones_pedidos' => $request->motivo // Assuming this field is used for rejection notes
+            'observaciones_pedidos' => $request->motivo
         ]);
+
+        // Send Email Notification to Creator
+        try {
+            if ($pedido->creador && $pedido->creador->correo) {
+                \Illuminate\Support\Facades\Mail::to($pedido->creador->correo)
+                    ->send(new \App\Mail\OrderRejectedNotification($pedido, $request->motivo));
+            }
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Error enviando correo de rechazo de pedido: ' . $e->getMessage());
+        }
 
         return response()->json(['message' => 'Pedido rechazado por compras', 'pedido' => $pedido]);
     }
@@ -352,20 +463,66 @@ class CpPedidoController extends Controller
     )]
     public function aprobarGerencia(Request $request, $id)
     {
-        $request->validate([
-            'observacion_gerencia' => 'nullable|string',
-        ]);
+        try {
+            $this->permissionService->authorize('cp_pedido.aprobar_gerencia');
+            $request->validate([
+                'observacion_gerencia' => 'nullable|string',
+                'use_stored_signature' => 'nullable|boolean',
+                'responsable_aprobacion_firma' => 'nullable|file|image|max:1024',
+            ]);
 
-        $pedido = CpPedido::find($id);
-        if (!$pedido) return response()->json(['error' => 'Pedido no encontrado'], 404);
+            if (!$request->hasFile('responsable_aprobacion_firma') && !$request->boolean('use_stored_signature')) {
+                return ApiResponse::error('Debe proporcionar una firma o usar la guardada.', 400);
+            }
 
-        $pedido->update([
-            'estado_gerencia' => 'aprobado',
-            'fecha_gerencia' => now(),
-            'observacion_gerencia' => $request->observacion_gerencia,
-        ]);
+            $pedido = CpPedido::find($id);
+            if (!$pedido) return ApiResponse::error('Pedido no encontrado', 404);
 
-        return response()->json(['message' => 'Pedido aprobado por gerencia', 'pedido' => $pedido]);
+            $path = null;
+
+            if ($request->boolean('use_stored_signature')) {
+                $user = auth('api')->user();
+                $originalPath = $user->getAttributes()['firma_digital'] ?? null;
+
+                if (!$originalPath || !Storage::disk('public')->exists($originalPath)) {
+                    return ApiResponse::error('No se encontró una firma digital guardada en su perfil.', 400);
+                }
+
+                $extension = pathinfo($originalPath, PATHINFO_EXTENSION);
+                $filename = 'gerencia_' . time() . '_stored.' . $extension;
+                $newPath = 'pedidos_firma/' . $filename;
+
+                Storage::disk('public')->copy($originalPath, $newPath);
+                $path = $newPath;
+            } elseif ($request->hasFile('responsable_aprobacion_firma')) {
+                $file = $request->file('responsable_aprobacion_firma');
+                $filename = 'gerencia_' . time() . '_' . $file->getClientOriginalName();
+                $path = $file->storeAs('pedidos_firma', $filename, 'public');
+            }
+
+            $pedido->update([
+                'estado_gerencia' => 'aprobado',
+                'responsable_aprobacion' => auth('api')->id(),
+                'responsable_aprobacion_firma' => $path ? 'storage/' . $path : null, // Store relative path like store()
+                'fecha_gerencia' => now(),
+                'observacion_gerencia' => $request->observacion_gerencia,
+            ]);
+
+            // Send Email Notification to Creator
+            try {
+                if ($pedido->creador && $pedido->creador->correo) {
+                    \Illuminate\Support\Facades\Mail::to($pedido->creador->correo)
+                        ->send(new \App\Mail\GerenciaApprovedNotification($pedido));
+                }
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::error('Error enviando correo de aprobación gerencia: ' . $e->getMessage());
+            }
+
+            return ApiResponse::success($pedido, 'Pedido aprobado por gerencia');
+        } catch (\Exception $e) {
+            $status = $e->getCode() === 403 ? 403 : 500;
+            return ApiResponse::error('Error al aprobar el pedido: ' . $e->getMessage(), $status);
+        }
     }
 
     #[OA\Post(
@@ -392,6 +549,7 @@ class CpPedidoController extends Controller
     )]
     public function rechazarGerencia(Request $request, $id)
     {
+        $this->permissionService->authorize('cp_pedido.rechazar_gerencia');
         $request->validate([
             'observacion_gerencia' => 'required|string',
         ]);
@@ -401,9 +559,71 @@ class CpPedidoController extends Controller
 
         $pedido->update([
             'estado_gerencia' => 'rechazado',
+            'responsable_aprobacion' => auth('api')->id(),
             'observacion_gerencia' => $request->observacion_gerencia,
         ]);
 
+        // Send Email Notification to Creator
+        try {
+            if ($pedido->creador && $pedido->creador->correo) {
+                \Illuminate\Support\Facades\Mail::to($pedido->creador->correo)
+                    ->send(new \App\Mail\GerenciaRejectedNotification($pedido, $request->observacion_gerencia));
+            }
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Error enviando correo de rechazo de gerencia: ' . $e->getMessage());
+        }
+
         return response()->json(['message' => 'Pedido rechazado por gerencia', 'pedido' => $pedido]);
+    }
+    #[OA\Post(
+        path: '/api/cp-pedidos/{id}/update-items',
+        tags: ['Pedidos de Compra'],
+        summary: 'Actualizar Items (Compras)',
+        description: 'Actualiza el estado de compra de los items de un pedido.',
+        security: [['bearerAuth' => []]],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer'))
+        ],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                properties: [
+                    new OA\Property(
+                        property: 'items',
+                        type: 'array',
+                        items: new OA\Items(
+                            type: 'object',
+                            properties: [
+                                new OA\Property(property: 'id', type: 'integer'),
+                                new OA\Property(property: 'comprado', type: 'integer')
+                            ]
+                        )
+                    )
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(response: 200, description: 'Items actualizados'),
+            new OA\Response(response: 404, description: 'Pedido no encontrado')
+        ]
+    )]
+    public function updateItems(Request $request, $id)
+    {
+        $this->permissionService->authorize('cp_pedido.actualizar_items');
+        $request->validate([
+            'items' => 'required|array',
+            'items.*.id' => 'required|exists:cp_items_pedidos,id',
+            'items.*.comprado' => 'required|boolean'
+        ]);
+        $pedido = CpPedido::find($id);
+        if (!$pedido) return response()->json(['error' => 'Pedido no encontrado'], 404);
+
+        foreach ($request->items as $itemData) {
+            CpItemPedido::where('id', $itemData['id'])
+                ->where('cp_pedido', $id)
+                ->update(['comprado' => $itemData['comprado']]);
+        }
+
+        return response()->json(['message' => 'Items actualizados correctamente', 'pedido' => $pedido->load('items')]);
     }
 }

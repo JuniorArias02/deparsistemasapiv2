@@ -27,7 +27,6 @@ class CpTipoSolicitudController extends Controller
     )]
     public function index()
     {
-        // $this->permissionService->authorize('cp_tipo_solicitud.read');
         $tipos = $this->service->getAll();
         return ApiResponse::success($tipos, 'Lista de tipos de solicitud');
     }
@@ -53,7 +52,7 @@ class CpTipoSolicitudController extends Controller
     )]
     public function store(Request $request)
     {
-        // $this->permissionService->authorize('cp_tipo_solicitud.create');
+        $this->permissionService->authorize('cp_tipo_solicitud.crear');
         
         $validated = $request->validate([
             'nombre' => 'required|string|max:100',
@@ -82,7 +81,6 @@ class CpTipoSolicitudController extends Controller
     )]
     public function show($id)
     {
-        // $this->permissionService->authorize('cp_tipo_solicitud.read');
         $item = $this->service->find($id);
 
         if (!$item) {
@@ -115,7 +113,7 @@ class CpTipoSolicitudController extends Controller
     )]
     public function update(Request $request, $id)
     {
-        // $this->permissionService->authorize('cp_tipo_solicitud.update');
+        $this->permissionService->authorize('cp_tipo_solicitud.actualizar');
 
         $item = $this->service->find($id);
         if (!$item) {
@@ -149,7 +147,7 @@ class CpTipoSolicitudController extends Controller
     )]
     public function destroy($id)
     {
-        // $this->permissionService->authorize('cp_tipo_solicitud.delete');
+        $this->permissionService->authorize('cp_tipo_solicitud.eliminar');
 
         if ($this->service->delete($id)) {
             return ApiResponse::success(null, 'Tipo de solicitud eliminado exitosamente');

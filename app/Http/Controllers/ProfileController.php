@@ -169,8 +169,8 @@ class ProfileController extends Controller
 
         if ($request->hasFile('firma')) {
             // Delete old signature if exists
-            if ($user->firma_digital && Storage::exists('public/' . $user->firma_digital)) {
-                Storage::delete('public/' . $user->firma_digital);
+            if ($user->firma_digital && Storage::exists('public/' . $user->getRawOriginal('firma_digital'))) {
+                Storage::delete('public/' . $user->getRawOriginal('firma_digital'));
             }
 
             $path = $request->file('firma')->store('signatures', 'public');
@@ -228,8 +228,8 @@ class ProfileController extends Controller
 
         if ($request->hasFile('foto')) {
             // Delete old photo if exists
-            if ($user->foto_usuario && Storage::exists('public/' . $user->foto_usuario)) {
-                Storage::delete('public/' . $user->foto_usuario);
+            if ($user->foto_usuario && Storage::exists('public/' . $user->getRawOriginal('foto_usuario'))) {
+                Storage::delete('public/' . $user->getRawOriginal('foto_usuario'));
             }
 
             $path = $request->file('foto')->store('fotoPerfil', 'public');
@@ -267,8 +267,8 @@ class ProfileController extends Controller
 
         /** @var Usuario $user */
         if ($user->foto_usuario) {
-            if (Storage::exists('public/' . $user->foto_usuario)) {
-                Storage::delete('public/' . $user->foto_usuario);
+            if (Storage::exists('public/' . $user->getRawOriginal('foto_usuario'))) {
+                Storage::delete('public/' . $user->getRawOriginal('foto_usuario'));
             }
             $user->foto_usuario = null;
             $user->save();

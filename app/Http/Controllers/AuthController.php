@@ -9,7 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log; // For error logging
-use App\Mail\LoginAlertMail;
+use App\Mail\LoginNotification;
 use App\Http\Controllers\Controller;
 use OpenApi\Attributes as OA;
 
@@ -82,9 +82,18 @@ class AuthController extends Controller
 
         if ($result) {
             try {
-                $user = auth('api')->user();
-                if ($user && $user->email) {
-                    Mail::to($user->email)->send(new LoginAlertMail($user, $request));
+                // Retrieve user manually since auth('api')->user() is not yet available
+                $user = \App\Models\Usuario::where('usuario', $request->usuario)
+                    ->orWhere('correo', $request->usuario)
+                    ->first();
+
+                if ($user && $user->correo) {
+                    $details = [
+                        'ip' => $request->ip(),
+                        'userAgent' => $request->userAgent(),
+                        'time' => now()->format('d/m/Y H:i:s A'),
+                    ];
+                    Mail::to($user->correo)->send(new LoginNotification($user, $details));
                 }
             } catch (\Exception $e) {
                 Log::error('Error sending login alert email: ' . $e->getMessage());

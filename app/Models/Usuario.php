@@ -28,7 +28,42 @@ class Usuario extends Authenticatable implements JWTSubject
         'codigo_verificacion',
         'codigo_verificacion_expira_at',
         'foto_usuario',
+        'last_activity',
     ];
+
+    protected $casts = [
+        'last_activity' => 'datetime',
+    ];
+
+    protected $appends = ['is_online', 'activity_status'];
+
+    public function getIsOnlineAttribute()
+    {
+        return $this->last_activity && $this->last_activity->gt(now()->subMinutes(5));
+    }
+
+    public function getActivityStatusAttribute()
+    {
+        if (!$this->last_activity) {
+            return 'inactive';
+        }
+
+        if ($this->last_activity->gt(now()->subMinutes(5))) {
+            return 'active';
+        }
+
+        return 'away';
+    }
+
+    public function getFotoUsuarioAttribute($value)
+    {
+        return $value ? asset('storage/' . $value) : null;
+    }
+
+    public function getFirmaDigitalAttribute($value)
+    {
+        return $value ? asset('storage/' . $value) : null;
+    }
 
     protected $hidden = [
         'contrasena',

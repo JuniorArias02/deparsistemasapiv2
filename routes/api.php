@@ -11,6 +11,37 @@ Route::get('/ping', function () {
     ]);
 });
 
+// TEST ROUTE
+Route::get('/test-email', function () {
+    try {
+        $to = config('mail.mailers.smtp.username');
+        if (!$to) $to = 'clinicalhousesoporte@gmail.com'; // Fallback
+
+        \Illuminate\Support\Facades\Mail::raw('Si lees esto, el correo funciona.', function ($message) use ($to) {
+            $message->to($to)->subject('Prueba de Correo Depart-Sistem');
+        });
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Correo enviado correctamente a ' . $to,
+            'config' => [
+                'host' => config('mail.mailers.smtp.host'),
+                'port' => config('mail.mailers.smtp.port'),
+                'encryption' => config('mail.mailers.smtp.encryption'),
+                'username' => config('mail.mailers.smtp.username'),
+                'from_address' => config('mail.from.address'),
+            ]
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'status' => 'error',
+            'message' => $e->getMessage(),
+            'file' => $e->getFile(),
+            'line' => $e->getLine()
+        ], 500);
+    }
+});
+
 Route::group(['middleware' => 'api', 'prefix' => 'auth'], function ($router) {
     Route::post('login', [AuthController::class, 'login']);
     Route::post('logout', [AuthController::class, 'logout']);
@@ -22,9 +53,11 @@ Route::group(['middleware' => 'api', 'prefix' => 'auth'], function ($router) {
 
 Route::group(['middleware' => 'api'], function () {
     Route::apiResource('usuarios', App\Http\Controllers\UsuarioController::class);
-    
+
     // Inventario Routes (protected with JWT authentication)
-    Route::middleware('auth:api')->group(function () {
+    Route::middleware(['auth:api', 'activity'])->group(function () {
+        Route::post('/heartbeat', [App\Http\Controllers\ActivityController::class, 'heartbeat']);
+
         Route::get('inventario', [App\Http\Controllers\InventarioController::class, 'index']);
         Route::get('inventario/{id}', [App\Http\Controllers\InventarioController::class, 'show']);
         Route::post('inventario', [App\Http\Controllers\InventarioController::class, 'store']);
@@ -46,7 +79,7 @@ Route::group(['middleware' => 'api'], function () {
         Route::get('pc-caracteristicas-tecnicas/equipo/{equipo_id}', [App\Http\Controllers\PcCaracteristicasTecnicasController::class, 'showByEquipo']);
         Route::apiResource('pc-mantenimientos', App\Http\Controllers\PcMantenimientoController::class);
         Route::get('pc-mantenimientos/equipo/{equipo_id}', [App\Http\Controllers\PcMantenimientoController::class, 'showByEquipo']);
-        
+
         Route::apiResource('pc-entregas', App\Http\Controllers\PcEntregaController::class);
         Route::apiResource('pc-devueltos', App\Http\Controllers\PcDevueltoController::class);
         Route::apiResource('pc-perifericos-entregados', App\Http\Controllers\PcPerifericoEntregadoController::class);

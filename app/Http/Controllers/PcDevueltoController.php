@@ -3,14 +3,16 @@
 namespace App\Http\Controllers;
 
 use App\Services\PcDevueltoService;
-use App\Responses\ApiResponse;
+use App\Responses\ApiResponse;  
+use App\Services\PermissionService;
 use Illuminate\Http\Request;
 use OpenApi\Attributes as OA;
 
 class PcDevueltoController extends Controller
 {
     public function __construct(
-        protected PcDevueltoService $service
+        protected PcDevueltoService $service,
+        protected PermissionService $permissionService
     ) {}
 
     #[OA\Get(
@@ -51,6 +53,7 @@ class PcDevueltoController extends Controller
     )]
     public function store(Request $request)
     {
+        $this->permissionService->authorize('pc_devuelto.crear');
         $validated = $request->validate([
             'entrega_id' => 'required|integer|exists:pc_entregas,id|unique:pc_devuelto,entrega_id',
             'firma_entrega' => 'required|string',
@@ -111,6 +114,7 @@ class PcDevueltoController extends Controller
     )]
     public function update(Request $request, $id)
     {
+        $this->permissionService->authorize("pc_devuelto.actualizar");
         $item = $this->service->find($id);
         if (!$item) {
             return ApiResponse::error('Devolución no encontrada', 404);
@@ -145,6 +149,7 @@ class PcDevueltoController extends Controller
     )]
     public function destroy($id)
     {
+        $this->permissionService->authorize("pc_devuelto.eliminar");
         if ($this->service->delete($id)) {
             return ApiResponse::success(null, 'Devolución eliminada exitosamente');
         }

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\CpEntregaActivosFijos;
 use App\Models\CpEntregaActivosFijosItem;
+use App\Services\PermissionService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -12,6 +13,12 @@ use OpenApi\Attributes as OA;
 
 class CpEntregaActivosFijosController extends Controller
 {
+    protected $permissionService;
+
+    public function __construct(PermissionService $permissionService)
+    {
+        $this->permissionService = $permissionService;
+    }
     /**
      * Display a listing of the resource.
      */
@@ -28,6 +35,7 @@ class CpEntregaActivosFijosController extends Controller
     )]
     public function index()
     {
+        $this->permissionService->authorize('cp_entrega_activos_fijos.listar');
         return CpEntregaActivosFijos::with([
             'personal',
             'sede',
@@ -86,6 +94,8 @@ class CpEntregaActivosFijosController extends Controller
     )]
     public function store(Request $request)
     {
+        $this->permissionService->authorize('cp_entrega_activos_fijos.crear');
+
         $validated = $request->validate([
             'personal_id' => 'required|integer|exists:personal,id',
             'sede_id' => 'required|integer|exists:sedes,id',
@@ -146,7 +156,6 @@ class CpEntregaActivosFijosController extends Controller
                 'objeto' => $entrega->load('items'),
                 'status' => 201
             ], 201);
-
         } catch (Exception $e) {
             DB::rollBack();
             return response()->json([
@@ -175,6 +184,7 @@ class CpEntregaActivosFijosController extends Controller
     )]
     public function show(string $id)
     {
+        $this->permissionService->authorize('cp_entrega_activos_fijos.listar');
         $entrega = CpEntregaActivosFijos::with([
             'personal',
             'sede',
@@ -216,6 +226,7 @@ class CpEntregaActivosFijosController extends Controller
     )]
     public function update(Request $request, string $id)
     {
+        $this->permissionService->authorize('cp_entrega_activos_fijos.actualizar');
         $entrega = CpEntregaActivosFijos::find($id);
 
         if (!$entrega) {
@@ -263,16 +274,9 @@ class CpEntregaActivosFijosController extends Controller
             }
 
             $entrega->fill($validated);
-            // Protect signatures from being nullified if not sent (though fill shouldn't touch them if not in validated array, but to be safe)
-            // Actually, if validation passes and keys are not present, fill won't touch them.
-            // But if keys are present and null (e.g. from FormData), we might need to be careful.
-            // Our service only appends if file is present. if null, it might send null.
-            // 'nullable' validation allows null.
-            // However, we handled file logic above manually.
-            // We should unset firm keys from validated to avoid overwriting with null if they were processed manually or if we want to preserve old ones when no new file is sent.
             unset($validated['firma_quien_entrega']);
             unset($validated['firma_quien_recibe']);
-            
+
             $entrega->update($validated);
 
             DB::commit();
@@ -282,7 +286,6 @@ class CpEntregaActivosFijosController extends Controller
                 'objeto' => $entrega->load('items'),
                 'status' => 200
             ]);
-
         } catch (Exception $e) {
             DB::rollBack();
             return response()->json([
@@ -311,6 +314,7 @@ class CpEntregaActivosFijosController extends Controller
     )]
     public function destroy(string $id)
     {
+        $this->permissionService->authorize('cp_entrega_activos_fijos.eliminar');
         $entrega = CpEntregaActivosFijos::find($id);
 
         if (!$entrega) {
@@ -344,7 +348,6 @@ class CpEntregaActivosFijosController extends Controller
                 'objeto' => null,
                 'status' => 200
             ]);
-
         } catch (Exception $e) {
             DB::rollBack();
             return response()->json([

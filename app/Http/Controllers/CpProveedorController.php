@@ -27,7 +27,6 @@ class CpProveedorController extends Controller
     )]
     public function index()
     {
-        // $this->permissionService->authorize('cp_proveedor.read');
         return ApiResponse::success($this->service->getAll(), 'Lista de proveedores');
     }
 
@@ -52,7 +51,7 @@ class CpProveedorController extends Controller
     )]
     public function store(Request $request)
     {
-        $this->permissionService->authorize('cp_proveedor.create');
+        $this->permissionService->authorize('cp_proveedor.crear');
         
         $validated = $request->validate([
             'nombre' => 'nullable|string|max:255',
@@ -84,7 +83,6 @@ class CpProveedorController extends Controller
     )]
     public function show($id)
     {
-        $this->permissionService->authorize('cp_proveedor.read');
         $proveedor = $this->service->find($id);
 
         if (!$proveedor) {
@@ -117,7 +115,7 @@ class CpProveedorController extends Controller
     )]
     public function update(Request $request, $id)
     {
-        $this->permissionService->authorize('cp_proveedor.update');
+        $this->permissionService->authorize('cp_proveedor.actualizar');
 
         $proveedor = $this->service->find($id);
         if (!$proveedor) {
@@ -154,7 +152,7 @@ class CpProveedorController extends Controller
     )]
     public function destroy($id)
     {
-        $this->permissionService->authorize('cp_proveedor.delete');
+        $this->permissionService->authorize('cp_proveedor.eliminar');
 
         if ($this->service->delete($id)) {
             return ApiResponse::success(null, 'Proveedor eliminado exitosamente');

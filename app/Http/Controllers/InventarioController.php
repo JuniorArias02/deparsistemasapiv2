@@ -175,7 +175,7 @@ class InventarioController extends Controller
     )]
     public function store(Request $request)
     {
-        // $this->permissionService->authorize('inventario.create');
+        $this->permissionService->authorize('inventario.crear');
 
         $validated = $request->validate([
             // Campos obligatorios
@@ -272,8 +272,6 @@ class InventarioController extends Controller
     )]
     public function show($id)
     {
-        // $this->permissionService->authorize('inventario.read');
-
         $inventario = Inventario::with(['responsablePersonal', 'coordinadorPersonal'])->find($id);
 
         if (!$inventario) {
@@ -297,7 +295,6 @@ class InventarioController extends Controller
             content: new OA\JsonContent(
                 properties: [
                     new OA\Property(property: 'nombre', type: 'string', example: 'Laptop Updated'),
-                    // ... other properties
                 ]
             )
         ),
@@ -309,7 +306,7 @@ class InventarioController extends Controller
     )]
     public function update(Request $request, $id)
     {
-        // $this->permissionService->authorize('inventario.update');
+        $this->permissionService->authorize('inventario.actualizar');
 
         $inventario = Inventario::find($id);
         if (!$inventario) {
@@ -388,7 +385,7 @@ class InventarioController extends Controller
     )]
     public function destroy($id)
     {
-        // $this->permissionService->authorize('inventario.delete');
+        $this->permissionService->authorize('inventario.eliminar');
 
         $inventario = Inventario::find($id);
         if (!$inventario) {

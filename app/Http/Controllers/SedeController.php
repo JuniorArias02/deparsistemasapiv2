@@ -51,7 +51,7 @@ class SedeController extends Controller
     )]
     public function store(Request $request)
     {
-        $this->permissionService->authorize('sede.create');
+        $this->permissionService->authorize('sede.crud');
         
         $validated = $request->validate([
             'nombre' => 'required|string|max:100',
@@ -111,7 +111,7 @@ class SedeController extends Controller
     )]
     public function update(Request $request, $id)
     {
-        $this->permissionService->authorize('sede.update');
+        $this->permissionService->authorize('sede.crud');
 
         $sede = $this->service->find($id);
         if (!$sede) {
@@ -144,7 +144,7 @@ class SedeController extends Controller
     )]
     public function destroy($id)
     {
-        $this->permissionService->authorize('sede.delete');
+        $this->permissionService->authorize('sede.crud');
 
         if ($this->service->delete($id)) {
             return ApiResponse::success(null, 'Sede eliminada exitosamente');

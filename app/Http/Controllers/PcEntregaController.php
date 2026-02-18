@@ -4,13 +4,15 @@ namespace App\Http\Controllers;
 
 use App\Services\PcEntregaService;
 use App\Responses\ApiResponse;
+use App\Services\PermissionService;
 use Illuminate\Http\Request;
 use OpenApi\Attributes as OA;
 
 class PcEntregaController extends Controller
 {
     public function __construct(
-        protected PcEntregaService $service
+        protected PcEntregaService $service,
+        protected PermissionService $permissionService
     ) {}
 
     #[OA\Get(
@@ -50,6 +52,7 @@ class PcEntregaController extends Controller
     )]
     public function store(Request $request)
     {
+        $this->permissionService->authorize('pc_entrega.listar');
         $validated = $request->validate([
             'equipo_id' => 'required|integer|exists:pc_equipos,id',
             'funcionario_id' => 'required|integer|exists:personal,id',
@@ -113,6 +116,7 @@ class PcEntregaController extends Controller
     )]
     public function update(Request $request, $id)
     {
+        $this->permissionService->authorize('pc_entrega.actualizar');
         $item = $this->service->find($id);
         if (!$item) {
             return ApiResponse::error('Entrega no encontrada', 404);
@@ -150,6 +154,7 @@ class PcEntregaController extends Controller
     )]
     public function destroy($id)
     {
+        $this->permissionService->authorize('pc_entrega.eliminar');
         if ($this->service->delete($id)) {
             return ApiResponse::success(null, 'Entrega eliminada exitosamente');
         }

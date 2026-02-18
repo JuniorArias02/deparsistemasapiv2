@@ -4,13 +4,15 @@ namespace App\Http\Controllers;
 
 use App\Services\DatosEmpresaService;
 use App\Responses\ApiResponse;
+use App\Services\PermissionService;
 use Illuminate\Http\Request;
 use OpenApi\Attributes as OA;
 
 class DatosEmpresaController extends Controller
 {
     public function __construct(
-        protected DatosEmpresaService $service
+        protected DatosEmpresaService $service,
+        protected PermissionService $permissionService
     ) {}
 
     #[OA\Get(
@@ -50,6 +52,7 @@ class DatosEmpresaController extends Controller
     )]
     public function store(Request $request)
     {
+        $this->permissionService->authorize('datos_empresa.crear');
         $validated = $request->validate([
             'nombre' => 'nullable|string|max:255',
             'nit' => 'nullable|string|max:255',
@@ -113,6 +116,7 @@ class DatosEmpresaController extends Controller
     )]
     public function update(Request $request, $id)
     {
+        $this->permissionService->authorize('datos_empresa.actualizar');
         $item = $this->service->find($id);
         if (!$item) {
             return ApiResponse::error('Empresa no encontrada', 404);
@@ -150,6 +154,7 @@ class DatosEmpresaController extends Controller
     )]
     public function destroy($id)
     {
+        $this->permissionService->authorize('datos_empresa.eliminar');
         if ($this->service->delete($id)) {
             return ApiResponse::success(null, 'Empresa eliminada exitosamente');
         }

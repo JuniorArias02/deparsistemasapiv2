@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Services\PcEquipoService;
 use App\Responses\ApiResponse;
 use Illuminate\Http\Request;
+use App\Services\PermissionService;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -14,7 +15,8 @@ use OpenApi\Attributes as OA;
 class PcEquipoController extends Controller
 {
     public function __construct(
-        protected PcEquipoService $service
+        protected PcEquipoService $service,
+        protected PermissionService $permissionService
     ) {}
 
     #[OA\Get(
@@ -55,6 +57,7 @@ class PcEquipoController extends Controller
     )]
     public function store(Request $request)
     {
+        $this->permissionService->authorize('pc_equipo.crear');
         $validated = $request->validate([
             'serial' => 'required|string|unique:pc_equipos,serial|max:255',
             'numero_inventario' => 'nullable|string|unique:pc_equipos,numero_inventario|max:255',
@@ -84,7 +87,7 @@ class PcEquipoController extends Controller
             if (auth()->check()) {
                 $validated['creado_por'] = auth()->id();
             } else {
-                 return ApiResponse::error('Usuario no autenticado', 401);
+                return ApiResponse::error('Usuario no autenticado', 401);
             }
 
             // Handle Image Upload
@@ -130,6 +133,7 @@ class PcEquipoController extends Controller
 
     public function update(Request $request, $id)
     {
+        $this->permissionService->authorize('pc_equipo.actualizar');
         $item = $this->service->find($id);
         if (!$item) {
             return ApiResponse::error('Equipo no encontrado', 404);
@@ -196,6 +200,7 @@ class PcEquipoController extends Controller
     )]
     public function destroy($id)
     {
+        $this->permissionService->authorize('pc_equipo.eliminar');
         if ($this->service->delete($id)) {
             return ApiResponse::success(null, 'Equipo eliminado exitosamente');
         }

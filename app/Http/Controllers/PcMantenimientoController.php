@@ -4,13 +4,15 @@ namespace App\Http\Controllers;
 
 use App\Services\PcMantenimientoService;
 use App\Responses\ApiResponse;
+use App\Services\PermissionService;
 use Illuminate\Http\Request;
 use OpenApi\Attributes as OA;
 
 class PcMantenimientoController extends Controller
 {
     public function __construct(
-        protected PcMantenimientoService $service
+        protected PcMantenimientoService $service,
+        protected PermissionService $permissionService
     ) {}
 
     #[OA\Get(
@@ -51,6 +53,7 @@ class PcMantenimientoController extends Controller
     )]
     public function store(Request $request)
     {
+        $this->permissionService->authorize("");
         $validated = $request->validate([
             'equipo_id' => 'required|integer|exists:pc_equipos,id',
             'tipo_mantenimiento' => 'nullable|in:preventivo,correctivo',
@@ -140,6 +143,7 @@ class PcMantenimientoController extends Controller
     )]
     public function update(Request $request, $id)
     {
+        $this->permissionService->authorize("pc_mantenimientos.crud");
         $item = $this->service->find($id);
         if (!$item) {
             return ApiResponse::error('Mantenimiento no encontrado', 404);
@@ -181,6 +185,7 @@ class PcMantenimientoController extends Controller
     )]
     public function destroy($id)
     {
+        $this->permissionService->authorize("pc_mantenimientos.eliminar");
         if ($this->service->delete($id)) {
             return ApiResponse::success(null, 'Mantenimiento eliminado exitosamente');
         }

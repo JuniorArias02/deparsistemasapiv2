@@ -65,7 +65,7 @@ class AreaController extends Controller
     )]
     public function store(Request $request)
     {
-        // $this->permissionService->authorize('area.create');
+        $this->permissionService->authorize('area.crear');
         
         $validated = $request->validate([
             'nombre' => 'required|string|max:255',
@@ -95,7 +95,6 @@ class AreaController extends Controller
     )]
     public function show($id)
     {
-        // $this->permissionService->authorize('area.read');
         return ApiResponse::success($this->service->update($id, []), 'Detalle de area');
     }
 
@@ -128,7 +127,7 @@ class AreaController extends Controller
     )]
     public function update(Request $request, $id)
     {
-        $this->permissionService->authorize('area.update');
+        $this->permissionService->authorize('area.actualizar');
 
         $validated = $request->validate([
             'nombre' => 'sometimes|string|max:255',
@@ -158,7 +157,7 @@ class AreaController extends Controller
     )]
     public function destroy($id)
     {
-        $this->permissionService->authorize('area.delete');
+        $this->permissionService->authorize('area.eliminar');
         $this->service->delete($id);
         return ApiResponse::success(null, 'Area eliminada exitosamente');
     }

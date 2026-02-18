@@ -35,7 +35,6 @@ class CpCentroCostoController extends Controller
     )]
     public function index()
     {
-        // $this->permissionService->authorize('cp_centro_costo.read');
         return ApiResponse::success($this->service->getAll(), 'Lista de centros de costo');
     }
 
@@ -64,8 +63,8 @@ class CpCentroCostoController extends Controller
     )]
     public function store(Request $request)
     {
-        // $this->permissionService->authorize('cp_centro_costo.create');
-        
+        $this->permissionService->authorize('cp_centro_costo.crear');
+
         $validated = $request->validate([
             'codigo' => 'sometimes|integer',
             'nombre' => 'required|string|max:160'
@@ -107,7 +106,7 @@ class CpCentroCostoController extends Controller
         summary: 'Actualizar centro de costo',
         description: 'Actualiza un centro de costo existente. Requiere permiso cp_centro_costo.update.',
         security: [['bearerAuth' => []]],
-        parameters: [
+        parameters: [ 
             new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer'))
         ],
         requestBody: new OA\RequestBody(
@@ -127,7 +126,7 @@ class CpCentroCostoController extends Controller
     )]
     public function update(Request $request, $id)
     {
-        // $this->permissionService->authorize('cp_centro_costo.update');
+        $this->permissionService->authorize('cp_centro_costo.crud');
 
         $validated = $request->validate([
             'codigo' => 'sometimes|integer',
@@ -157,7 +156,7 @@ class CpCentroCostoController extends Controller
     )]
     public function destroy($id)
     {
-        // $this->permissionService->authorize('cp_centro_costo.delete');
+        $this->permissionService->authorize('cp_centro_costo.crud');
         $this->service->delete($id);
         return ApiResponse::success(null, 'Centro de costo eliminado exitosamente');
     }

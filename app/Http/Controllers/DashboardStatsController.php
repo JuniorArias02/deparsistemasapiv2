@@ -34,9 +34,7 @@ class DashboardStatsController extends Controller
     )]
     public function index(Request $request)
     {
-        $type = $request->query('type', 'admin'); // Default to admin or infer from role
-        
-        // You could also enforce role checks here based on $request->user()->role...
+        $type = $request->query('type', 'admin');
 
         $stats = [];
         switch ($type) {

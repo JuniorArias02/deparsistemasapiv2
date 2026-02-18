@@ -58,6 +58,7 @@ class PermisoController extends Controller
 
     public function destroy($id)
     {
+        
         try {
             $this->permisoService->deletePermiso($id);
             return ApiResponse::success(null, 'Permiso eliminado correctamente');
@@ -80,7 +81,7 @@ class PermisoController extends Controller
     {
         $request->validate([
             'rol_id' => 'required|exists:rol,id',
-            'permisos' => 'present|array', // Can be empty array to remove all
+            'permisos' => 'present|array',
             'permisos.*' => 'exists:permisos,id'
         ]);
 

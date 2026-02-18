@@ -4,13 +4,15 @@ namespace App\Http\Controllers;
 
 use App\Services\PcLicenciaSoftwareService;
 use App\Responses\ApiResponse;
+use App\Services\PermissionService;
 use Illuminate\Http\Request;
 use OpenApi\Attributes as OA;
 
 class PcLicenciaSoftwareController extends Controller
 {
     public function __construct(
-        protected PcLicenciaSoftwareService $service
+        protected PcLicenciaSoftwareService $service,
+        protected PermissionService $permissionService
     ) {}
 
     #[OA\Get(
@@ -50,6 +52,7 @@ class PcLicenciaSoftwareController extends Controller
     )]
     public function store(Request $request)
     {
+        $this->permissionService->authorize("pc_licencia_software.crear");
         $validated = $request->validate([
             'equipo_id' => 'required|integer|exists:pc_equipos,id|unique:pc_licencias_software,equipo_id',
             'windows' => 'nullable|string|max:10',
@@ -133,6 +136,7 @@ class PcLicenciaSoftwareController extends Controller
     )]
     public function update(Request $request, $id)
     {
+        $this->permissionService->authorize("pc_licencia_software.actualizar");
         $item = $this->service->find($id);
         if (!$item) {
             return ApiResponse::error('Licencia no encontrada', 404);
@@ -167,6 +171,7 @@ class PcLicenciaSoftwareController extends Controller
     )]
     public function destroy($id)
     {
+        $this->permissionService->authorize("pc_licencia_software.eliminar");
         if ($this->service->delete($id)) {
             return ApiResponse::success(null, 'Licencia eliminada exitosamente');
         }
