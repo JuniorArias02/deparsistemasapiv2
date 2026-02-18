@@ -11,36 +11,25 @@ Route::get('/ping', function () {
     ]);
 });
 
-// TEST ROUTE
-Route::get('/test-email', function () {
+// DB CONNECTION TEST
+Route::get('/db-test', function () {
     try {
-        $to = config('mail.mailers.smtp.username');
-        if (!$to) $to = 'clinicalhousesoporte@gmail.com'; // Fallback
-
-        \Illuminate\Support\Facades\Mail::raw('Si lees esto, el correo funciona.', function ($message) use ($to) {
-            $message->to($to)->subject('Prueba de Correo Depart-Sistem');
-        });
-
+        \Illuminate\Support\Facades\DB::connection()->getPdo();
+        $dbName = \Illuminate\Support\Facades\DB::connection()->getDatabaseName();
         return response()->json([
             'status' => 'success',
-            'message' => 'Correo enviado correctamente a ' . $to,
-            'config' => [
-                'host' => config('mail.mailers.smtp.host'),
-                'port' => config('mail.mailers.smtp.port'),
-                'encryption' => config('mail.mailers.smtp.encryption'),
-                'username' => config('mail.mailers.smtp.username'),
-                'from_address' => config('mail.from.address'),
-            ]
+            'message' => 'Conexión a base de datos exitosa',
+            'database' => $dbName
         ]);
     } catch (\Exception $e) {
         return response()->json([
             'status' => 'error',
-            'message' => $e->getMessage(),
-            'file' => $e->getFile(),
-            'line' => $e->getLine()
+            'message' => 'Error al conectar a la base de datos',
+            'error' => $e->getMessage()
         ], 500);
     }
 });
+
 
 Route::group(['middleware' => 'api', 'prefix' => 'auth'], function ($router) {
     Route::post('login', [AuthController::class, 'login']);
