@@ -21,4 +21,3 @@
     RewriteCond %{REQUEST_URI} !^/public/
     RewriteRule ^(.*)$ public/$1 [L]
 </IfModule>
-https://jundsproapi.clinicalhouse.co/public/api/ping
