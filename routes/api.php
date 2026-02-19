@@ -11,6 +11,33 @@ Route::get('/ping', function () {
     ]);
 });
 
+// TEMPORARY DEBUG - REMOVE AFTER FIXING
+Route::post('/debug-login', function (\Illuminate\Http\Request $request) {
+    $usuario = $request->input('usuario');
+    $contrasena = $request->input('contrasena');
+
+    $user = \App\Models\Usuario::where('usuario', $usuario)->first();
+
+    if (!$user) {
+        return response()->json(['error' => 'User not found', 'searched_by' => $usuario]);
+    }
+
+    $rawHash = $user->getAttributes()['contrasena'] ?? 'NULL';
+    $isBcrypt = str_starts_with($rawHash, '$2y$') || str_starts_with($rawHash, '$2a$');
+    $hashLength = strlen($rawHash);
+    $hashCheck = \Illuminate\Support\Facades\Hash::check($contrasena, $rawHash);
+
+    return response()->json([
+        'user_found' => true,
+        'user_id' => $user->id,
+        'hash_starts_with' => substr($rawHash, 0, 7),
+        'hash_length' => $hashLength,
+        'is_bcrypt_format' => $isBcrypt,
+        'hash_check_result' => $hashCheck,
+        'getAuthPassword_works' => $user->getAuthPassword() !== null,
+    ]);
+});
+
 // DB CONNECTION TEST
 Route::get('/db-test', function () {
     try {
