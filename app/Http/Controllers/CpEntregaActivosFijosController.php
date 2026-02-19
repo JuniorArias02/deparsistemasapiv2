@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\CpEntregaActivosFijos;
 use App\Models\CpEntregaActivosFijosItem;
 use App\Services\PermissionService;
+use App\Services\CpEntregaActivosFijosService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -14,10 +15,12 @@ use OpenApi\Attributes as OA;
 class CpEntregaActivosFijosController extends Controller
 {
     protected $permissionService;
+    protected $entregaService;
 
-    public function __construct(PermissionService $permissionService)
+    public function __construct(PermissionService $permissionService, CpEntregaActivosFijosService $entregaService)
     {
         $this->permissionService = $permissionService;
+        $this->entregaService = $entregaService;
     }
     /**
      * Display a listing of the resource.
@@ -35,7 +38,7 @@ class CpEntregaActivosFijosController extends Controller
     )]
     public function index()
     {
-        $this->permissionService->authorize('cp_entrega_activos_fijos.listar');
+        // $this->permissionService->authorize('cp_entrega_activos_fijos.listar');
         return CpEntregaActivosFijos::with([
             'personal',
             'sede',
@@ -111,53 +114,18 @@ class CpEntregaActivosFijosController extends Controller
         ]);
 
         try {
-            DB::beginTransaction();
-
-            // Handle file uploads
-            $firmaEntregaPath = null;
-            $firmaRecibePath = null;
-
-            if ($request->hasFile('firma_quien_entrega')) {
-                $file = $request->file('firma_quien_entrega');
-                $filename = time() . '_firma_entrega.' . $file->getClientOriginalExtension();
-                $firmaEntregaPath = $file->storeAs('entrega_activos_firma', $filename, 'public');
-            }
-
-            if ($request->hasFile('firma_quien_recibe')) {
-                $file = $request->file('firma_quien_recibe');
-                $filename = time() . '_firma_recibe.' . $file->getClientOriginalExtension();
-                $firmaRecibePath = $file->storeAs('entrega_activos_firma', $filename, 'public');
-            }
-
-            /** @var CpEntregaActivosFijos $entrega */
-            $entrega = CpEntregaActivosFijos::create([
-                'personal_id' => $validated['personal_id'],
-                'sede_id' => $validated['sede_id'],
-                'proceso_solicitante' => $validated['proceso_solicitante'],
-                'coordinador_id' => $validated['coordinador_id'],
-                'fecha_entrega' => $validated['fecha_entrega'],
-                'firma_quien_entrega' => $firmaEntregaPath ? 'storage/' . $firmaEntregaPath : null,
-                'firma_quien_recibe' => $firmaRecibePath ? 'storage/' . $firmaRecibePath : null,
-            ]);
-
-            foreach ($validated['items'] as $item) {
-                CpEntregaActivosFijosItem::create([
-                    'item_id' => $item['item_id'],
-                    'es_accesorio' => $item['es_accesorio'] ?? false,
-                    'accesorio_descripcion' => $item['accesorio_descripcion'] ?? null,
-                    'entrega_activos_id' => $entrega->id,
-                ]);
-            }
-
-            DB::commit();
+            $entrega = $this->entregaService->create(
+                $validated,
+                $request->file('firma_quien_entrega'),
+                $request->file('firma_quien_recibe')
+            );
 
             return response()->json([
                 'mensaje' => 'Entrega de activos fijos creada exitosamente',
-                'objeto' => $entrega->load('items'),
+                'objeto' => $entrega,
                 'status' => 201
             ], 201);
         } catch (Exception $e) {
-            DB::rollBack();
             return response()->json([
                 'mensaje' => 'Error al crear la entrega: ' . $e->getMessage(),
                 'objeto' => null,
@@ -184,7 +152,7 @@ class CpEntregaActivosFijosController extends Controller
     )]
     public function show(string $id)
     {
-        $this->permissionService->authorize('cp_entrega_activos_fijos.listar');
+        // $this->permissionService->authorize('cp_entrega_activos_fijos.listar');
         $entrega = CpEntregaActivosFijos::with([
             'personal',
             'sede',
@@ -227,15 +195,6 @@ class CpEntregaActivosFijosController extends Controller
     public function update(Request $request, string $id)
     {
         $this->permissionService->authorize('cp_entrega_activos_fijos.actualizar');
-        $entrega = CpEntregaActivosFijos::find($id);
-
-        if (!$entrega) {
-            return response()->json([
-                'mensaje' => 'Entrega no encontrada',
-                'objeto' => null,
-                'status' => 404
-            ], 404);
-        }
 
         $validated = $request->validate([
             'personal_id' => 'sometimes|integer|exists:personal,id',
@@ -248,51 +207,25 @@ class CpEntregaActivosFijosController extends Controller
         ]);
 
         try {
-            DB::beginTransaction();
-
-            // Handle file uploads
-            if ($request->hasFile('firma_quien_entrega')) {
-                // Delete old file if exists
-                if ($entrega->firma_quien_entrega) {
-                    Storage::disk('public')->delete(str_replace('storage/', '', $entrega->firma_quien_entrega));
-                }
-                $file = $request->file('firma_quien_entrega');
-                $filename = time() . '_firma_entrega.' . $file->getClientOriginalExtension();
-                $path = $file->storeAs('entrega_activos_firma', $filename, 'public');
-                $entrega->firma_quien_entrega = 'storage/' . $path;
-            }
-
-            if ($request->hasFile('firma_quien_recibe')) {
-                // Delete old file if exists
-                if ($entrega->firma_quien_recibe) {
-                    Storage::disk('public')->delete(str_replace('storage/', '', $entrega->firma_quien_recibe));
-                }
-                $file = $request->file('firma_quien_recibe');
-                $filename = time() . '_firma_recibe.' . $file->getClientOriginalExtension();
-                $path = $file->storeAs('entrega_activos_firma', $filename, 'public');
-                $entrega->firma_quien_recibe = 'storage/' . $path;
-            }
-
-            $entrega->fill($validated);
-            unset($validated['firma_quien_entrega']);
-            unset($validated['firma_quien_recibe']);
-
-            $entrega->update($validated);
-
-            DB::commit();
+            $entrega = $this->entregaService->update(
+                $id,
+                $validated,
+                $request->file('firma_quien_entrega'),
+                $request->file('firma_quien_recibe')
+            );
 
             return response()->json([
                 'mensaje' => 'Entrega actualizada exitosamente',
-                'objeto' => $entrega->load('items'),
+                'objeto' => $entrega,
                 'status' => 200
             ]);
         } catch (Exception $e) {
-            DB::rollBack();
+            $status = $e->getMessage() === 'Entrega no encontrada' ? 404 : 500;
             return response()->json([
                 'mensaje' => 'Error al actualizar la entrega: ' . $e->getMessage(),
                 'objeto' => null,
-                'status' => 500
-            ], 500);
+                'status' => $status
+            ], $status);
         }
     }
 
@@ -315,33 +248,9 @@ class CpEntregaActivosFijosController extends Controller
     public function destroy(string $id)
     {
         $this->permissionService->authorize('cp_entrega_activos_fijos.eliminar');
-        $entrega = CpEntregaActivosFijos::find($id);
-
-        if (!$entrega) {
-            return response()->json([
-                'mensaje' => 'Entrega no encontrada',
-                'objeto' => null,
-                'status' => 404
-            ], 404);
-        }
 
         try {
-            DB::beginTransaction();
-
-            // Delete associated items
-            CpEntregaActivosFijosItem::where('entrega_activos_id', $id)->delete();
-
-            // Delete signature files if they exist
-            if ($entrega->firma_quien_entrega) {
-                Storage::disk('public')->delete(str_replace('storage/', '', $entrega->firma_quien_entrega));
-            }
-            if ($entrega->firma_quien_recibe) {
-                Storage::disk('public')->delete(str_replace('storage/', '', $entrega->firma_quien_recibe));
-            }
-
-            $entrega->delete();
-
-            DB::commit();
+            $this->entregaService->delete($id);
 
             return response()->json([
                 'mensaje' => 'Entrega eliminada exitosamente',
@@ -349,12 +258,12 @@ class CpEntregaActivosFijosController extends Controller
                 'status' => 200
             ]);
         } catch (Exception $e) {
-            DB::rollBack();
+            $status = $e->getMessage() === 'Entrega no encontrada' ? 404 : 500;
             return response()->json([
                 'mensaje' => 'Error al eliminar la entrega: ' . $e->getMessage(),
                 'objeto' => null,
-                'status' => 500
-            ], 500);
+                'status' => $status
+            ], $status);
         }
     }
 }

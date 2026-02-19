@@ -27,7 +27,7 @@ class PersonalController extends Controller
     )]
     public function index(Request $request)
     {
-        // $this->permissionService->authorize('personal.read');
+        $this->permissionService->authorize('personal.listar');
         return ApiResponse::success($this->service->getAll($request->get('q')), 'Lista de personal');
     }
 
@@ -54,8 +54,8 @@ class PersonalController extends Controller
     )]
     public function store(Request $request)
     {
-        $this->permissionService->authorize('personal.crud');
-        
+        $this->permissionService->authorize('personal.crear');
+
         $validated = $request->validate([
             'nombre' => 'required|string|max:255',
             'cedula' => 'nullable|string|max:255|unique:personal,cedula',
@@ -85,8 +85,8 @@ class PersonalController extends Controller
     )]
     public function show($id)
     {
+        $this->permissionService->authorize('personal.listar');
         $personal = $this->service->find($id);
-
         if (!$personal) {
             return ApiResponse::error('Personal no encontrado', 404);
         }
@@ -119,7 +119,7 @@ class PersonalController extends Controller
     )]
     public function update(Request $request, $id)
     {
-        $this->permissionService->authorize('personal.crud');
+        $this->permissionService->authorize('personal.actualizar');
 
         $personal = $this->service->find($id);
         if (!$personal) {

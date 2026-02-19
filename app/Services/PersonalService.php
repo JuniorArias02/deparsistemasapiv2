@@ -11,9 +11,9 @@ class PersonalService
         $query = Personal::with('cargo');
         if ($search) {
             $query->where('cedula', 'like', "%{$search}%")
-                  ->orWhere('nombre', 'like', "%{$search}%");
+                ->orWhere('nombre', 'like', "%{$search}%");
         }
-        return $query->limit(20)->get();
+        return $query->get();
     }
 
     public function create(array $data)

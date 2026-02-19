@@ -113,6 +113,7 @@ class CpProductoController extends Controller
     )]
     public function update(Request $request, $id)
     {
+        
         $this->permissionService->authorize('cp_producto.actualizar');
 
         $producto = $this->service->find($id);
