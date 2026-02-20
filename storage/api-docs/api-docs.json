@@ -15,6 +15,314 @@
         }
     ],
     "paths": {
+        "/api/heartbeat": {
+            "post": {
+                "tags": [
+                    "Actividad"
+                ],
+                "summary": "Registrar actividad (Heartbeat)",
+                "description": "Actualiza la fecha de última actividad del usuario. Debe llamarse periódicamente desde el frontend.",
+                "operationId": "1b1deac6a7f964fd97f9e0c7d69949fe",
+                "responses": {
+                    "200": {
+                        "description": "Actividad registrada",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/agenda-mantenimientos": {
+            "get": {
+                "tags": [
+                    "Agenda Mantenimientos"
+                ],
+                "summary": "Listar agenda de mantenimientos",
+                "operationId": "b83d5bb127f09b11f620655bed410dc3",
+                "responses": {
+                    "200": {
+                        "description": "Lista de agenda de mantenimientos",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Prohibido"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Agenda Mantenimientos"
+                ],
+                "summary": "Crear agenda de mantenimiento",
+                "operationId": "cc71f1af047c5879b2fb5ac7af2811b3",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "mantenimiento_id": {
+                                        "type": "integer"
+                                    },
+                                    "titulo": {
+                                        "type": "string"
+                                    },
+                                    "descripcion": {
+                                        "type": "string"
+                                    },
+                                    "sede_id": {
+                                        "type": "integer"
+                                    },
+                                    "fecha_inicio": {
+                                        "type": "string",
+                                        "format": "date-time"
+                                    },
+                                    "fecha_fin": {
+                                        "type": "string",
+                                        "format": "date-time"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Agenda creada",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Prohibido"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/agenda-mantenimientos/{id}": {
+            "get": {
+                "tags": [
+                    "Agenda Mantenimientos"
+                ],
+                "summary": "Obtener agenda de mantenimiento",
+                "operationId": "22969089fc12667532a66562a5b3fccc",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Detalle de la agenda",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No encontrado"
+                    },
+                    "403": {
+                        "description": "Prohibido"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Agenda Mantenimientos"
+                ],
+                "summary": "Actualizar agenda de mantenimiento",
+                "operationId": "c17f66dc185f655cc698257b0fa1b41c",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "mantenimiento_id": {
+                                        "type": "integer"
+                                    },
+                                    "titulo": {
+                                        "type": "string"
+                                    },
+                                    "descripcion": {
+                                        "type": "string"
+                                    },
+                                    "sede_id": {
+                                        "type": "integer"
+                                    },
+                                    "fecha_inicio": {
+                                        "type": "string",
+                                        "format": "date-time"
+                                    },
+                                    "fecha_fin": {
+                                        "type": "string",
+                                        "format": "date-time"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Actualizada exitosamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No encontrado"
+                    },
+                    "403": {
+                        "description": "Prohibido"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Agenda Mantenimientos"
+                ],
+                "summary": "Eliminar agenda de mantenimiento",
+                "operationId": "a2d30870295cdc77010b9f67fbde0e1b",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Eliminada exitosamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No encontrado"
+                    },
+                    "403": {
+                        "description": "Prohibido"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/agenda-mantenimientos/mantenimiento/{mantenimiento_id}": {
+            "get": {
+                "tags": [
+                    "Agenda Mantenimientos"
+                ],
+                "summary": "Obtener agendas por mantenimiento",
+                "operationId": "76b605e6d250ba743399ca63d0e32f26",
+                "parameters": [
+                    {
+                        "name": "mantenimiento_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Agendas del mantenimiento",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Prohibido"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/areas": {
             "get": {
                 "tags": [
@@ -758,7 +1066,7 @@
                     "CP Dependencias"
                 ],
                 "summary": "Eliminar dependencia",
-                "description": "Elimina una dependencia. Requiere permiso cp_dependencia.delete.",
+                "description": "Elimina una dependencia. Requiere permiso cp_dependencia.eliminar.",
                 "operationId": "ff45f7cdde7406543f79a5650c59ac1b",
                 "parameters": [
                     {
@@ -1062,7 +1370,6 @@
                                     "consecutivo",
                                     "sede_id",
                                     "elaborado_por",
-                                    "elaborado_por_firma",
                                     "items"
                                 ],
                                 "properties": {
@@ -1072,10 +1379,6 @@
                                     },
                                     "tipo_solicitud": {
                                         "description": "ID del tipo de solicitud",
-                                        "type": "integer"
-                                    },
-                                    "consecutivo": {
-                                        "description": "Número consecutivo único",
                                         "type": "integer"
                                     },
                                     "observacion": {
@@ -1094,6 +1397,10 @@
                                         "description": "Archivo de firma (PNG < 1MB)",
                                         "type": "string",
                                         "format": "binary"
+                                    },
+                                    "use_stored_signature": {
+                                        "description": "Usar firma guardada del usuario",
+                                        "type": "boolean"
                                     },
                                     "items": {
                                         "description": "Lista de items del pedido",
@@ -1246,9 +1553,7 @@
                     "content": {
                         "multipart/form-data": {
                             "schema": {
-                                "required": [
-                                    "proceso_compra_firma"
-                                ],
+                                "required": [],
                                 "properties": {
                                     "motivo_aprobacion": {
                                         "description": "Motivo de la aprobación (opcional)",
@@ -1258,6 +1563,10 @@
                                         "description": "Archivo de firma (PNG < 1MB)",
                                         "type": "string",
                                         "format": "binary"
+                                    },
+                                    "use_stored_signature": {
+                                        "description": "Usar firma guardada del usuario",
+                                        "type": "boolean"
                                     }
                                 },
                                 "type": "object"
@@ -1271,6 +1580,9 @@
                     },
                     "404": {
                         "description": "Pedido no encontrado"
+                    },
+                    "400": {
+                        "description": "Error de validación o falta de firma"
                     }
                 },
                 "security": [
@@ -1415,6 +1727,65 @@
                 "responses": {
                     "200": {
                         "description": "Pedido rechazado"
+                    },
+                    "404": {
+                        "description": "Pedido no encontrado"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/cp-pedidos/{id}/update-items": {
+            "post": {
+                "tags": [
+                    "Pedidos de Compra"
+                ],
+                "summary": "Actualizar Items (Compras)",
+                "description": "Actualiza el estado de compra de los items de un pedido.",
+                "operationId": "0d4483060bb76610054566f95fb41022",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "items": {
+                                        "type": "array",
+                                        "items": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer"
+                                                },
+                                                "comprado": {
+                                                    "type": "integer"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Items actualizados"
                     },
                     "404": {
                         "description": "Pedido no encontrado"
@@ -2286,6 +2657,51 @@
                 ]
             }
         },
+        "/api/dashboard/stats": {
+            "get": {
+                "tags": [
+                    "Dashboard"
+                ],
+                "summary": "Obtener estadísticas del dashboard",
+                "operationId": "57c1d8696f18b88f556dbba8850b31df",
+                "parameters": [
+                    {
+                        "name": "type",
+                        "in": "query",
+                        "description": "Tipo de dashboard (sistemas, compras, admin)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "sistemas",
+                                "compras",
+                                "admin"
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Estadísticas obtenidas",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Prohibido"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/datos-empresa": {
             "get": {
                 "tags": [
@@ -2992,6 +3408,44 @@
             }
         },
         "/api/inventario/{id}": {
+            "get": {
+                "tags": [
+                    "Inventario"
+                ],
+                "summary": "Obtener item de inventario",
+                "description": "Obtiene los detalles de un item específico del inventario por su ID.",
+                "operationId": "33dbea8a80af449a5c3a83b831a0cae9",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Detalles del inventario",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Inventario no encontrado"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
             "put": {
                 "tags": [
                     "Inventario"
@@ -3079,6 +3533,295 @@
                     },
                     "404": {
                         "description": "Inventario no encontrado"
+                    },
+                    "403": {
+                        "description": "Prohibido"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/mantenimientos": {
+            "get": {
+                "tags": [
+                    "Mantenimientos"
+                ],
+                "summary": "Listar mantenimientos",
+                "operationId": "98eb8bd3b5c15a4078751d0c2f9d12ad",
+                "responses": {
+                    "200": {
+                        "description": "Lista de mantenimientos",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Prohibido"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Mantenimientos"
+                ],
+                "summary": "Crear mantenimiento",
+                "operationId": "2e7dbf32fd0b9bd23aa7c42ce7a2d530",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "titulo"
+                                ],
+                                "properties": {
+                                    "titulo": {
+                                        "type": "string"
+                                    },
+                                    "codigo": {
+                                        "type": "string"
+                                    },
+                                    "modelo": {
+                                        "type": "string"
+                                    },
+                                    "dependencia": {
+                                        "type": "string"
+                                    },
+                                    "sede_id": {
+                                        "type": "integer"
+                                    },
+                                    "nombre_receptor": {
+                                        "type": "integer"
+                                    },
+                                    "descripcion": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Mantenimiento creado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Prohibido"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/mantenimientos/{id}": {
+            "get": {
+                "tags": [
+                    "Mantenimientos"
+                ],
+                "summary": "Obtener mantenimiento",
+                "operationId": "f1eccfea98c96e09c78b65db74a6c46e",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Detalle del mantenimiento",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No encontrado"
+                    },
+                    "403": {
+                        "description": "Prohibido"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Mantenimientos"
+                ],
+                "summary": "Actualizar mantenimiento",
+                "operationId": "7b682cf6eb6fd45d9f93d8d5132d63f5",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "titulo": {
+                                        "type": "string"
+                                    },
+                                    "codigo": {
+                                        "type": "string"
+                                    },
+                                    "modelo": {
+                                        "type": "string"
+                                    },
+                                    "dependencia": {
+                                        "type": "string"
+                                    },
+                                    "sede_id": {
+                                        "type": "integer"
+                                    },
+                                    "nombre_receptor": {
+                                        "type": "integer"
+                                    },
+                                    "descripcion": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Actualizado exitosamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No encontrado"
+                    },
+                    "403": {
+                        "description": "Prohibido"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Mantenimientos"
+                ],
+                "summary": "Eliminar mantenimiento",
+                "operationId": "d624e7b533b922ada73de58f62ed764d",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Eliminado exitosamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No encontrado"
+                    },
+                    "403": {
+                        "description": "Prohibido"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/mantenimientos/{id}/marcar-revisado": {
+            "post": {
+                "tags": [
+                    "Mantenimientos"
+                ],
+                "summary": "Marcar mantenimiento como revisado",
+                "operationId": "f3357ac678579c60c003f0a2362bc541",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Marcado como revisado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No encontrado"
                     },
                     "403": {
                         "description": "Prohibido"
@@ -3318,7 +4061,7 @@
                         }
                     },
                     "403": {
-                        "description": "Prohibido"
+                        "description": "Prohib000000.0ido"
                     }
                 },
                 "security": [
@@ -3543,6 +4286,220 @@
                     },
                     "404": {
                         "description": "No encontrado"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/pc-config-cronograma": {
+            "get": {
+                "tags": [
+                    "PcConfigCronograma"
+                ],
+                "summary": "Listar configuraciones de cronograma",
+                "operationId": "b59309e783425226bf9f3ea1095a7b26",
+                "responses": {
+                    "200": {
+                        "description": "Lista obtenida",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Prohibido"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "PcConfigCronograma"
+                ],
+                "summary": "Registrar configuración de cronograma",
+                "operationId": "1c66f55e6b147d37064377d8c3854cd9",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "dias_cumplimiento": {
+                                        "type": "integer"
+                                    },
+                                    "meses_cumplimiento": {
+                                        "type": "integer"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Creado exitosamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Prohibido"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/pc-config-cronograma/{id}": {
+            "get": {
+                "tags": [
+                    "PcConfigCronograma"
+                ],
+                "summary": "Obtener configuración de cronograma",
+                "operationId": "900ad28f02726b53eb84dc10e0406a4b",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Detalle",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No encontrado"
+                    },
+                    "403": {
+                        "description": "Prohibido"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "PcConfigCronograma"
+                ],
+                "summary": "Actualizar configuración de cronograma",
+                "operationId": "7b14edc101844d76794f86c43bd10ecf",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "dias_cumplimiento": {
+                                        "type": "integer"
+                                    },
+                                    "meses_cumplimiento": {
+                                        "type": "integer"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Actualizado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No encontrado"
+                    },
+                    "403": {
+                        "description": "Prohibido"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "PcConfigCronograma"
+                ],
+                "summary": "Eliminar configuración de cronograma",
+                "operationId": "21580698adba40151c95d0beac39624d",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Eliminado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No encontrado"
+                    },
+                    "403": {
+                        "description": "Prohibido"
                     }
                 },
                 "security": [
@@ -4059,7 +5016,7 @@
                 "tags": [
                     "PcEquipos"
                 ],
-                "summary": "Obtener detalle de equipo",
+                "summary": "Obtener detalles de un equipo",
                 "operationId": "6da2c33b523691d67b24a3d985605651",
                 "parameters": [
                     {
@@ -4073,65 +5030,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Detalle",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/ApiResponse"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "No encontrado"
-                    },
-                    "403": {
-                        "description": "Prohibido"
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            },
-            "put": {
-                "tags": [
-                    "PcEquipos"
-                ],
-                "summary": "Actualizar equipo",
-                "operationId": "6d3158750bb4cb9f2a9c1f16403ba567",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "properties": {
-                                    "nombre_equipo": {
-                                        "type": "string"
-                                    },
-                                    "marca": {
-                                        "type": "string"
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "Actualizado",
+                        "description": "Detalles del equipo",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -5190,6 +6089,224 @@
                 ]
             }
         },
+        "/api/profile/update": {
+            "post": {
+                "tags": [
+                    "Perfil"
+                ],
+                "summary": "Actualizar perfil",
+                "description": "Actualiza la información básica del usuario autenticado.",
+                "operationId": "658523cb93a6af7d87e1ca8740b514f5",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "nombre_completo": {
+                                        "type": "string"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email"
+                                    },
+                                    "telefono": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Perfil actualizado exitosamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/profile/change-password": {
+            "post": {
+                "tags": [
+                    "Perfil"
+                ],
+                "summary": "Cambiar contraseña",
+                "description": "Actualiza la contraseña del usuario autenticado.",
+                "operationId": "433a588a87f6eb4c76d0b1987b878d41",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "current_password",
+                                    "new_password",
+                                    "new_password_confirmation"
+                                ],
+                                "properties": {
+                                    "current_password": {
+                                        "type": "string",
+                                        "format": "password"
+                                    },
+                                    "new_password": {
+                                        "type": "string",
+                                        "format": "password"
+                                    },
+                                    "new_password_confirmation": {
+                                        "type": "string",
+                                        "format": "password"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Contraseña actualizada exitosamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/profile/upload-signature": {
+            "post": {
+                "tags": [
+                    "Perfil"
+                ],
+                "summary": "Subir firma",
+                "description": "Sube y actualiza la firma del usuario autenticado.",
+                "operationId": "f0ab5c254bf9cc4323c29ce8feb44188",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "properties": {
+                                    "firma": {
+                                        "type": "string",
+                                        "format": "binary"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Firma actualizada exitosamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/profile/upload-photo": {
+            "post": {
+                "tags": [
+                    "Perfil"
+                ],
+                "summary": "Subir foto de perfil",
+                "description": "Sube y actualiza la foto de perfil del usuario autenticado.",
+                "operationId": "d404ca9aa279158e12d3fe0b7c1b678f",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "properties": {
+                                    "foto": {
+                                        "type": "string",
+                                        "format": "binary"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Foto actualizada exitosamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/profile/delete-photo": {
+            "post": {
+                "tags": [
+                    "Perfil"
+                ],
+                "summary": "Eliminar foto de perfil",
+                "description": "Elimina la foto de perfil del usuario autenticado.",
+                "operationId": "1b78e7ac7b02f3cbefe8dc84dda0e69f",
+                "responses": {
+                    "200": {
+                        "description": "Foto eliminada exitosamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/roles": {
             "get": {
                 "tags": [
@@ -5924,6 +7041,14 @@
     },
     "tags": [
         {
+            "name": "Actividad",
+            "description": "Actividad"
+        },
+        {
+            "name": "Agenda Mantenimientos",
+            "description": "Agenda Mantenimientos"
+        },
+        {
             "name": "Areas",
             "description": "Areas"
         },
@@ -5964,6 +7089,10 @@
             "description": "CpTiposSolicitud"
         },
         {
+            "name": "Dashboard",
+            "description": "Dashboard"
+        },
+        {
             "name": "DatosEmpresa",
             "description": "DatosEmpresa"
         },
@@ -5976,12 +7105,20 @@
             "description": "Inventario"
         },
         {
+            "name": "Mantenimientos",
+            "description": "Mantenimientos"
+        },
+        {
             "name": "PCargos",
             "description": "PCargos"
         },
         {
             "name": "PcCaracteristicasTecnicas",
             "description": "PcCaracteristicasTecnicas"
+        },
+        {
+            "name": "PcConfigCronograma",
+            "description": "PcConfigCronograma"
         },
         {
             "name": "PcDevueltos",
@@ -6010,6 +7147,10 @@
         {
             "name": "Personal",
             "description": "Personal"
+        },
+        {
+            "name": "Perfil",
+            "description": "Perfil"
         },
         {
             "name": "Roles",
