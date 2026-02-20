@@ -35,4 +35,9 @@ return [
         ],
     ],
 
+    'kubapp' => [
+        'url' => env('KUBAPP_API_URL', 'http://190.145.135.122:8090'),
+        'timeout' => env('KUBAPP_TIMEOUT', 10),
+    ],
+
 ];
