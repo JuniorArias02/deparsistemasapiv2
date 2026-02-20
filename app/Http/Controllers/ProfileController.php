@@ -177,7 +177,7 @@ class ProfileController extends Controller
             $user->firma_digital = $path;
             $user->save();
 
-            return ApiResponse::success(['firma_url' => asset('storage/' . $path)], 'Firma actualizada exitosamente');
+            return ApiResponse::success(['firma_url' => url('api/storage/' . $path)], 'Firma actualizada exitosamente');
         }
 
         return ApiResponse::error('No se ha subido ningún archivo', 400);
@@ -236,7 +236,7 @@ class ProfileController extends Controller
             $user->foto_usuario = $path;
             $user->save();
 
-            return ApiResponse::success(['foto_url' => asset('storage/' . $path)], 'Foto actualizada exitosamente');
+            return ApiResponse::success(['foto_url' => url('api/storage/' . $path)], 'Foto actualizada exitosamente');
         }
 
         return ApiResponse::error('No se ha subido ningún archivo', 400);
