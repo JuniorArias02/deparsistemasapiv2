@@ -126,6 +126,18 @@ Route::group(['middleware' => 'api'], function () {
         Route::apiResource('permisos', App\Http\Controllers\PermisoController::class);
         Route::get('permisos/roles-assignments/list', [App\Http\Controllers\PermisoController::class, 'getRoles']);
         Route::post('permisos/assign', [App\Http\Controllers\PermisoController::class, 'assignPermisos']);
+
+        // Mantenimientos Routes
+        Route::get('mantenimientos/mis-mantenimientos', [App\Http\Controllers\MantenimientoController::class, 'misMantenimientos']);
+        Route::apiResource('mantenimientos', App\Http\Controllers\MantenimientoController::class);
+        Route::post('mantenimientos/{id}/marcar-revisado', [App\Http\Controllers\MantenimientoController::class, 'marcarRevisado']);
+
+        // Usuarios por permiso
+        Route::get('usuarios/por-permiso/{permiso}', [App\Http\Controllers\UsuarioController::class, 'getByPermission']);
+
+        // Agenda Mantenimientos Routes
+        Route::get('agenda-mantenimientos/mantenimiento/{mantenimiento_id}', [App\Http\Controllers\AgendaMantenimientoController::class, 'getByMantenimiento']);
+        Route::apiResource('agenda-mantenimientos', App\Http\Controllers\AgendaMantenimientoController::class);
     });
     Route::apiResource('personal', App\Http\Controllers\PersonalController::class);
     // Cp Dependencias
@@ -143,6 +155,8 @@ Route::group(['middleware' => 'api'], function () {
             Route::post('rechazar-compras', [App\Http\Controllers\CpPedidoController::class, 'rechazarCompras']);
             Route::post('aprobar-gerencia', [App\Http\Controllers\CpPedidoController::class, 'aprobarGerencia']);
             Route::post('rechazar-gerencia', [App\Http\Controllers\CpPedidoController::class, 'rechazarGerencia']);
+            Route::post('update-items', [App\Http\Controllers\CpPedidoController::class, 'updateItems']);
+            Route::patch('tracking', [App\Http\Controllers\CpPedidoController::class, 'updateTracking']);
         });
     });
 

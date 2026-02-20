@@ -140,4 +140,16 @@ class UsuarioController extends Controller
             return ApiResponse::error('Error al eliminar usuario', 404);
         }
     }
+
+    /**
+     * Get users whose role has a specific permission.
+     */
+    public function getByPermission($permiso)
+    {
+        $usuarios = \App\Models\Usuario::whereHas('rol.permisos', function ($query) use ($permiso) {
+            $query->where('nombre', $permiso);
+        })->with('rol')->get();
+
+        return ApiResponse::success($usuarios, 'Usuarios con permiso: ' . $permiso);
+    }
 }

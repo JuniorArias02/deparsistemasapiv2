@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Services\PcConfigCronogramaService;
 use App\Responses\ApiResponse;
-use App\Services\PermissionService
+use App\Services\PermissionService;
 use Illuminate\Http\Request;
 use OpenApi\Attributes as OA;
 

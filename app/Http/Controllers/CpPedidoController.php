@@ -122,7 +122,7 @@ class CpPedidoController extends Controller
                 $request->boolean('use_stored_signature'),
                 auth()->user()
             );
-            
+
             return response()->json([
                 'message' => 'Pedido creado exitosamente',
                 'pedido' => $pedido,
@@ -427,6 +427,32 @@ class CpPedidoController extends Controller
         } catch (\Exception $e) {
             $status = $e->getCode() === 404 ? 404 : 500;
             return response()->json(['error' => $e->getMessage()], $status);
+        }
+    }
+    public function updateTracking(Request $request, $id)
+    {
+        $this->permissionService->authorize('cp_pedido.actualizar');
+
+        $validated = $request->validate([
+            'fecha_solicitud_cotizacion' => 'nullable|string|max:255',
+            'fecha_respuesta_cotizacion' => 'nullable|string|max:255',
+            'firma_aprobacion_orden' => 'nullable|date',
+            'fecha_envio_proveedor' => 'nullable|string|max:255',
+            'observaciones_pedidos' => 'nullable|string',
+        ]);
+
+        try {
+            $pedido = CpPedido::find($id);
+            if (!$pedido) {
+                return ApiResponse::error('Pedido no encontrado', 404);
+            }
+
+            $pedido->update($validated);
+            $pedido->load(['items', 'solicitante', 'tipoSolicitud', 'sede', 'elaboradoPor', 'procesoCompra', 'responsableAprobacion', 'creador']);
+
+            return ApiResponse::success($pedido, 'Seguimiento actualizado correctamente');
+        } catch (\Exception $e) {
+            return ApiResponse::error('Error al actualizar seguimiento: ' . $e->getMessage(), 500);
         }
     }
 }

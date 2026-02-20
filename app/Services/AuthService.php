@@ -30,7 +30,7 @@ class AuthService
     public function me()
     {
         $user = $this->authRepository->user();
-        return $user ? $user->load('rol') : null;
+        return $user ? $user->load('rol.permisos') : null;
     }
 
     public function logout()
