@@ -108,6 +108,7 @@ Route::group(['middleware' => 'api'], function () {
         Route::apiResource('cp-productos-servicios', App\Http\Controllers\CpProductoServicioController::class);
         Route::apiResource('cp-proveedores', App\Http\Controllers\CpProveedorController::class);
         Route::apiResource('cp-tipos-solicitud', App\Http\Controllers\CpTipoSolicitudController::class);
+        Route::get('pc-equipos/{id}/hoja-de-vida', [App\Http\Controllers\PcEquipoController::class, 'hojaDeVida']);
         Route::apiResource('pc-equipos', App\Http\Controllers\PcEquipoController::class);
         Route::apiResource('pc-caracteristicas-tecnicas', App\Http\Controllers\PcCaracteristicasTecnicasController::class);
         Route::get('pc-caracteristicas-tecnicas/equipo/{equipo_id}', [App\Http\Controllers\PcCaracteristicasTecnicasController::class, 'showByEquipo']);

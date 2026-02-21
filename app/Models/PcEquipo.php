@@ -59,11 +59,31 @@ class PcEquipo extends Model
 
     public function responsable()
     {
-        return $this->belongsTo(Personal::class, 'responsable_id');
+        return $this->belongsTo(Usuario::class, 'responsable_id');
     }
 
     public function creador()
     {
         return $this->belongsTo(Usuario::class, 'creado_por');
+    }
+
+    public function caracteristicasTecnicas()
+    {
+        return $this->hasOne(PcCaracteristicasTecnicas::class, 'equipo_id');
+    }
+
+    public function licenciasSoftware()
+    {
+        return $this->hasOne(PcLicenciaSoftware::class, 'equipo_id');
+    }
+
+    public function entregas()
+    {
+        return $this->hasMany(PcEntrega::class, 'equipo_id');
+    }
+
+    public function mantenimientos()
+    {
+        return $this->hasMany(PcMantenimiento::class, 'equipo_id');
     }
 }

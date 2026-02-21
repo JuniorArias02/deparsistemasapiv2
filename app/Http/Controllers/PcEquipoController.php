@@ -207,4 +207,19 @@ class PcEquipoController extends Controller
 
         return ApiResponse::error('Equipo no encontrado o no se pudo eliminar', 404);
     }
+
+    public function hojaDeVida($id)
+    {
+        try {
+            $data = $this->service->hojaDeVida($id);
+
+            if (!$data) {
+                return ApiResponse::error('Equipo no encontrado', 404);
+            }
+
+            return ApiResponse::success($data, 'Hoja de vida del equipo');
+        } catch (\Exception $e) {
+            return ApiResponse::error('Error al obtener hoja de vida: ' . $e->getMessage(), 500);
+        }
+    }
 }
