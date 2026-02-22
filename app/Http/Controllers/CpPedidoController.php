@@ -6,6 +6,7 @@ use App\Models\CpPedido;
 use App\Models\CpItemPedido;
 use App\Services\PermissionService;
 use App\Services\CpPedidoService;
+use App\Exports\CpPedidoExport;
 use App\Responses\ApiResponse;
 use Illuminate\Http\Request;
 use OpenApi\Attributes as OA;
@@ -453,6 +454,36 @@ class CpPedidoController extends Controller
             return ApiResponse::success($pedido, 'Seguimiento actualizado correctamente');
         } catch (\Exception $e) {
             return ApiResponse::error('Error al actualizar seguimiento: ' . $e->getMessage(), 500);
+        }
+    }
+
+    /**
+     * Export a pedido to Excel.
+     */
+    #[OA\Get(
+        path: '/api/cp-pedidos/{id}/exportar-excel',
+        tags: ['Pedidos de Compra'],
+        summary: 'Exportar pedido a Excel',
+        description: 'Genera y descarga un archivo Excel con los datos del pedido.',
+        security: [['bearerAuth' => []]],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer'))
+        ],
+        responses: [
+            new OA\Response(response: 200, description: 'Archivo Excel descargado'),
+            new OA\Response(response: 404, description: 'Pedido no encontrado'),
+            new OA\Response(response: 500, description: 'Error del servidor')
+        ]
+    )]
+    public function exportExcel($id)
+    {
+        $this->permissionService->authorize('cp_pedido.listar');
+
+        try {
+            $export = new CpPedidoExport();
+            return $export->generate((int) $id);
+        } catch (\Exception $e) {
+            return ApiResponse::error('Error al exportar pedido: ' . $e->getMessage(), 500);
         }
     }
 }
