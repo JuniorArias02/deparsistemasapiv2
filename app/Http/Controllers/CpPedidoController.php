@@ -7,6 +7,7 @@ use App\Models\CpItemPedido;
 use App\Services\PermissionService;
 use App\Services\CpPedidoService;
 use App\Exports\CpPedidoExport;
+use App\Exports\CpConsolidadoExport;
 use App\Responses\ApiResponse;
 use Illuminate\Http\Request;
 use OpenApi\Attributes as OA;
@@ -484,6 +485,45 @@ class CpPedidoController extends Controller
             return $export->generate((int) $id);
         } catch (\Exception $e) {
             return ApiResponse::error('Error al exportar pedido: ' . $e->getMessage(), 500);
+        }
+    }
+
+    /**
+     * Export a consolidated report of pedidos to Excel.
+     */
+    #[OA\Post(
+        path: '/api/cp-pedidos/exportar-consolidado',
+        tags: ['Pedidos de Compra'],
+        summary: 'Exportar consolidado de pedidos a Excel',
+        description: 'Genera y descarga un archivo Excel con el consolidado de pedidos basado en filtros.',
+        security: [['bearerAuth' => []]],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                properties: [
+                    new OA\Property(property: 'fecha_desde', type: 'string', format: 'date'),
+                    new OA\Property(property: 'fecha_hasta', type: 'string', format: 'date'),
+                    new OA\Property(property: 'sede_id', type: 'integer'),
+                    new OA\Property(property: 'proceso', type: 'string'),
+                    new OA\Property(property: 'elaborado_por', type: 'integer'),
+                    new OA\Property(property: 'search', type: 'string'),
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(response: 200, description: 'Archivo Excel descargado'),
+            new OA\Response(response: 500, description: 'Error del servidor')
+        ]
+    )]
+    public function exportConsolidadoExcel(Request $request)
+    {
+        $this->permissionService->authorize('cp_pedido.listar');
+
+        try {
+            $export = new CpConsolidadoExport();
+            return $export->generate($request->all());
+        } catch (\Exception $e) {
+            return ApiResponse::error('Error al exportar consolidado: ' . $e->getMessage(), 500);
         }
     }
 }

@@ -178,6 +178,7 @@ Route::group(['middleware' => 'api'], function () {
             Route::patch('tracking', [App\Http\Controllers\CpPedidoController::class, 'updateTracking']);
             Route::get('exportar-excel', [App\Http\Controllers\CpPedidoController::class, 'exportExcel']);
         });
+        Route::post('cp-pedidos/exportar-consolidado', [App\Http\Controllers\CpPedidoController::class, 'exportConsolidadoExcel']);
     });
 
     // CP Entrega Activos Fijos Routes (Protected with JWT)
