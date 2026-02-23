@@ -17,7 +17,7 @@ class CpPedidoService
 
     public function getAll(Usuario $user)
     {
-        $query = CpPedido::with(['items', 'solicitante', 'tipoSolicitud', 'sede', 'elaboradoPor', 'procesoCompra', 'responsableAprobacion', 'creador'])
+        $query = CpPedido::with(['items.producto', 'solicitante', 'tipoSolicitud', 'sede', 'elaboradoPor', 'procesoCompra', 'responsableAprobacion', 'creador'])
             ->orderBy('id', 'desc');
 
         if ($this->permissionService->check($user, 'cp_pedido.listar.compras')) {
@@ -31,7 +31,7 @@ class CpPedidoService
 
     public function getById($id)
     {
-        return CpPedido::with(['items', 'solicitante', 'tipoSolicitud', 'sede', 'elaboradoPor', 'procesoCompra', 'responsableAprobacion', 'creador'])->find($id);
+        return CpPedido::with(['items.producto', 'solicitante', 'tipoSolicitud', 'sede', 'elaboradoPor', 'procesoCompra', 'responsableAprobacion', 'creador'])->find($id);
     }
 
     public function create(array $data, $firmaFile = null, $useStoredSignature = false, Usuario $user)
