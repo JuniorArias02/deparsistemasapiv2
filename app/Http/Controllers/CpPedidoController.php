@@ -33,11 +33,11 @@ class CpPedidoController extends Controller
             new OA\Response(response: 403, description: 'Prohibido')
         ]
     )]
-    public function index()
+    public function index(Request $request)
     {
         try {
             $user = auth('api')->user();
-            $pedidos = $this->service->getAll($user);
+            $pedidos = $this->service->getAll($user, $request->all());
             return ApiResponse::success($pedidos, 'Listado de pedidos obtenido correctamente');
         } catch (\Exception $e) {
             $status = $e->getCode() === 403 ? 403 : 500;

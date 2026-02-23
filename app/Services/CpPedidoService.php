@@ -15,11 +15,16 @@ class CpPedidoService
 {
     public function __construct(protected PermissionService $permissionService) {}
 
-    public function getAll(Usuario $user)
+    public function getAll(Usuario $user, array $filters = [])
     {
         $query = CpPedido::with(['items.producto', 'solicitante', 'tipoSolicitud', 'sede', 'elaboradoPor', 'procesoCompra', 'responsableAprobacion', 'creador'])
             ->orderBy('id', 'desc');
 
+        if (!empty($filters['consecutivo'])) {
+            $query->where('consecutivo', $filters['consecutivo']);
+        } elseif (!empty($filters['month'])) {
+            $query->where('fecha_solicitud', 'like', $filters['month'] . '%');
+        }
         if ($this->permissionService->check($user, 'cp_pedido.listar.compras')) {
             return $query->get();
         } elseif ($this->permissionService->check($user, 'cp_pedido.listar.responsable')) {
