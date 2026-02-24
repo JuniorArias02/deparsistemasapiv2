@@ -109,7 +109,7 @@ class CpPedidoController extends Controller
             'items.*.nombre' => 'required|string|max:255',
             'items.*.cantidad' => 'required|integer|min:1',
             'items.*.unidad_medida' => 'required|string|max:60',
-            'items.*.productos_id' => 'required|exists:cp_productos,id',
+            'items.*.productos_id' => 'nullable|exists:cp_productos,id',
             'items.*.referencia_items' => 'nullable|string|max:255',
         ]);
 
