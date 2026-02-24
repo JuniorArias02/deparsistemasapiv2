@@ -25,9 +25,8 @@ php_value memory_limit 256M
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteRule ^ index.php [L]
 
-    # Redirigir todo a /public
+    # Redirigir todo a /public de forma limpia
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteCond %{REQUEST_FILENAME} !-f
-    RewriteCond %{REQUEST_URI} !^/public/
-    RewriteRule ^(.*)$ public/$1 [L]
+    RewriteRule ^((?!public/).*)$ public/$1 [L,NC]
 </IfModule>

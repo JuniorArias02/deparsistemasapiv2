@@ -11,24 +11,6 @@ Route::get('/ping', function () {
     ]);
 });
 
-// Serve storage files without symlink (shared hosting fix)
-Route::get('/storage/{path}', function (string $path) {
-    $fullPath = storage_path('app/public/' . $path);
-
-    if (!file_exists($fullPath)) {
-        abort(404);
-    }
-
-    // Security: only allow safe file extensions
-    $allowed = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'pdf', 'doc', 'docx', 'xls', 'xlsx'];
-    $ext = strtolower(pathinfo($fullPath, PATHINFO_EXTENSION));
-    if (!in_array($ext, $allowed)) {
-        abort(403);
-    }
-
-    return response()->file($fullPath);
-})->where('path', '.*');
-
 // TEMPORARY DEBUG - REMOVE AFTER FIXING
 Route::post('/debug-login', function (\Illuminate\Http\Request $request) {
     $usuario = $request->input('usuario');
