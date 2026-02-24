@@ -523,11 +523,16 @@ class CpPedidoController extends Controller
     {
         $this->permissionService->authorize('cp_pedido.actualizar');
 
+        // Normalize empty strings to null for date fields to avoid validation errors
+        if ($request->has('firma_aprobacion_orden') && $request->input('firma_aprobacion_orden') === '') {
+            $request->merge(['firma_aprobacion_orden' => null]);
+        }
+
         $validated = $request->validate([
-            'fecha_solicitud_cotizacion' => 'nullable|string|max:255',
-            'fecha_respuesta_cotizacion' => 'nullable|string|max:255',
+            'fecha_solicitud_cotizacion' => 'nullable|string',
+            'fecha_respuesta_cotizacion' => 'nullable|string',
             'firma_aprobacion_orden' => 'nullable|date',
-            'fecha_envio_proveedor' => 'nullable|string|max:255',
+            'fecha_envio_proveedor' => 'nullable|string',
             'observaciones_pedidos' => 'nullable|string',
         ]);
 
