@@ -3,14 +3,24 @@
 use Illuminate\Support\Facades\Route;
 
 // Serve storage files WITHOUT middleware (fix for shared hosting/missing sessions table)
-Route::get('{prefix}storage/{path}', function (string $prefix, string $path) {
-    $fullPath = storage_path('app/public/' . $path);
-    if (!file_exists($fullPath)) abort(404);
-    $allowed = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'pdf', 'doc', 'docx', 'xls', 'xlsx'];
-    $ext = strtolower(pathinfo($fullPath, PATHINFO_EXTENSION));
-    if (!in_array($ext, $allowed)) abort(403);
-    return response()->file($fullPath);
-})->where('prefix', '(public/)?')->where('path', '.*')
+// Handles both /storage/... and /public/storage/... URLs
+Route::get('{fullPath}', function (string $fullPath) {
+    // Extract the part after 'storage/'
+    if (preg_match('/(?:public\/)?storage\/(.+)$/', $fullPath, $matches)) {
+        $path = $matches[1];
+        $absolutePath = storage_path('app/public/' . $path);
+
+        if (file_exists($absolutePath)) {
+            $allowed = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'pdf', 'doc', 'docx', 'xls', 'xlsx'];
+            $ext = strtolower(pathinfo($absolutePath, PATHINFO_EXTENSION));
+            if (in_array($ext, $allowed)) {
+                return response()->file($absolutePath);
+            }
+            abort(403, 'Extension not allowed');
+        }
+    }
+    abort(404);
+})->where('fullPath', '(public/)?storage/.*')
     ->withoutMiddleware([
         \Illuminate\Session\Middleware\StartSession::class,
         \Illuminate\View\Middleware\ShareErrorsFromSession::class,
