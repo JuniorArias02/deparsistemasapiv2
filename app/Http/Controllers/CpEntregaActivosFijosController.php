@@ -6,6 +6,7 @@ use App\Models\CpEntregaActivosFijos;
 use App\Models\CpEntregaActivosFijosItem;
 use App\Services\PermissionService;
 use App\Services\CpEntregaActivosFijosService;
+use App\Exports\CpEntregaActivosFijosExport;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -264,6 +265,40 @@ class CpEntregaActivosFijosController extends Controller
                 'objeto' => null,
                 'status' => $status
             ], $status);
+        }
+    }
+
+    /**
+     * Exportar entrega a Excel.
+     */
+    #[OA\Get(
+        path: '/api/cp-entrega-activos-fijos/{id}/exportar-excel',
+        tags: ['Entrega de Activos Fijos'],
+        summary: 'Exportar entrega a Excel',
+        description: 'Genera un archivo Excel basado en una plantilla para la entrega especificada.',
+        security: [['bearerAuth' => []]],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer'))
+        ],
+        responses: [
+            new OA\Response(response: 200, description: 'Archivo Excel generado'),
+            new OA\Response(response: 404, description: 'Entrega no encontrada'),
+            new OA\Response(response: 500, description: 'Error al generar el Excel')
+        ]
+    )]
+    public function exportExcel($id)
+    {
+        $this->permissionService->authorize('cp_entrega_activos_fijos.listar');
+
+        try {
+            $export = new CpEntregaActivosFijosExport();
+            return $export->generate((int)$id);
+        } catch (Exception $e) {
+            return response()->json([
+                'mensaje' => 'Error al exportar a Excel: ' . $e->getMessage(),
+                'objeto' => null,
+                'status' => 500
+            ], 500);
         }
     }
 }

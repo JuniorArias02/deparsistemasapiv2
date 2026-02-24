@@ -166,5 +166,6 @@ Route::group(['middleware' => 'api'], function () {
     // CP Entrega Activos Fijos Routes (Protected with JWT)
     Route::middleware('auth:api')->group(function () {
         Route::apiResource('cp-entrega-activos-fijos', App\Http\Controllers\CpEntregaActivosFijosController::class);
+        Route::get('cp-entrega-activos-fijos/{id}/exportar-excel', [App\Http\Controllers\CpEntregaActivosFijosController::class, 'exportExcel']);
     });
 });
