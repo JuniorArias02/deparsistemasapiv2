@@ -19,7 +19,8 @@ Route::get('/', function () {
 
 // Serve storage files without symlink (shared hosting fix)
 // This works even if public/storage doesn't exist or is broken
-Route::get('/storage/{path}', function (string $path) {
+// Updated to handle both /storage and /public/storage prefixes
+Route::get('{prefix}storage/{path}', function (string $prefix, string $path) {
     $fullPath = storage_path('app/public/' . $path);
 
     if (!file_exists($fullPath)) {
@@ -34,4 +35,4 @@ Route::get('/storage/{path}', function (string $path) {
     }
 
     return response()->file($fullPath);
-})->where('path', '.*');
+})->where('prefix', '(public/)?')->where('path', '.*');
