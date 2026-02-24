@@ -92,17 +92,87 @@ class CpPedidoService
         }
     }
 
+    public function update($id, array $data, $firmaFile = null, $useStoredSignature = false, Usuario $user)
+    {
+        $pedido = CpPedido::findOrFail($id);
+
+        DB::beginTransaction();
+
+        try {
+            $updateData = [
+                'proceso_solicitante' => $data['proceso_solicitante'],
+                'tipo_solicitud' => $data['tipo_solicitud'],
+                'observacion' => $data['observacion'] ?? null,
+                'sede_id' => $data['sede_id'],
+                'elaborado_por' => $data['elaborado_por'],
+            ];
+
+            // Only update signature if provided or requested to use stored
+            if ($firmaFile || $useStoredSignature) {
+                $path = $this->handleSignature($firmaFile, $useStoredSignature, $user, 'elaboracion_edit');
+                if ($path) {
+                    $updateData['elaborado_por_firma'] = 'storage/' . $path;
+                }
+            }
+
+            $pedido->update($updateData);
+
+            // Sync items: Delete and recreate
+            $pedido->items()->delete();
+
+            foreach ($data['items'] as $item) {
+                CpItemPedido::create([
+                    'nombre' => $item['nombre'],
+                    'cantidad' => $item['cantidad'],
+                    'unidad_medida' => $item['unidad_medida'],
+                    'referencia_items' => $item['referencia_items'] ?? null,
+                    'cp_pedido' => $pedido->id,
+                    'productos_id' => $item['productos_id'],
+                    'comprado' => 0,
+                ]);
+            }
+
+            DB::commit();
+
+            return $pedido->load('items');
+        } catch (Exception $e) {
+            DB::rollBack();
+            if (isset($path) && strpos($path, 'stored') === false) {
+                Storage::disk('public')->delete($path);
+            }
+            throw $e;
+        }
+    }
+
     public function delete($id)
     {
-        $pedido = CpPedido::find($id);
-        if (!$pedido) {
-            return false;
+        $pedido = CpPedido::findOrFail($id);
+
+        // Safety check: Only allow deletion if it hasn't been processed
+        if ($pedido->estado_compras !== 'pendiente' || $pedido->estado_gerencia !== 'pendiente') {
+            throw new Exception('No se puede eliminar un pedido que ya ha sido procesado (aprobado o rechazado).');
         }
 
         DB::beginTransaction();
         try {
+            // 1. Delete items first
             $pedido->items()->delete();
+
+            // 2. Cleanup signature file if it's not a profile-stored signature
+            // Signature paths usually look like 'storage/pedidos_firma/...' or 'storage/stored_firma/...'
+            if ($pedido->elaborado_por_firma) {
+                $relativePath = str_replace('storage/', '', $pedido->elaborado_por_firma);
+                // Only delete if it's in the pedidos_firma folder and not a 'stored' one
+                if (strpos($relativePath, 'pedidos_firma/') === 0 && strpos($relativePath, '_stored.') === false) {
+                    if (Storage::disk('public')->exists($relativePath)) {
+                        Storage::disk('public')->delete($relativePath);
+                    }
+                }
+            }
+
+            // 3. Delete the pedido record
             $pedido->delete();
+
             DB::commit();
             return true;
         } catch (Exception $e) {

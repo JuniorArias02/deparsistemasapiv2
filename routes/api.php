@@ -150,7 +150,8 @@ Route::group(['middleware' => 'api'], function () {
 
     // CP Pedidos Routes (Protected with JWT)
     Route::middleware('auth:api')->group(function () {
-        Route::apiResource('cp-pedidos', App\Http\Controllers\CpPedidoController::class)->except(['update']);
+        Route::apiResource('cp-pedidos', App\Http\Controllers\CpPedidoController::class);
+        Route::post('cp-pedidos/{id}', [App\Http\Controllers\CpPedidoController::class, 'update']); // Support FormData update
         Route::group(['prefix' => 'cp-pedidos/{id}'], function () {
             Route::post('aprobar-compras', [App\Http\Controllers\CpPedidoController::class, 'aprobarCompras']);
             Route::post('rechazar-compras', [App\Http\Controllers\CpPedidoController::class, 'rechazarCompras']);

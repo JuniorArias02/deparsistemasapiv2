@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\CpPedido;
 use App\Models\CpItemPedido;
+use App\Models\Usuario;
 use App\Services\PermissionService;
 use App\Services\CpPedidoService;
 use App\Exports\CpPedidoExport;
@@ -100,7 +101,7 @@ class CpPedidoController extends Controller
         $validated = $request->validate([
             'proceso_solicitante' => 'required|exists:dependencias_sedes,id',
             'tipo_solicitud' => 'required|exists:cp_tipo_solicitud,id',
-            'observacion' => 'nullable|string',
+            'observacion' => 'required|string',
             'sede_id' => 'required|exists:sedes,id',
             'elaborado_por' => 'required|exists:usuarios,id',
             'use_stored_signature' => 'nullable|boolean',
@@ -110,7 +111,7 @@ class CpPedidoController extends Controller
             'items.*.cantidad' => 'required|integer|min:1',
             'items.*.unidad_medida' => 'required|string|max:60',
             'items.*.productos_id' => 'nullable|exists:cp_productos,id',
-            'items.*.referencia_items' => 'nullable|string|max:255',
+            'items.*.referencia_items' => 'nullable|string',
         ]);
 
         if (!$request->hasFile('elaborado_por_firma') && !$request->boolean('use_stored_signature')) {
@@ -131,6 +132,93 @@ class CpPedidoController extends Controller
             ], 201);
         } catch (\Exception $e) {
             return response()->json(['error' => 'Error al crear el pedido: ' . $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    #[OA\Post(
+        path: '/api/cp-pedidos/{id}',
+        tags: ['Pedidos de Compra'],
+        summary: 'Actualizar pedido de compra',
+        description: 'Actualiza un pedido de compra existente con sus items.',
+        security: [['bearerAuth' => []]],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer'))
+        ],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\MediaType(
+                mediaType: 'multipart/form-data',
+                schema: new OA\Schema(
+                    required: ['proceso_solicitante', 'tipo_solicitud', 'sede_id', 'elaborado_por', 'items'],
+                    properties: [
+                        new OA\Property(property: 'proceso_solicitante', type: 'integer'),
+                        new OA\Property(property: 'tipo_solicitud', type: 'integer'),
+                        new OA\Property(property: 'observacion', type: 'string'),
+                        new OA\Property(property: 'sede_id', type: 'integer'),
+                        new OA\Property(property: 'elaborado_por', type: 'integer'),
+                        new OA\Property(property: 'elaborado_por_firma', type: 'string', format: 'binary'),
+                        new OA\Property(property: 'use_stored_signature', type: 'boolean'),
+                        new OA\Property(
+                            property: 'items',
+                            type: 'array',
+                            items: new OA\Items(
+                                type: 'object',
+                                required: ['nombre', 'cantidad', 'unidad_medida'],
+                                properties: [
+                                    new OA\Property(property: 'nombre', type: 'string'),
+                                    new OA\Property(property: 'cantidad', type: 'integer'),
+                                    new OA\Property(property: 'unidad_medida', type: 'string'),
+                                    new OA\Property(property: 'referencia_items', type: 'string'),
+                                    new OA\Property(property: 'productos_id', type: 'integer')
+                                ]
+                            )
+                        )
+                    ]
+                )
+            )
+        ),
+        responses: [
+            new OA\Response(response: 200, description: 'Pedido actualizado exitosamente'),
+            new OA\Response(response: 422, description: 'Error de validación')
+        ]
+    )]
+    public function update(Request $request, $id)
+    {
+        $this->permissionService->authorize('cp_pedido.actualizar');
+        $validated = $request->validate([
+            'proceso_solicitante' => 'required|exists:dependencias_sedes,id',
+            'tipo_solicitud' => 'required|exists:cp_tipo_solicitud,id',
+            'observacion' => 'required|string',
+            'sede_id' => 'required|exists:sedes,id',
+            'elaborado_por' => 'required|exists:usuarios,id',
+            'use_stored_signature' => 'nullable|boolean',
+            'elaborado_por_firma' => 'nullable|file|image|max:1024',
+            'items' => 'required|array|min:1',
+            'items.*.nombre' => 'required|string|max:255',
+            'items.*.cantidad' => 'required|integer|min:1',
+            'items.*.unidad_medida' => 'required|string|max:60',
+            'items.*.productos_id' => 'nullable|exists:cp_productos,id',
+            'items.*.referencia_items' => 'nullable|string',
+        ]);
+
+        try {
+            $pedido = $this->service->update(
+                $id,
+                $validated,
+                $request->file('elaborado_por_firma'),
+                $request->boolean('use_stored_signature'),
+                auth()->user()
+            );
+
+            return response()->json([
+                'message' => 'Pedido actualizado exitosamente',
+                'pedido' => $pedido,
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Error al actualizar el pedido: ' . $e->getMessage()], 500);
         }
     }
 
