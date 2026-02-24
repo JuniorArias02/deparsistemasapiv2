@@ -523,10 +523,14 @@ class CpPedidoController extends Controller
     {
         $this->permissionService->authorize('cp_pedido.actualizar');
 
-        // Normalize empty strings to null for date fields to avoid validation errors
-        if ($request->has('firma_aprobacion_orden') && $request->input('firma_aprobacion_orden') === '') {
-            $request->merge(['firma_aprobacion_orden' => null]);
+        // Convert ALL empty strings to null for this request to avoid validation/DB errors
+        $data = $request->all();
+        foreach ($data as $key => $value) {
+            if ($value === '') {
+                $data[$key] = null;
+            }
         }
+        $request->merge($data);
 
         $validated = $request->validate([
             'fecha_solicitud_cotizacion' => 'nullable|string',
