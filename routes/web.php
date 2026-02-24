@@ -18,8 +18,7 @@ Route::get('/', function () {
 });
 
 // Serve storage files without symlink (shared hosting fix)
-// This works even if public/storage doesn't exist or is broken
-// Updated to handle both /storage and /public/storage prefixes
+// We use 'withoutMiddleware' to avoid dependencies like the 'sessions' table which might not exist in production
 Route::get('{prefix}storage/{path}', function (string $prefix, string $path) {
     $fullPath = storage_path('app/public/' . $path);
 
@@ -35,4 +34,5 @@ Route::get('{prefix}storage/{path}', function (string $prefix, string $path) {
     }
 
     return response()->file($fullPath);
-})->where('prefix', '(public/)?')->where('path', '.*');
+})->where('prefix', '(public/)?')->where('path', '.*')
+    ->middleware([]); // Empty middleware avoids sessions, cookies, and database calls for assets.
