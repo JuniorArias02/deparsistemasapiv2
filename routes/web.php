@@ -3,10 +3,10 @@
 use Illuminate\Support\Facades\Route;
 
 // Serve storage files WITHOUT middleware (fix for shared hosting/missing sessions table)
-// Handles both /storage/... and /public/storage/... URLs
+// Handles /storage/..., /public/storage/..., /api/storage/..., or /public/api/storage/...
 Route::get('{fullPath}', function (string $fullPath) {
-    // Extract the part after 'storage/'
-    if (preg_match('/(?:public\/)?storage\/(.+)$/', $fullPath, $matches)) {
+    // Extract the part after 'storage/' allowing for public/ and/or api/ prefixes
+    if (preg_match('/(?:(?:public\/)?(?:api\/)?)?storage\/(.+)$/', $fullPath, $matches)) {
         $path = $matches[1];
         $absolutePath = storage_path('app/public/' . $path);
 
@@ -20,7 +20,7 @@ Route::get('{fullPath}', function (string $fullPath) {
         }
     }
     abort(404);
-})->where('fullPath', '(public/)?storage/.*')
+})->where('fullPath', '(public\/)?(api\/)?storage\/.*')
     ->withoutMiddleware([
         \Illuminate\Session\Middleware\StartSession::class,
         \Illuminate\View\Middleware\ShareErrorsFromSession::class,
