@@ -30,7 +30,7 @@ class GerenciaApprovedNotification extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Pedido Aprobado por Gerencia - Depart-Sistem',
+            subject: 'Pedido Aprobado por Gerencia - NexaCore',
         );
     }
 

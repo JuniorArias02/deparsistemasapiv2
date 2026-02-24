@@ -43,7 +43,7 @@ class LoginNotification extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Alerta de Inicio de Sesión - Depart-Sistem',
+            subject: 'Alerta de Inicio de Sesión - NexaCore',
         );
     }
 

@@ -32,7 +32,7 @@ class OrderRejectedNotification extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Pedido Rechazado por Compras - Depart-Sistem',
+            subject: 'Pedido Rechazado por Compras - NexaCore',
         );
     }
 

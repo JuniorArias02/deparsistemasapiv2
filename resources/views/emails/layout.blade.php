@@ -69,7 +69,7 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>Depart-Sistem</h1>
+            <h1>NexaCore</h1>
             <div class="subtitle">@yield('title', 'Notificación del Sistema')</div>
         </div>
         

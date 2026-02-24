@@ -80,6 +80,7 @@ class CpPedidoService
 
             DB::commit();
 
+            $pedido->load(['items', 'solicitante', 'tipoSolicitud', 'sede', 'elaboradoPor', 'creador']);
             $this->sendNewOrderNotification($pedido);
 
             return $pedido->load('items');

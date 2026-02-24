@@ -32,7 +32,7 @@ class GerenciaRejectedNotification extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Pedido Rechazado por Gerencia - Depart-Sistem',
+            subject: 'Pedido Rechazado por Gerencia - NexaCore',
         );
     }
 

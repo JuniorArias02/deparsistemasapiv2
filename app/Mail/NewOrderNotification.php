@@ -30,7 +30,7 @@ class NewOrderNotification extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Tienes pedido por revisar - Depart-Sistem',
+            subject: 'Tienes pedido por revisar - NexaCore',
         );
     }
 

@@ -30,7 +30,7 @@ class OrderApprovedNotification extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Pedido Aprobado por Compras - Depart-Sistem',
+            subject: 'Pedido Aprobado por Compras - NexaCore',
         );
     }
 
