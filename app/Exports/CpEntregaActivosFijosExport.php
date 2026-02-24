@@ -83,9 +83,10 @@ class CpEntregaActivosFijosExport
                 }
             }
 
-            $sheet->setCellValue($item->es_accesorio ? "R{$row}" : "S{$row}", "X");
+            $hasAccesorio = ($inv && $inv->tiene_accesorio === 'Si');
+            $sheet->setCellValue($hasAccesorio ? "R{$row}" : "S{$row}", "X");
             $sheet->setCellValue("Q{$row}", $inv->estado ?? 'N/A');
-            $sheet->setCellValue("T{$row}", $item->accesorio_descripcion ?? 'N/A');
+            $sheet->setCellValue("T{$row}", $inv->descripcion_accesorio ?? 'N/A');
             $sheet->setCellValue("U{$row}", $inv->observaciones ?? 'N/A');
 
             $sheet->getStyle("B{$row}:U{$row}")

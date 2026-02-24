@@ -46,16 +46,16 @@ class InventarioController extends Controller
     public function index(Request $request)
     {
         // $this->permissionService->authorize('inventario.read');
-        
+
         try {
             $query = Inventario::query();
 
             if ($request->has('search') && !empty($request->search)) {
                 $search = $request->search;
-                $query->where(function($q) use ($search) {
+                $query->where(function ($q) use ($search) {
                     $q->where('codigo', 'like', "%{$search}%")
-                      ->orWhere('nombre', 'like', "%{$search}%")
-                      ->orWhere('serial', 'like', "%{$search}%");
+                        ->orWhere('nombre', 'like', "%{$search}%")
+                        ->orWhere('serial', 'like', "%{$search}%");
                 });
             }
 
@@ -186,13 +186,13 @@ class InventarioController extends Controller
             'coordinador_id' => 'required|exists:personal,id',
             'sede_id' => 'required|exists:sedes,id',
             'proceso_id' => 'required|integer',
-            
+
             // Campos opcionales
             'responsable' => 'nullable|string|max:100',
             'marca' => 'nullable|string|max:100',
             'modelo' => 'nullable|string|max:100',
             'serial' => 'nullable|string|max:100',
-            'creado_por' => 'nullable|integer', 
+            'creado_por' => 'nullable|integer',
             'codigo_barras' => 'nullable|string|max:160',
             'num_factu' => 'nullable|string|max:60',
             'grupo' => 'nullable|string|max:60',
@@ -224,6 +224,7 @@ class InventarioController extends Controller
             'valor_actual' => 'nullable|numeric',
             'depreciacion_acumulada' => 'nullable|numeric',
             'tipo_bien' => 'nullable|string|max:60',
+            'tiene_accesorio' => 'nullable|string|max:10',
             'descripcion_accesorio' => 'nullable|string',
         ]);
 
@@ -239,7 +240,7 @@ class InventarioController extends Controller
             $file = $request->file('soporte_adjunto');
             // Validate it is a PDF if strictly required, though max:260 suggests path length constraint in DB.
             // Let's ensure it's a file.
-             $request->validate([
+            $request->validate([
                 'soporte_adjunto' => 'file|mimes:pdf|max:10240', // Max 10MB
             ]);
 
@@ -324,7 +325,7 @@ class InventarioController extends Controller
             'serial' => 'nullable|string|max:100',
             'proceso_id' => 'nullable|integer',
             'sede_id' => 'nullable|exists:sedes,id',
-            'creado_por' => 'nullable|integer', 
+            'creado_por' => 'nullable|integer',
             'codigo_barras' => 'nullable|string|max:160',
             'num_factu' => 'nullable|string|max:60',
             'grupo' => 'nullable|string|max:60',
