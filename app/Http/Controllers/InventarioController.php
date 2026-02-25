@@ -273,7 +273,7 @@ class InventarioController extends Controller
     )]
     public function show($id)
     {
-        $inventario = Inventario::with(['responsablePersonal', 'coordinadorPersonal'])->find($id);
+        $inventario = Inventario::with(['responsablePersonal', 'coordinadorPersonal', 'sede'])->find($id);
 
         if (!$inventario) {
             return ApiResponse::error('Item de inventario no encontrado', 404);

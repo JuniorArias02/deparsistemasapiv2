@@ -245,6 +245,7 @@ class MantenimientoController extends Controller
      */
     public function misMantenimientos()
     {
+        $this->permissionService->authorize("mantenimiento.receptor");
         $user = \Illuminate\Support\Facades\Auth::guard('api')->user();
         $mantenimientos = $this->service->getByReceptor($user->id);
         return ApiResponse::success($mantenimientos, 'Mis mantenimientos asignados');

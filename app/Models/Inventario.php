@@ -10,7 +10,10 @@ class Inventario extends Model
     public $timestamps = false; // Custom timestamps in migration (fecha_creacion, fecha_actualizacion)
 
     protected $fillable = [
+        'id',
         'codigo',
+        'codigo2',
+        'activo',
         'nombre',
         'dependencia',
         'responsable',
