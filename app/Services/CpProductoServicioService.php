@@ -6,14 +6,18 @@ use App\Models\CpProductoServicio;
 
 class CpProductoServicioService
 {
-    public function getAll($search = null)
+    public function getAll($search = null, $perPage = 15)
     {
         $query = CpProductoServicio::query();
+
         if ($search) {
-            $query->where('codigo_producto', 'like', "%{$search}%")
-                  ->orWhere('nombre', 'like', "%{$search}%");
+            $query->where(function ($q) use ($search) {
+                $q->where('codigo_producto', 'like', "%{$search}%")
+                    ->orWhere('nombre', 'like', "%{$search}%");
+            });
         }
-        return $query->limit(20)->get();
+
+        return $query->paginate($perPage);
     }
 
     public function create(array $data)

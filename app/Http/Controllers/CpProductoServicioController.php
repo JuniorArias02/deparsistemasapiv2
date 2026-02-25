@@ -27,7 +27,13 @@ class CpProductoServicioController extends Controller
     )]
     public function index(Request $request)
     {
-        return ApiResponse::success($this->service->getAll($request->get('q')), 'Lista de productos servicios');
+        $search = $request->get('search') ?? $request->get('q');
+        $perPage = $request->get('per_page', 15);
+
+        return ApiResponse::success(
+            $this->service->getAll($search, $perPage),
+            'Lista de productos servicios'
+        );
     }
 
     #[OA\Post(
@@ -52,7 +58,7 @@ class CpProductoServicioController extends Controller
     public function store(Request $request)
     {
         $this->permissionService->authorize('cp_producto_servicio.crear');
-        
+
         $validated = $request->validate([
             'codigo_producto' => 'required|string|max:50',
             'nombre' => 'required|string|max:255',
