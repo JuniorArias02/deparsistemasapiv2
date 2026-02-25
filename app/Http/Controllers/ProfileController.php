@@ -168,12 +168,8 @@ class ProfileController extends Controller
         }
 
         if ($request->hasFile('firma')) {
-            // Delete old signature if exists
-            if ($user->firma_digital && Storage::exists('public/' . $user->getRawOriginal('firma_digital'))) {
-                Storage::delete('public/' . $user->getRawOriginal('firma_digital'));
-            }
-
-            $path = $request->file('firma')->store('signatures', 'public');
+            $usuarioService = app(\App\Services\UsuarioService::class);
+            $path = $usuarioService->handleSignatureUpload($user, $request->file('firma'));
             $user->firma_digital = $path;
             $user->save();
 

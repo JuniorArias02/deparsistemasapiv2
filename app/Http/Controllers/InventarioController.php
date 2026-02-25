@@ -59,11 +59,13 @@ class InventarioController extends Controller
                 });
             }
 
+            $perPage = $request->input('per_page', 100);
+
             // Limit results if searching to avoid huge payload, or just paginate
-            if ($request->has('search')) {
-                $inventarios = $query->limit(20)->get();
+            if ($request->has('search') && !empty($request->search)) {
+                $inventarios = $query->paginate($perPage);
             } else {
-                $inventarios = $query->get();
+                $inventarios = $query->paginate($perPage);
             }
 
             return ApiResponse::success($inventarios, 'Lista de inventario', 200);

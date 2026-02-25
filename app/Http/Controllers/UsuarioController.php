@@ -102,8 +102,12 @@ class UsuarioController extends Controller
             'telefono' => 'nullable|string|max:15',
             'estado' => 'boolean',
             'sede_id' => 'nullable|exists:sedes,id',
-            'firma_digital' => 'nullable|string|max:260',
+            'firma_digital' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
+
+        if ($request->hasFile('firma_digital')) {
+            $validated['firma_file'] = $request->file('firma_digital');
+        }
 
         $usuario = $this->usuarioService->create($validated);
         return ApiResponse::success($usuario, 'Usuario creado exitosamente', 201);
@@ -120,8 +124,12 @@ class UsuarioController extends Controller
             'telefono' => 'nullable|string|max:15',
             'estado' => 'boolean',
             'sede_id' => 'nullable|exists:sedes,id',
-            'firma_digital' => 'nullable|string|max:260',
+            'firma_digital' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
+
+        if ($request->hasFile('firma_digital')) {
+            $validated['firma_file'] = $request->file('firma_digital');
+        }
 
         try {
             $usuario = $this->usuarioService->update($id, $validated);
