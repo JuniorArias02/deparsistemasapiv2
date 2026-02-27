@@ -74,7 +74,6 @@ class CpPedido extends Model
         'fecha_gerencia',
         'motivo_aprobacion_gerencia',
         'motivo_rechazado_gerencia',
-        // Antiguos campos (Mantenidos para migración manual)
         'motivo_aprobacion',
         'observaciones_pedidos',
         'observacion_gerencia',

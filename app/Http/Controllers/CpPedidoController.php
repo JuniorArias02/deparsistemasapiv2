@@ -537,6 +537,7 @@ class CpPedidoController extends Controller
             'fecha_respuesta_cotizacion' => 'nullable|string',
             'firma_aprobacion_orden' => 'nullable|date',
             'fecha_envio_proveedor' => 'nullable|string',
+            'observaciones_pedidos' => 'nullable|string',
         ]);
 
         try {
