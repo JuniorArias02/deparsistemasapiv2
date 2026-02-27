@@ -78,7 +78,15 @@ class CpConsolidadoExport
             $sheet->setCellValue("H{$row}", $pedido->estado_compras);
             $sheet->setCellValue("I{$row}", $pedido->fecha_compra); // FECHA_RESPUESTA
             $sheet->setCellValue("J{$row}", $pedido->fecha_gerencia); // FECHA_RESPUESTA_SOLICITANTE
-            $sheet->setCellValue("K{$row}", $pedido->observaciones_pedidos);
+            // Consolidate reasons for the export row (fallback separated by dots if multiple exist)
+            $observaciones = collect([
+                $pedido->motivo_aprobacion_compras,
+                $pedido->motivo_rechazado_compras,
+                $pedido->motivo_aprobacion_gerencia,
+                $pedido->motivo_rechazado_gerencia
+            ])->filter()->implode('; ');
+
+            $sheet->setCellValue("K{$row}", $observaciones);
         }
 
         return new StreamedResponse(function () use ($spreadsheet) {

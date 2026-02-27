@@ -46,6 +46,10 @@ class CpPedidoService
         try {
             $path = $this->handleSignature($firmaFile, $useStoredSignature, $user, 'elaboracion');
 
+            if (empty($path)) {
+                throw new Exception('La firma es obligatoria para crear un pedido.');
+            }
+
             // Calculate consecutivo
             $lastConsecutivo = CpPedido::max('consecutivo');
             $nextConsecutivo = $lastConsecutivo ? $lastConsecutivo + 1 : 1;
@@ -60,7 +64,7 @@ class CpPedidoService
                 'observacion' => $data['observacion'] ?? null,
                 'sede_id' => $data['sede_id'],
                 'elaborado_por' => $data['elaborado_por'],
-                'elaborado_por_firma' => $path ? 'storage/' . $path : null,
+                'elaborado_por_firma' => 'storage/' . $path,
                 'creador_por' => $user->id,
                 'pedido_visto' => 0,
                 'estado_gerencia' => 'pendiente',
@@ -191,11 +195,15 @@ class CpPedidoService
 
         $path = $this->handleSignature($firmaFile, $useStoredSignature, $user, 'compra');
 
+        if (empty($path)) {
+            throw new Exception('La firma es obligatoria para aprobar el pedido en compras.');
+        }
+
         $pedido->update([
             'estado_compras' => 'aprobado',
             'proceso_compra' => $user->id,
-            'proceso_compra_firma' => $path ? 'storage/' . $path : null,
-            'motivo_aprobacion' => $data['motivo_aprobacion'] ?? null,
+            'proceso_compra_firma' => 'storage/' . $path,
+            'motivo_aprobacion_compras' => $data['motivo_aprobacion_compras'] ?? null,
             'fecha_compra' => now(),
         ]);
 
@@ -217,7 +225,7 @@ class CpPedidoService
 
         $pedido->update([
             'estado_compras' => 'rechazado',
-            'observaciones_pedidos' => $motivo
+            'motivo_rechazado_compras' => $motivo
         ]);
 
         $this->sendOrderRejectedNotification($pedido, $motivo);
@@ -234,12 +242,16 @@ class CpPedidoService
 
         $path = $this->handleSignature($firmaFile, $useStoredSignature, $user, 'gerencia');
 
+        if (empty($path)) {
+            throw new Exception('La firma es obligatoria para aprobar el pedido en gerencia.');
+        }
+
         $pedido->update([
             'estado_gerencia' => 'aprobado',
             'responsable_aprobacion' => $user->id,
-            'responsable_aprobacion_firma' => $path ? 'storage/' . $path : null,
+            'responsable_aprobacion_firma' => 'storage/' . $path,
             'fecha_gerencia' => now(),
-            'observacion_gerencia' => $data['observacion_gerencia'] ?? null,
+            'motivo_aprobacion_gerencia' => $data['motivo_aprobacion_gerencia'] ?? null,
         ]);
 
         $this->sendGerenciaApprovedNotification($pedido);
@@ -257,7 +269,7 @@ class CpPedidoService
         $pedido->update([
             'estado_gerencia' => 'rechazado',
             'responsable_aprobacion' => $user->id,
-            'observacion_gerencia' => $motivo,
+            'motivo_rechazado_gerencia' => $motivo,
         ]);
 
         $this->sendGerenciaRejectedNotification($pedido, $motivo);

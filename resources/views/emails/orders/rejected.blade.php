@@ -12,7 +12,7 @@
     <!-- Card de Motivo -->
     <div style="background-color: #fff1f2; border-left: 4px solid #f43f5e; padding: 20px; border-radius: 4px; margin-bottom: 30px;">
         <h3 style="margin-top: 0; margin-bottom: 10px; font-size: 16px; color: #9f1239;">Motivo del Rechazo:</h3>
-        <p style="margin: 0; color: #881337; line-height: 1.5;">{{ $motivo ?? $pedido->observaciones_pedidos ?? 'No especificado' }}</p>
+        <p style="margin: 0; color: #881337; line-height: 1.5;">{{ $motivo ?? $pedido->motivo_rechazado_compras ?? 'No especificado' }}</p>
     </div>
     
     <!-- Resumen -->

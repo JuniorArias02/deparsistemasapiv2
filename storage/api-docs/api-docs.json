@@ -1320,6 +1320,42 @@
                 ]
             }
         },
+        "/api/cp-entrega-activos-fijos/{id}/exportar-excel": {
+            "get": {
+                "tags": [
+                    "Entrega de Activos Fijos"
+                ],
+                "summary": "Exportar entrega a Excel",
+                "description": "Genera un archivo Excel basado en una plantilla para la entrega especificada.",
+                "operationId": "d538fddde9ef967e023017a2140c81f4",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Archivo Excel generado"
+                    },
+                    "404": {
+                        "description": "Entrega no encontrada"
+                    },
+                    "500": {
+                        "description": "Error al generar el Excel"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/cp-pedidos": {
             "get": {
                 "tags": [
@@ -1495,6 +1531,106 @@
                     }
                 ]
             },
+            "post": {
+                "tags": [
+                    "Pedidos de Compra"
+                ],
+                "summary": "Actualizar pedido de compra",
+                "description": "Actualiza un pedido de compra existente con sus items.",
+                "operationId": "9f70bbc81d088362763cd99ac25df2ad",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "proceso_solicitante",
+                                    "tipo_solicitud",
+                                    "sede_id",
+                                    "elaborado_por",
+                                    "items"
+                                ],
+                                "properties": {
+                                    "proceso_solicitante": {
+                                        "type": "integer"
+                                    },
+                                    "tipo_solicitud": {
+                                        "type": "integer"
+                                    },
+                                    "observacion": {
+                                        "type": "string"
+                                    },
+                                    "sede_id": {
+                                        "type": "integer"
+                                    },
+                                    "elaborado_por": {
+                                        "type": "integer"
+                                    },
+                                    "elaborado_por_firma": {
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "use_stored_signature": {
+                                        "type": "boolean"
+                                    },
+                                    "items": {
+                                        "type": "array",
+                                        "items": {
+                                            "required": [
+                                                "nombre",
+                                                "cantidad",
+                                                "unidad_medida"
+                                            ],
+                                            "properties": {
+                                                "nombre": {
+                                                    "type": "string"
+                                                },
+                                                "cantidad": {
+                                                    "type": "integer"
+                                                },
+                                                "unidad_medida": {
+                                                    "type": "string"
+                                                },
+                                                "referencia_items": {
+                                                    "type": "string"
+                                                },
+                                                "productos_id": {
+                                                    "type": "integer"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Pedido actualizado exitosamente"
+                    },
+                    "422": {
+                        "description": "Error de validación"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
             "delete": {
                 "tags": [
                     "Pedidos de Compra"
@@ -1555,8 +1691,8 @@
                             "schema": {
                                 "required": [],
                                 "properties": {
-                                    "motivo_aprobacion": {
-                                        "description": "Motivo de la aprobación (opcional)",
+                                    "motivo_aprobacion_compras": {
+                                        "description": "Motivo de la aprobación por compras (opcional)",
                                         "type": "string"
                                     },
                                     "proceso_compra_firma": {
@@ -1616,7 +1752,7 @@
                         "application/json": {
                             "schema": {
                                 "properties": {
-                                    "motivo": {
+                                    "motivo_rechazado_compras": {
                                         "description": "Motivo del rechazo",
                                         "type": "string"
                                     }
@@ -1665,8 +1801,8 @@
                         "application/json": {
                             "schema": {
                                 "properties": {
-                                    "observacion_gerencia": {
-                                        "description": "Observación de gerencia (opcional)",
+                                    "motivo_aprobacion_gerencia": {
+                                        "description": "Observación de aprobación de gerencia (opcional)",
                                         "type": "string"
                                     }
                                 },
@@ -1714,8 +1850,8 @@
                         "application/json": {
                             "schema": {
                                 "properties": {
-                                    "observacion_gerencia": {
-                                        "description": "Observación de gerencia (obligatoria)",
+                                    "motivo_rechazado_gerencia": {
+                                        "description": "Motivo de rechazo de gerencia (obligatorio)",
                                         "type": "string"
                                     }
                                 },
@@ -1789,6 +1925,97 @@
                     },
                     "404": {
                         "description": "Pedido no encontrado"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/cp-pedidos/{id}/exportar-excel": {
+            "get": {
+                "tags": [
+                    "Pedidos de Compra"
+                ],
+                "summary": "Exportar pedido a Excel",
+                "description": "Genera y descarga un archivo Excel con los datos del pedido.",
+                "operationId": "06ca49ac7da84c8c0398a31edb6bf1b3",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Archivo Excel descargado"
+                    },
+                    "404": {
+                        "description": "Pedido no encontrado"
+                    },
+                    "500": {
+                        "description": "Error del servidor"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/cp-pedidos/exportar-consolidado": {
+            "post": {
+                "tags": [
+                    "Pedidos de Compra"
+                ],
+                "summary": "Exportar consolidado de pedidos a Excel",
+                "description": "Genera y descarga un archivo Excel con el consolidado de pedidos basado en filtros.",
+                "operationId": "b64d5fb232c98a8c6146119d402edcd3",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "fecha_desde": {
+                                        "type": "string",
+                                        "format": "date"
+                                    },
+                                    "fecha_hasta": {
+                                        "type": "string",
+                                        "format": "date"
+                                    },
+                                    "sede_id": {
+                                        "type": "integer"
+                                    },
+                                    "proceso": {
+                                        "type": "string"
+                                    },
+                                    "elaborado_por": {
+                                        "type": "integer"
+                                    },
+                                    "search": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Archivo Excel descargado"
+                    },
+                    "500": {
+                        "description": "Error del servidor"
                     }
                 },
                 "security": [

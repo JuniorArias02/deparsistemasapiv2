@@ -59,12 +59,12 @@ class CpPedido extends Model
         'proceso_compra_firma',
         'responsable_aprobacion',
         'responsable_aprobacion_firma',
-        'motivo_aprobacion',
+        'motivo_aprobacion_compras',
         'creador_por',
         'pedido_visto',
         'observacion_diligenciado',
         'estado_gerencia',
-        'observaciones_pedidos',
+        'motivo_rechazado_compras',
         'adjunto_pdf',
         'fecha_compra',
         'fecha_solicitud_cotizacion',
@@ -72,6 +72,11 @@ class CpPedido extends Model
         'firma_aprobacion_orden',
         'fecha_envio_proveedor',
         'fecha_gerencia',
+        'motivo_aprobacion_gerencia',
+        'motivo_rechazado_gerencia',
+        // Antiguos campos (Mantenidos para migración manual)
+        'motivo_aprobacion',
+        'observaciones_pedidos',
         'observacion_gerencia',
     ];
 
@@ -84,7 +89,7 @@ class CpPedido extends Model
     {
         return $this->belongsTo(DependenciaSede::class, 'proceso_solicitante');
     }
-    
+
     public function tipoSolicitud()
     {
         return $this->belongsTo(CpTipoSolicitud::class, 'tipo_solicitud');
@@ -99,7 +104,7 @@ class CpPedido extends Model
     {
         return $this->belongsTo(Usuario::class, 'elaborado_por');
     }
-    
+
     public function procesoCompra()
     {
         return $this->belongsTo(Usuario::class, 'proceso_compra');

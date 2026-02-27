@@ -299,7 +299,7 @@ class CpPedidoController extends Controller
                 schema: new OA\Schema(
                     required: [],
                     properties: [
-                        new OA\Property(property: 'motivo_aprobacion', type: 'string', description: 'Motivo de la aprobación (opcional)'),
+                        new OA\Property(property: 'motivo_aprobacion_compras', type: 'string', description: 'Motivo de la aprobación por compras (opcional)'),
                         new OA\Property(property: 'proceso_compra_firma', type: 'string', format: 'binary', description: 'Archivo de firma (PNG < 1MB)'),
                         new OA\Property(property: 'use_stored_signature', type: 'boolean', description: 'Usar firma guardada del usuario')
                     ]
@@ -316,7 +316,7 @@ class CpPedidoController extends Controller
     {
         $this->permissionService->authorize('cp_pedido.aprobar_compras');
         $validated = $request->validate([
-            'motivo_aprobacion' => 'nullable|string',
+            'motivo_aprobacion_compras' => 'nullable|string',
             'use_stored_signature' => 'nullable|boolean',
             'proceso_compra_firma' => 'nullable|file|image|max:1024',
             'items_comprados' => 'nullable|array',
@@ -356,7 +356,7 @@ class CpPedidoController extends Controller
             required: true,
             content: new OA\JsonContent(
                 properties: [
-                    new OA\Property(property: 'motivo', type: 'string', description: 'Motivo del rechazo')
+                    new OA\Property(property: 'motivo_rechazado_compras', type: 'string', description: 'Motivo del rechazo')
                 ]
             )
         ),
@@ -369,11 +369,11 @@ class CpPedidoController extends Controller
     {
         $this->permissionService->authorize('cp_pedido.rechazar_compras');
         $request->validate([
-            'motivo' => 'nullable|string',
+            'motivo_rechazado_compras' => 'nullable|string',
         ]);
 
         try {
-            $pedido = $this->service->rechazarCompras($id, $request->motivo);
+            $pedido = $this->service->rechazarCompras($id, $request->motivo_rechazado_compras);
             return response()->json(['message' => 'Pedido rechazado por compras', 'pedido' => $pedido]);
         } catch (\Exception $e) {
             $status = $e->getCode() === 404 ? 404 : 500;
@@ -394,7 +394,7 @@ class CpPedidoController extends Controller
             required: false,
             content: new OA\JsonContent(
                 properties: [
-                    new OA\Property(property: 'observacion_gerencia', type: 'string', description: 'Observación de gerencia (opcional)')
+                    new OA\Property(property: 'motivo_aprobacion_gerencia', type: 'string', description: 'Observación de aprobación de gerencia (opcional)')
                 ]
             )
         ),
@@ -407,7 +407,7 @@ class CpPedidoController extends Controller
     {
         $this->permissionService->authorize('cp_pedido.aprobar_gerencia');
         $validated = $request->validate([
-            'observacion_gerencia' => 'nullable|string',
+            'motivo_aprobacion_gerencia' => 'nullable|string',
             'use_stored_signature' => 'nullable|boolean',
             'responsable_aprobacion_firma' => 'nullable|file|image|max:1024',
         ]);
@@ -445,7 +445,7 @@ class CpPedidoController extends Controller
             required: true,
             content: new OA\JsonContent(
                 properties: [
-                    new OA\Property(property: 'observacion_gerencia', type: 'string', description: 'Observación de gerencia (obligatoria)')
+                    new OA\Property(property: 'motivo_rechazado_gerencia', type: 'string', description: 'Motivo de rechazo de gerencia (obligatorio)')
                 ]
             )
         ),
@@ -458,11 +458,11 @@ class CpPedidoController extends Controller
     {
         $this->permissionService->authorize('cp_pedido.rechazar_gerencia');
         $request->validate([
-            'observacion_gerencia' => 'required|string',
+            'motivo_rechazado_gerencia' => 'required|string',
         ]);
 
         try {
-            $pedido = $this->service->rechazarGerencia($id, $request->observacion_gerencia, auth('api')->user());
+            $pedido = $this->service->rechazarGerencia($id, $request->motivo_rechazado_gerencia, auth('api')->user());
             return response()->json(['message' => 'Pedido rechazado por gerencia', 'pedido' => $pedido]);
         } catch (\Exception $e) {
             $status = $e->getCode() === 404 ? 404 : 500;
@@ -537,7 +537,6 @@ class CpPedidoController extends Controller
             'fecha_respuesta_cotizacion' => 'nullable|string',
             'firma_aprobacion_orden' => 'nullable|date',
             'fecha_envio_proveedor' => 'nullable|string',
-            'observaciones_pedidos' => 'nullable|string',
         ]);
 
         try {

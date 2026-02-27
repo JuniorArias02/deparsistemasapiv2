@@ -23,10 +23,10 @@
     </p>
 
     <!-- Observación Gerencia -->
-    @if($pedido->observacion_gerencia)
+    @if($pedido->motivo_aprobacion_gerencia)
     <div style="background-color: #fdf4ff; border-left: 4px solid #d946ef; padding: 15px; margin-bottom: 25px; border-radius: 4px;">
         <p style="margin: 0; color: #86198f; font-size: 14px;"><strong>Observación de Gerencia:</strong></p>
-        <p style="margin: 5px 0 0 0; color: #701a75;">{{ $pedido->observacion_gerencia }}</p>
+        <p style="margin: 5px 0 0 0; color: #701a75;">{{ $pedido->motivo_aprobacion_gerencia }}</p>
     </div>
     @endif
     

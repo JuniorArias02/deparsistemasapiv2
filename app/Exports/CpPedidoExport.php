@@ -61,7 +61,7 @@ class CpPedidoExport
         $proceso = $this->sanitize($pedido->solicitante?->nombre ?? 'SIN_PROCESO');
         $sede = $this->sanitize($pedido->sede?->nombre ?? 'SIN_SEDE');
         $consecutivo = $this->sanitize($pedido->consecutivo ?? 'SIN_CONSECUTIVO');
-        $filename = "PEDIDO_{$proceso}_{$sede}_{$consecutivo}.xlsx";
+        $filename = "N.{$consecutivo} SOLICITUD DE PEDIDO {$proceso}.xlsx";
 
         return new StreamedResponse(function () use ($spreadsheet) {
             $writer = new Xlsx($spreadsheet);
@@ -197,21 +197,38 @@ class CpPedidoExport
     {
         if (empty($rutaFirma)) return;
 
-        $fullPath = Storage::disk('public')->path($rutaFirma);
-        if (!file_exists($fullPath)) return;
+        // Limpiar el prefijo 'storage/' si viene en la ruta
+        $rutaLimpia = preg_replace('/^storage\//', '', $rutaFirma);
 
-        $drawing = new Drawing();
-        $drawing->setPath($fullPath);
-        $drawing->setCoordinates($celda);
-        $drawing->setHeight(75);
-        $drawing->setResizeProportional(true);
-        $drawing->setOffsetX(65);
-        $drawing->setOffsetY(17);
-        $drawing->setWorksheet($this->sheet);
+        // Primero intentamos la ruta directa en el disco public
+        $fullPath = Storage::disk('public')->path($rutaLimpia);
 
-        preg_match('/([A-Z]+)([0-9]+)/', $celda, $matches);
-        $row = (int)$matches[2];
-        $this->sheet->getRowDimension($row)->setRowHeight(67);
+        // Si no existe, probamos si está en storage/app/public/signatures/ 
+        // por si la rutaLimpia solo era el nombre del archivo
+        if (!file_exists($fullPath)) {
+            $fullPathAlter = Storage::disk('public')->path('signatures/' . basename($rutaLimpia));
+            if (!file_exists($fullPathAlter)) {
+                return; // No se encontró de ninguna forma
+            }
+            $fullPath = $fullPathAlter;
+        }
+
+        try {
+            $drawing = new Drawing();
+            $drawing->setPath($fullPath);
+            $drawing->setCoordinates($celda);
+            $drawing->setHeight(75);
+            $drawing->setResizeProportional(true);
+            $drawing->setOffsetX(65);
+            $drawing->setOffsetY(17);
+            $drawing->setWorksheet($this->sheet);
+
+            preg_match('/([A-Z]+)([0-9]+)/', $celda, $matches);
+            $row = (int)$matches[2];
+            $this->sheet->getRowDimension($row)->setRowHeight(67);
+        } catch (Exception $e) {
+            // Ignorar el error de la imagen si ocurre para no romper la exportación
+        }
     }
 
     // ─── Responsables ─────────────────────────────────────────
@@ -249,9 +266,78 @@ class CpPedidoExport
         $concat('G' . (41 + $offset), $pedido->responsableAprobacion?->rol?->nombre);
     }
 
-    // ─── Helpers ──────────────────────────────────────────────
     protected function sanitize(string $value): string
     {
-        return preg_replace('/[^A-Za-z0-9_\-]/', '_', $value);
+        // 1. Reemplazar caracteres con tilde por vocales normales y la eñe por n
+        $unwanted_array = array(
+            'Š' => 'S',
+            'š' => 's',
+            'Ž' => 'Z',
+            'ž' => 'z',
+            'À' => 'A',
+            'Á' => 'A',
+            'Â' => 'A',
+            'Ã' => 'A',
+            'Ä' => 'A',
+            'Å' => 'A',
+            'Æ' => 'A',
+            'Ç' => 'C',
+            'È' => 'E',
+            'É' => 'E',
+            'Ê' => 'E',
+            'Ë' => 'E',
+            'Ì' => 'I',
+            'Í' => 'I',
+            'Î' => 'I',
+            'Ï' => 'I',
+            'Ñ' => 'N',
+            'Ò' => 'O',
+            'Ó' => 'O',
+            'Ô' => 'O',
+            'Õ' => 'O',
+            'Ö' => 'O',
+            'Ø' => 'O',
+            'Ù' => 'U',
+            'Ú' => 'U',
+            'Û' => 'U',
+            'Ü' => 'U',
+            'Ý' => 'Y',
+            'Þ' => 'B',
+            'ß' => 'Ss',
+            'à' => 'a',
+            'á' => 'a',
+            'â' => 'a',
+            'ã' => 'a',
+            'ä' => 'a',
+            'å' => 'a',
+            'æ' => 'a',
+            'ç' => 'c',
+            'è' => 'e',
+            'é' => 'e',
+            'ê' => 'e',
+            'ë' => 'e',
+            'ì' => 'i',
+            'í' => 'i',
+            'î' => 'i',
+            'ï' => 'i',
+            'ð' => 'o',
+            'ñ' => 'n',
+            'ò' => 'o',
+            'ó' => 'o',
+            'ô' => 'o',
+            'õ' => 'o',
+            'ö' => 'o',
+            'ø' => 'o',
+            'ù' => 'u',
+            'ú' => 'u',
+            'û' => 'u',
+            'ý' => 'y',
+            'þ' => 'b',
+            'ÿ' => 'y'
+        );
+        $value = strtr($value, $unwanted_array);
+
+        // 2. Permitir solo letras ascii, números, espacios, puntos y guiones
+        return preg_replace('/[^a-zA-Z0-9_\-\. ]/', '_', $value);
     }
 }

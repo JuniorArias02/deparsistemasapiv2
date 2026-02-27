@@ -10,10 +10,10 @@
     </p>
 
     <!-- Motivo Aprobación -->
-    @if($pedido->motivo_aprobacion)
+    @if($pedido->motivo_aprobacion_compras)
     <div style="background-color: #f0fdf4; border-left: 4px solid #16a34a; padding: 15px; margin-bottom: 25px; border-radius: 4px;">
         <p style="margin: 0; color: #166534; font-size: 14px;"><strong>Motivo / Observación:</strong></p>
-        <p style="margin: 5px 0 0 0; color: #14532d;">{{ $pedido->motivo_aprobacion }}</p>
+        <p style="margin: 5px 0 0 0; color: #14532d;">{{ $pedido->motivo_aprobacion_compras }}</p>
     </div>
     @endif
     

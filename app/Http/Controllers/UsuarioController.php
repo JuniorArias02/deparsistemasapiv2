@@ -154,9 +154,10 @@ class UsuarioController extends Controller
      */
     public function getByPermission($permiso)
     {
-        $usuarios = \App\Models\Usuario::whereHas('rol.permisos', function ($query) use ($permiso) {
-            $query->where('nombre', $permiso);
-        })->with('rol')->get();
+        $usuarios = \App\Models\Usuario::where('estado', 1)
+            ->whereHas('rol.permisos', function ($query) use ($permiso) {
+                $query->where('nombre', $permiso);
+            })->with('rol')->get();
 
         return ApiResponse::success($usuarios, 'Usuarios con permiso: ' . $permiso);
     }
