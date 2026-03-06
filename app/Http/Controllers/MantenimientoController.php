@@ -4,9 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Services\MantenimientoService;
 use App\Services\PermissionService;
+use App\Exports\MantenimientoExport;
 use App\Responses\ApiResponse;
 use Illuminate\Http\Request;
 use OpenApi\Attributes as OA;
+use App\Models\Mantenimiento;
+use App\Models\AgendaMantenimiento;
+use Illuminate\Support\Facades\DB;
 
 class MantenimientoController extends Controller
 {
@@ -48,7 +52,7 @@ class MantenimientoController extends Controller
                     new OA\Property(property: 'modelo', type: 'string'),
                     new OA\Property(property: 'dependencia', type: 'string'),
                     new OA\Property(property: 'sede_id', type: 'integer'),
-                    new OA\Property(property: 'nombre_receptor', type: 'integer'),
+                    new OA\Property(property: 'coordinador_id', type: 'integer'),
                     new OA\Property(property: 'descripcion', type: 'string'),
                 ]
             )
@@ -68,7 +72,7 @@ class MantenimientoController extends Controller
             'modelo' => 'nullable|string|max:100',
             'dependencia' => 'nullable|string|max:255',
             'sede_id' => 'nullable|exists:sedes,id',
-            'nombre_receptor' => 'nullable|exists:usuarios,id',
+            'coordinador_id' => 'nullable|exists:usuarios,id',
             'imagen' => 'nullable|file|image|max:5120',
             'imagen2' => 'nullable|file|image|max:5120',
             'descripcion' => 'nullable|string',
@@ -137,7 +141,7 @@ class MantenimientoController extends Controller
                     new OA\Property(property: 'modelo', type: 'string'),
                     new OA\Property(property: 'dependencia', type: 'string'),
                     new OA\Property(property: 'sede_id', type: 'integer'),
-                    new OA\Property(property: 'nombre_receptor', type: 'integer'),
+                    new OA\Property(property: 'coordinador_id', type: 'integer'),
                     new OA\Property(property: 'descripcion', type: 'string'),
                 ]
             )
@@ -163,7 +167,7 @@ class MantenimientoController extends Controller
             'modelo' => 'nullable|string|max:100',
             'dependencia' => 'nullable|string|max:255',
             'sede_id' => 'nullable|exists:sedes,id',
-            'nombre_receptor' => 'nullable|exists:usuarios,id',
+            'coordinador_id' => 'nullable|exists:usuarios,id',
             'imagen' => 'nullable|file|image|max:5120',
             'imagen2' => 'nullable|file|image|max:5120',
             'descripcion' => 'nullable|string',
@@ -240,14 +244,133 @@ class MantenimientoController extends Controller
         return ApiResponse::success($mantenimiento, 'Mantenimiento marcado como revisado');
     }
 
-    /**
-     * Get mantenimientos assigned to the authenticated user (receptor).
-     */
+    #[OA\Get(
+        path: '/api/mantenimientos/mis-mantenimientos',
+        tags: ['Mantenimientos'],
+        summary: 'Obtener mantenimientos del usuario o todos según permisos',
+        description: 'Retorna todos los mantenimientos si el usuario tiene permiso "mantenimiento.listar_todos", de lo contrario retorna los asignados al usuario si tiene permiso "mantenimiento.receptor".',
+        security: [['bearerAuth' => []]],
+        responses: [
+            new OA\Response(response: 200, description: 'Lista de mantenimientos', content: new OA\JsonContent(ref: '#/components/schemas/ApiResponse')),
+            new OA\Response(response: 403, description: 'Prohibido')
+        ]
+    )]
     public function misMantenimientos()
     {
-        $this->permissionService->authorize("mantenimiento.receptor");
         $user = \Illuminate\Support\Facades\Auth::guard('api')->user();
-        $mantenimientos = $this->service->getByReceptor($user->id);
+
+        if ($this->permissionService->check($user, 'mantenimiento.listar_todos')) {
+            $mantenimientos = $this->service->getAll();
+            return ApiResponse::success($mantenimientos, 'Todos los mantenimientos');
+        }
+
+        $this->permissionService->authorize("mantenimiento.seleccion_tecnico");
+        $mantenimientos = $this->service->getByTecnico($user->id);
         return ApiResponse::success($mantenimientos, 'Mis mantenimientos asignados');
+    }
+
+    #[OA\Get(
+        path: '/api/mantenimientos/exportar-excel',
+        tags: ['Mantenimientos'],
+        summary: 'Exportar mantenimientos a Excel',
+        security: [['bearerAuth' => []]],
+        parameters: [
+            new OA\Parameter(name: 'fecha_inicio', in: 'query', schema: new OA\Schema(type: 'string', format: 'date')),
+            new OA\Parameter(name: 'fecha_fin', in: 'query', schema: new OA\Schema(type: 'string', format: 'date')),
+        ],
+        responses: [
+            new OA\Response(response: 200, description: 'Archivo Excel generado'),
+            new OA\Response(response: 403, description: 'Prohibido')
+        ]
+    )]
+    public function exportExcel(Request $request, MantenimientoExport $export)
+    {
+        $this->permissionService->authorize('mantenimiento.listar');
+        $user = \Illuminate\Support\Facades\Auth::guard('api')->user();
+
+        $fechaInicio = $request->query('fecha_inicio');
+        $fechaFin = $request->query('fecha_fin');
+
+        $query = \App\Models\Mantenimiento::with(['sede', 'coordinador', 'revisador', 'creador', 'agendas.tecnico']);
+
+        // Filtrar por usuario creador si no tiene permiso para ver todos
+        if (!$this->permissionService->check($user, 'mantenimiento.listar_todos')) {
+            $query->where('creado_por', $user->id);
+        }
+
+        if ($fechaInicio) {
+            $query->whereDate('fecha_creacion', '>=', $fechaInicio);
+        }
+        if ($fechaFin) {
+            $query->whereDate('fecha_creacion', '<=', $fechaFin);
+        }
+
+        $maintenances = $query->orderBy('fecha_creacion', 'desc')->get();
+
+        return $export->generate($maintenances, $user);
+    }
+
+    public function getStatistics(Request $request)
+    {
+        $this->permissionService->authorize('mantenimiento.listar');
+
+        // 1. Top Creators (Mantenimientos por usuario)
+        $topCreators = Mantenimiento::select('creado_por', DB::raw('count(*) as total'))
+            ->with('creador:id,nombre_completo')
+            ->groupBy('creado_por')
+            ->orderBy('total', 'desc')
+            ->get();
+
+        // 2. Maintenances by Sede
+        $bySede = Mantenimiento::select('sede_id', DB::raw('count(*) as total'))
+            ->with('sede:id,nombre')
+            ->groupBy('sede_id')
+            ->get();
+
+        // 3. Review Status (Revisados vs No Revisados)
+        $reviewStatus = Mantenimiento::select('esta_revisado', DB::raw('count(*) as total'))
+            ->groupBy('esta_revisado')
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'label' => $item->esta_revisado ? 'Revisados' : 'Pendientes',
+                    'total' => $item->total,
+                    'value' => (bool)$item->esta_revisado
+                ];
+            });
+
+        // 4. Technician Workload (Carga de trabajo por técnico)
+        $technicianWorkload = AgendaMantenimiento::select('tecnico_id', DB::raw('count(*) as total'))
+            ->with('tecnico:id,nombre_completo')
+            ->groupBy('tecnico_id')
+            ->orderBy('total', 'desc')
+            ->get();
+
+        // 5. Monthly Trends (Created per month)
+        $monthlyTrends = Mantenimiento::select(
+            DB::raw("DATE_FORMAT(fecha_creacion, '%Y-%m') as mes"),
+            DB::raw('count(*) as total')
+        )
+            ->groupBy('mes')
+            ->orderBy('mes')
+            ->get();
+
+        // 6. Summary Totals
+        $totalMantenimientos = Mantenimiento::count();
+        $totalPendientes = Mantenimiento::where('esta_revisado', false)->count();
+        $totalAgendados = AgendaMantenimiento::count();
+
+        return ApiResponse::success([
+            'summary' => [
+                'total_mantenimientos' => $totalMantenimientos,
+                'total_pendientes' => $totalPendientes,
+                'total_agendados' => $totalAgendados,
+            ],
+            'top_creators' => $topCreators,
+            'by_sede' => $bySede,
+            'review_status' => $reviewStatus,
+            'technician_workload' => $technicianWorkload,
+            'monthly_trends' => $monthlyTrends,
+        ], 'Estadísticas obtenidas correctamente');
     }
 }

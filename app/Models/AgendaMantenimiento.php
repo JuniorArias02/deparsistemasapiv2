@@ -16,8 +16,8 @@ class AgendaMantenimiento extends Model
         'sede_id',
         'fecha_inicio',
         'fecha_fin',
-        'creado_por',
-        'agendado_por',
+        'tecnico_id',
+        'coordinador_id',
         'fecha_creacion',
     ];
 
@@ -39,13 +39,13 @@ class AgendaMantenimiento extends Model
         return $this->belongsTo(Sede::class, 'sede_id');
     }
 
-    public function creador()
+    public function tecnico()
     {
-        return $this->belongsTo(Usuario::class, 'creado_por');
+        return $this->belongsTo(Usuario::class, 'tecnico_id');
     }
 
-    public function agendador()
+    public function coordinador()
     {
-        return $this->belongsTo(Usuario::class, 'agendado_por');
+        return $this->belongsTo(Usuario::class, 'coordinador_id');
     }
 }

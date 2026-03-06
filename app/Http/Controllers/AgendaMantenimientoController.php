@@ -19,6 +19,7 @@ class AgendaMantenimientoController extends Controller
         path: '/api/agenda-mantenimientos',
         tags: ['Agenda Mantenimientos'],
         summary: 'Listar agenda de mantenimientos',
+        description: 'Retorna todas las agendas si el usuario tiene permiso "agenda_mantenimiento.listar", las programadas por el coordinador si tiene "agenda_mantenimiento.listar_coordinador", o las asignadas al técnico si tiene "agenda_mantenimiento.listar_tecnico".',
         security: [['bearerAuth' => []]],
         responses: [
             new OA\Response(response: 200, description: 'Lista de agenda de mantenimientos', content: new OA\JsonContent(ref: '#/components/schemas/ApiResponse')),
@@ -27,10 +28,21 @@ class AgendaMantenimientoController extends Controller
     )]
     public function index()
     {
-        $this->permissionService->authorize('agenda_mantenimiento.listar');
+        $user = \Illuminate\Support\Facades\Auth::guard('api')->user();
 
-        $agendas = $this->service->getAll();
-        return ApiResponse::success($agendas, 'Lista de agenda de mantenimientos');
+        if ($this->permissionService->check($user, 'agenda_mantenimiento.listar')) {
+            $agendas = $this->service->getAll();
+            return ApiResponse::success($agendas, 'Todas las agendas de mantenimientos');
+        }
+
+        if ($this->permissionService->check($user, 'agenda_mantenimiento.listar_coordinador')) {
+            $agendas = $this->service->getByCoordinador($user->id);
+            return ApiResponse::success($agendas, 'Agendas programadas por ti');
+        }
+
+        $this->permissionService->authorize('agenda_mantenimiento.listar_tecnico');
+        $agendas = $this->service->getByTecnico($user->id);
+        return ApiResponse::success($agendas, 'Tus agendas de mantenimientos');
     }
 
     #[OA\Post(
@@ -77,8 +89,8 @@ class AgendaMantenimientoController extends Controller
                 'titulo' => $validated['titulo'],
                 'descripcion' => $validated['descripcion'] ?? null,
                 'sede_id' => $validated['sede_id'] ?? null,
-                'creado_por' => $validated['asignado_a'],
-                'nombre_receptor' => $user ? $user->id : null,
+                'creado_por' => $validated['asignado_a'], // Technician
+                'coordinador_id' => $user ? $user->id : null, // Coordinator
                 'fecha_creacion' => \Carbon\Carbon::now(),
                 'esta_revisado' => false,
             ]);
@@ -91,13 +103,13 @@ class AgendaMantenimientoController extends Controller
                 'sede_id' => $validated['sede_id'] ?? null,
                 'fecha_inicio' => $validated['fecha_inicio'],
                 'fecha_fin' => $validated['fecha_fin'],
-                'creado_por' => $validated['asignado_a'],
-                'agendado_por' => $user ? $user->id : null,
+                'tecnico_id' => $validated['asignado_a'],
+                'coordinador_id' => $user ? $user->id : null,
                 'fecha_creacion' => \Carbon\Carbon::now(),
             ];
 
             $agenda = \App\Models\AgendaMantenimiento::create($agendaData);
-            $agenda->load(['mantenimiento', 'sede', 'creador', 'agendador']);
+            $agenda->load(['mantenimiento', 'sede', 'tecnico', 'coordinador']);
 
             // 3. Send email notification to the assigned person
             try {

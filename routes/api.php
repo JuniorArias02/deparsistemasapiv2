@@ -130,6 +130,8 @@ Route::group(['middleware' => 'api'], function () {
 
         // Mantenimientos Routes
         Route::get('mantenimientos/mis-mantenimientos', [App\Http\Controllers\MantenimientoController::class, 'misMantenimientos']);
+        Route::get('mantenimientos/exportar-excel', [App\Http\Controllers\MantenimientoController::class, 'exportExcel']);
+        Route::get('mantenimientos/estadisticas', [App\Http\Controllers\MantenimientoController::class, 'getStatistics']);
         Route::apiResource('mantenimientos', App\Http\Controllers\MantenimientoController::class);
         Route::post('mantenimientos/{id}/marcar-revisado', [App\Http\Controllers\MantenimientoController::class, 'marcarRevisado']);
 

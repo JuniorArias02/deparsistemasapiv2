@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Auth;
 
 class AgendaMantenimientoService
 {
-    protected $relations = ['mantenimiento', 'sede', 'creador', 'agendador'];
+    protected $relations = ['mantenimiento', 'sede', 'tecnico', 'coordinador'];
 
     public function getAll()
     {
@@ -18,8 +18,10 @@ class AgendaMantenimientoService
     public function create(array $data)
     {
         $user = Auth::guard('api')->user();
-        $data['creado_por'] = $user ? $user->id : null;
-        $data['agendado_por'] = $user ? $user->id : null;
+        if (!isset($data['tecnico_id'])) {
+            $data['tecnico_id'] = $user ? $user->id : null;
+        }
+        $data['coordinador_id'] = $user ? $user->id : null;
         $data['fecha_creacion'] = Carbon::now();
 
         return AgendaMantenimiento::create($data);
@@ -53,6 +55,20 @@ class AgendaMantenimientoService
     {
         return AgendaMantenimiento::with($this->relations)
             ->where('mantenimiento_id', $mantenimientoId)
+            ->get();
+    }
+
+    public function getByTecnico($userId)
+    {
+        return AgendaMantenimiento::with($this->relations)
+            ->where('tecnico_id', $userId)
+            ->get();
+    }
+
+    public function getByCoordinador($userId)
+    {
+        return AgendaMantenimiento::with($this->relations)
+            ->where('coordinador_id', $userId)
             ->get();
     }
 }

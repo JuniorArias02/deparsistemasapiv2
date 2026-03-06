@@ -15,7 +15,7 @@ class Mantenimiento extends Model
         'modelo',
         'dependencia',
         'sede_id',
-        'nombre_receptor',
+        'coordinador_id',
         'imagen',
         'descripcion',
         'revisado_por',
@@ -40,9 +40,9 @@ class Mantenimiento extends Model
         return $this->belongsTo(Sede::class, 'sede_id');
     }
 
-    public function receptor()
+    public function coordinador()
     {
-        return $this->belongsTo(Usuario::class, 'nombre_receptor');
+        return $this->belongsTo(Usuario::class, 'coordinador_id');
     }
 
     public function revisador()

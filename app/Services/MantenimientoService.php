@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Auth;
 
 class MantenimientoService
 {
-    protected $relations = ['sede', 'receptor', 'revisador', 'creador'];
+    protected $relations = ['sede', 'coordinador', 'revisador', 'creador'];
 
     public function getAll()
     {
@@ -24,6 +24,7 @@ class MantenimientoService
 
         return Mantenimiento::create($data);
     }
+
 
     public function find($id)
     {
@@ -50,10 +51,10 @@ class MantenimientoService
         return false;
     }
 
-    public function getByReceptor($userId)
+    public function getByTecnico($userId)
     {
         return Mantenimiento::with($this->relations)
-            ->where('nombre_receptor', $userId)
+            ->where('creado_por', $userId)
             ->orderBy('fecha_creacion', 'desc')
             ->get();
     }
