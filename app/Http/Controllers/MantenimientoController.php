@@ -312,7 +312,7 @@ class MantenimientoController extends Controller
 
     public function getStatistics(Request $request)
     {
-        $this->permissionService->authorize('mantenimiento.listar');
+        $this->permissionService->authorize('mantenimiento.reportes');
 
         // 1. Top Creators (Mantenimientos por usuario activo)
         $topCreators = Mantenimiento::join('usuarios', 'mantenimientos.creado_por', '=', 'usuarios.id')
