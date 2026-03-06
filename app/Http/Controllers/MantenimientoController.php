@@ -314,22 +314,28 @@ class MantenimientoController extends Controller
     {
         $this->permissionService->authorize('mantenimiento.listar');
 
-        // 1. Top Creators (Mantenimientos por usuario)
-        $topCreators = Mantenimiento::select('creado_por', DB::raw('count(*) as total'))
+        // 1. Top Creators (Mantenimientos por usuario activo)
+        $topCreators = Mantenimiento::join('usuarios', 'mantenimientos.creado_por', '=', 'usuarios.id')
+            ->where('usuarios.estado', 1)
+            ->select('mantenimientos.creado_por', DB::raw('count(mantenimientos.id) as total'))
             ->with('creador:id,nombre_completo')
-            ->groupBy('creado_por')
+            ->groupBy('mantenimientos.creado_por')
             ->orderBy('total', 'desc')
             ->get();
 
-        // 2. Maintenances by Sede
-        $bySede = Mantenimiento::select('sede_id', DB::raw('count(*) as total'))
+        // 2. Maintenances by Sede (Creados por usuarios activos)
+        $bySede = Mantenimiento::join('usuarios', 'mantenimientos.creado_por', '=', 'usuarios.id')
+            ->where('usuarios.estado', 1)
+            ->select('mantenimientos.sede_id', DB::raw('count(mantenimientos.id) as total'))
             ->with('sede:id,nombre')
-            ->groupBy('sede_id')
+            ->groupBy('mantenimientos.sede_id')
             ->get();
 
-        // 3. Review Status (Revisados vs No Revisados)
-        $reviewStatus = Mantenimiento::select('esta_revisado', DB::raw('count(*) as total'))
-            ->groupBy('esta_revisado')
+        // 3. Review Status (Revisados vs No Revisados de usuarios activos)
+        $reviewStatus = Mantenimiento::join('usuarios', 'mantenimientos.creado_por', '=', 'usuarios.id')
+            ->where('usuarios.estado', 1)
+            ->select('mantenimientos.esta_revisado', DB::raw('count(mantenimientos.id) as total'))
+            ->groupBy('mantenimientos.esta_revisado')
             ->get()
             ->map(function ($item) {
                 return [
@@ -339,26 +345,39 @@ class MantenimientoController extends Controller
                 ];
             });
 
-        // 4. Technician Workload (Carga de trabajo por técnico)
-        $technicianWorkload = AgendaMantenimiento::select('tecnico_id', DB::raw('count(*) as total'))
+        // 4. Technician Workload (Carga de trabajo por técnico activo)
+        $technicianWorkload = AgendaMantenimiento::join('usuarios', 'agenda_mantenimientos.tecnico_id', '=', 'usuarios.id')
+            ->where('usuarios.estado', 1)
+            ->select('agenda_mantenimientos.tecnico_id', DB::raw('count(agenda_mantenimientos.id) as total'))
             ->with('tecnico:id,nombre_completo')
-            ->groupBy('tecnico_id')
+            ->groupBy('agenda_mantenimientos.tecnico_id')
             ->orderBy('total', 'desc')
             ->get();
 
-        // 5. Monthly Trends (Created per month)
-        $monthlyTrends = Mantenimiento::select(
-            DB::raw("DATE_FORMAT(fecha_creacion, '%Y-%m') as mes"),
-            DB::raw('count(*) as total')
-        )
+        // 5. Monthly Trends (Created per month by active users)
+        $monthlyTrends = Mantenimiento::join('usuarios', 'mantenimientos.creado_por', '=', 'usuarios.id')
+            ->where('usuarios.estado', 1)
+            ->select(
+                DB::raw("DATE_FORMAT(mantenimientos.fecha_creacion, '%Y-%m') as mes"),
+                DB::raw('count(mantenimientos.id) as total')
+            )
             ->groupBy('mes')
             ->orderBy('mes')
             ->get();
 
-        // 6. Summary Totals
-        $totalMantenimientos = Mantenimiento::count();
-        $totalPendientes = Mantenimiento::where('esta_revisado', false)->count();
-        $totalAgendados = AgendaMantenimiento::count();
+        // 6. Summary Totals (Solo usuarios activos)
+        $totalMantenimientos = Mantenimiento::join('usuarios', 'mantenimientos.creado_por', '=', 'usuarios.id')
+            ->where('usuarios.estado', 1)
+            ->count();
+
+        $totalPendientes = Mantenimiento::join('usuarios', 'mantenimientos.creado_por', '=', 'usuarios.id')
+            ->where('usuarios.estado', 1)
+            ->where('mantenimientos.esta_revisado', false)
+            ->count();
+
+        $totalAgendados = AgendaMantenimiento::join('usuarios', 'agenda_mantenimientos.tecnico_id', '=', 'usuarios.id')
+            ->where('usuarios.estado', 1)
+            ->count();
 
         return ApiResponse::success([
             'summary' => [
