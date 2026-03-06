@@ -269,12 +269,7 @@ class MantenimientoController extends Controller
             return ApiResponse::success($mantenimientos, 'Mantenimientos como coordinador');
         }
 
-        if ($this->permissionService->check($user, 'mantenimiento.seleccion_tecnico')) {
-            $mantenimientos = $this->service->getByTecnico($user->id);
-            return ApiResponse::success($mantenimientos, 'Mantenimientos creados por ti');
-        }
-
-        return ApiResponse::success([], 'No tienes registros asignados');
+        return ApiResponse::success([], 'No tienes registros asignados bajo tu cargo');
     }
 
     #[OA\Get(
