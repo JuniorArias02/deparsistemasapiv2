@@ -59,6 +59,14 @@ class MantenimientoService
             ->get();
     }
 
+    public function getByCoordinador($userId)
+    {
+        return Mantenimiento::with($this->relations)
+            ->where('coordinador_id', $userId)
+            ->orderBy('fecha_creacion', 'desc')
+            ->get();
+    }
+
     public function marcarRevisado($id)
     {
         $mantenimiento = Mantenimiento::find($id);

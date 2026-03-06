@@ -42,7 +42,7 @@ class AgendaMantenimientoController extends Controller
 
         $this->permissionService->authorize('agenda_mantenimiento.listar_tecnico');
         $agendas = $this->service->getByTecnico($user->id);
-        return ApiResponse::success($agendas, 'Tus agendas de mantenimientos');
+    return ApiResponse::success($agendas, 'Tus agendas de mantenimientos');
     }
 
     #[OA\Post(

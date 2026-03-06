@@ -264,9 +264,17 @@ class MantenimientoController extends Controller
             return ApiResponse::success($mantenimientos, 'Todos los mantenimientos');
         }
 
-        $this->permissionService->authorize("mantenimiento.seleccion_tecnico");
-        $mantenimientos = $this->service->getByTecnico($user->id);
-        return ApiResponse::success($mantenimientos, 'Mis mantenimientos asignados');
+        if ($this->permissionService->check($user, 'mantenimiento.seleccion_coordinador')) {
+            $mantenimientos = $this->service->getByCoordinador($user->id);
+            return ApiResponse::success($mantenimientos, 'Mantenimientos como coordinador');
+        }
+
+        if ($this->permissionService->check($user, 'mantenimiento.seleccion_tecnico')) {
+            $mantenimientos = $this->service->getByTecnico($user->id);
+            return ApiResponse::success($mantenimientos, 'Mantenimientos creados por ti');
+        }
+
+        return ApiResponse::success([], 'No tienes registros asignados');
     }
 
     #[OA\Get(
