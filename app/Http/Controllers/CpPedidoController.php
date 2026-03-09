@@ -523,7 +523,6 @@ class CpPedidoController extends Controller
     {
         $this->permissionService->authorize('cp_pedido.actualizar');
 
-        // Convert ALL empty strings to null for this request to avoid validation/DB errors
         $data = $request->all();
         foreach ($data as $key => $value) {
             if ($value === '') {
@@ -535,7 +534,6 @@ class CpPedidoController extends Controller
         $validated = $request->validate([
             'fecha_solicitud_cotizacion' => 'nullable|string',
             'fecha_respuesta_cotizacion' => 'nullable|string',
-            'firma_aprobacion_orden' => 'nullable|date',
             'fecha_envio_proveedor' => 'nullable|string',
             'observaciones_pedidos' => 'nullable|string',
         ]);

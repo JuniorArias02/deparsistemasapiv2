@@ -153,7 +153,6 @@ class CpPedidoService
     {
         $pedido = CpPedido::findOrFail($id);
 
-        // Safety check: Only allow deletion if it hasn't been processed
         if ($pedido->estado_compras !== 'pendiente' || $pedido->estado_gerencia !== 'pendiente') {
             throw new Exception('No se puede eliminar un pedido que ya ha sido procesado (aprobado o rechazado).');
         }
@@ -162,12 +161,8 @@ class CpPedidoService
         try {
             // 1. Delete items first
             $pedido->items()->delete();
-
-            // 2. Cleanup signature file if it's not a profile-stored signature
-            // Signature paths usually look like 'storage/pedidos_firma/...' or 'storage/stored_firma/...'
             if ($pedido->elaborado_por_firma) {
                 $relativePath = str_replace('storage/', '', $pedido->elaborado_por_firma);
-                // Only delete if it's in the pedidos_firma folder and not a 'stored' one
                 if (strpos($relativePath, 'pedidos_firma/') === 0 && strpos($relativePath, '_stored.') === false) {
                     if (Storage::disk('public')->exists($relativePath)) {
                         Storage::disk('public')->delete($relativePath);
@@ -204,7 +199,7 @@ class CpPedidoService
             'proceso_compra' => $user->id,
             'proceso_compra_firma' => 'storage/' . $path,
             'motivo_aprobacion_compras' => $data['motivo_aprobacion_compras'] ?? null,
-            'fecha_compra' => now(),
+            'fecha_compra' => now('UTC'),
         ]);
 
         if (isset($data['items_comprados']) && is_array($data['items_comprados'])) {
@@ -225,7 +220,8 @@ class CpPedidoService
 
         $pedido->update([
             'estado_compras' => 'rechazado',
-            'motivo_rechazado_compras' => $motivo
+            'motivo_rechazado_compras' => $motivo,
+            'fecha_compra' => now('UTC'),
         ]);
 
         $this->sendOrderRejectedNotification($pedido, $motivo);
@@ -250,7 +246,7 @@ class CpPedidoService
             'estado_gerencia' => 'aprobado',
             'responsable_aprobacion' => $user->id,
             'responsable_aprobacion_firma' => 'storage/' . $path,
-            'fecha_gerencia' => now(),
+            'fecha_gerencia' => now('UTC'),
             'motivo_aprobacion_gerencia' => $data['motivo_aprobacion_gerencia'] ?? null,
         ]);
 
@@ -270,6 +266,7 @@ class CpPedidoService
             'estado_gerencia' => 'rechazado',
             'responsable_aprobacion' => $user->id,
             'motivo_rechazado_gerencia' => $motivo,
+            'fecha_gerencia' => now('UTC'),
         ]);
 
         $this->sendGerenciaRejectedNotification($pedido, $motivo);
