@@ -88,4 +88,9 @@ class Inventario extends Model
     {
         return $this->belongsTo(Personal::class, 'coordinador_id');
     }
+
+    public function proceso()
+    {
+        return $this->belongsTo(DependenciaSede::class, 'proceso_id');
+    }
 }

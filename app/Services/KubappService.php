@@ -14,7 +14,15 @@ class KubappService
 
     public function __construct()
     {
-        $this->baseUrl = rtrim(config('services.kubapp.url', env('KUBAPP_API_URL', 'http://190.145.135.122:8090')), '/');
+        $principalIp = '190.145.135.122';
+        $clientIp = request()->ip();
+
+        if ($clientIp === $principalIp) {
+            $this->baseUrl = rtrim(env('KUBAPP_API_URL_PRINCIPAL', 'http://192.168.0.13:8090/api'), '/');
+        } else {
+            $this->baseUrl = rtrim(env('KUBAPP_API_URL_DEMAS_SEDES', 'http://190.145.135.122:8090/api'), '/');
+        }
+
         $this->timeout = (int) config('services.kubapp.timeout', 10);
     }
 
@@ -27,12 +35,25 @@ class KubappService
      */
     public function buscarPorNombre(string $nombre): array
     {
+        $url = "{$this->baseUrl}/terceros/buscar";
+        
+        Log::info('Llamando a Kubapp API', [
+            'url' => $url,
+            'params' => ['nombre' => $nombre],
+            'client_ip' => request()->ip()
+        ]);
+
         try {
             $response = Http::timeout($this->timeout)
                 ->acceptJson()
-                ->get("{$this->baseUrl}/api/terceros/buscar", [
+                ->get($url, [
                     'nombre' => $nombre,
                 ]);
+
+            Log::info('Respuesta de Kubapp API recibida', [
+                'status' => $response->status(),
+                'url_final' => $response->effectiveUri()->__toString()
+            ]);
 
             if ($response->failed()) {
                 Log::warning('Kubapp API respondió con error', [
@@ -45,7 +66,12 @@ class KubappService
 
             $data = $response->json();
 
-            // La API devuelve un array directamente
+            // La API puede devolver los resultados dentro de una clave 'content' (paginado)
+            // o como un array directo.
+            if (isset($data['content']) && is_array($data['content'])) {
+                return $data['content'];
+            }
+
             return is_array($data) ? $data : [];
         } catch (Exception $e) {
             Log::error('Error conectando con Kubapp API', [

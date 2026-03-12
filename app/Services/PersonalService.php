@@ -11,11 +11,7 @@ class PersonalService
         protected KubappService $kubappService
     ) {}
 
-    /**
-     * Busca personal en BD local. Si no hay resultados y hay término de búsqueda,
-     * hace fallback a Kubapp para buscar y auto-registrar.
-     */
-    public function getAll($search = null)
+    public function getAll($search = null, $externalSearch = false)
     {
         $query = Personal::with('cargo');
 
@@ -33,8 +29,12 @@ class PersonalService
             return $localResults;
         }
 
-        // Fallback a Kubapp — solo si hay un término de búsqueda y no se encontró nada local
-        return $this->searchKubappAndSync($search);
+        // Solo buscar en Kubapp si se solicita explícitamente la búsqueda externa
+        if ($externalSearch) {
+            return $this->searchKubappAndSync($search);
+        }
+
+        return collect(); // Retornar vacío si no hay resultados locales y no se pidió búsqueda externa
     }
 
     /**
@@ -57,13 +57,16 @@ class PersonalService
             }
 
             try {
+                // Buscamos un cargo por defecto (ID 1 o el primero que exista)
+                // ya que cargo_id no es nullable en la base de datos.
+                $defaulCargo = \App\Models\PCargo::first();
 
                 $personal = Personal::firstOrCreate(
                     ['cedula' => $tercero['nit']],
                     [
                         'nombre' => $tercero['nombre'],
                         'telefono' => null,
-                        'cargo_id' => null,
+                        'cargo_id' => $defaulCargo ? $defaulCargo->id : 1, // Fallback a 1 si no hay cargos
                     ]
                 );
 

@@ -28,7 +28,9 @@ class PersonalController extends Controller
     public function index(Request $request)
     {
         $this->permissionService->authorize('personal.listar');
-        return ApiResponse::success($this->service->getAll($request->get('q')), 'Lista de personal');
+        $search = $request->get('q');
+        $externalSearch = $request->get('external_search', false);
+        return ApiResponse::success($this->service->getAll($search, $externalSearch), 'Lista de personal');
     }
 
     #[OA\Post(

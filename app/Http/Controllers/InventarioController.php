@@ -61,12 +61,7 @@ class InventarioController extends Controller
 
             $perPage = $request->input('per_page', 100);
 
-            // Limit results if searching to avoid huge payload, or just paginate
-            if ($request->has('search') && !empty($request->search)) {
-                $inventarios = $query->paginate($perPage);
-            } else {
-                $inventarios = $query->paginate($perPage);
-            }
+            $inventarios = $query->with(['responsablePersonal', 'coordinadorPersonal', 'sede', 'proceso'])->paginate($perPage);
 
             return ApiResponse::success($inventarios, 'Lista de inventario', 200);
         } catch (\Exception $e) {
@@ -275,7 +270,7 @@ class InventarioController extends Controller
     )]
     public function show($id)
     {
-        $inventario = Inventario::with(['responsablePersonal', 'coordinadorPersonal', 'sede'])->find($id);
+        $inventario = Inventario::with(['responsablePersonal', 'coordinadorPersonal', 'sede', 'proceso'])->find($id);
 
         if (!$inventario) {
             return ApiResponse::error('Item de inventario no encontrado', 404);

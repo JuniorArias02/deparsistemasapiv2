@@ -61,7 +61,7 @@ class CpPedidoExport
         $proceso = $this->sanitize($pedido->solicitante?->nombre ?? 'SIN_PROCESO');
         $sede = $this->sanitize($pedido->sede?->nombre ?? 'SIN_SEDE');
         $consecutivo = $this->sanitize($pedido->consecutivo ?? 'SIN_CONSECUTIVO');
-        $filename = "N.{$consecutivo} SOLICITUD DE PEDIDO {$proceso}.xlsx";
+        $filename = "N.{$consecutivo} SOLICITUD DE PEDIDO {$proceso} {$sede}.xlsx";
 
         return new StreamedResponse(function () use ($spreadsheet) {
             $writer = new Xlsx($spreadsheet);
