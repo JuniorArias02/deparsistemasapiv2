@@ -95,7 +95,7 @@ class CpConsolidadoExport
             $spreadsheet->disconnectWorksheets();
         }, 200, [
             'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-            'Content-Disposition' => 'attachment; filename="consolidado_pedidos.xlsx"',
+            'Content-Disposition' => 'attachment; filename="CONSOLIDADO PEDIDOS.xlsx"',
             'Cache-Control' => 'max-age=0',
             'Access-Control-Expose-Headers' => 'Content-Disposition',
         ]);

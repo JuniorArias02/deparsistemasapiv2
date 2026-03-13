@@ -72,8 +72,8 @@ class CpEntregaActivosFijosService
             // Handle file uploads
             if ($firmaEntregaFile) {
                 // Delete old file if exists
-                if ($entrega->firma_quien_entrega) {
-                    Storage::disk('public')->delete(str_replace('storage/', '', $entrega->firma_quien_entrega));
+                if ($entrega->getRawOriginal('firma_quien_entrega')) {
+                    Storage::disk('public')->delete(str_replace(['storage/', 'public/'], '', $entrega->getRawOriginal('firma_quien_entrega')));
                 }
                 $filename = time() . '_firma_entrega.' . $firmaEntregaFile->getClientOriginalExtension();
                 $path = $firmaEntregaFile->storeAs('entrega_activos_firma', $filename, 'public');
@@ -82,8 +82,8 @@ class CpEntregaActivosFijosService
 
             if ($firmaRecibeFile) {
                 // Delete old file if exists
-                if ($entrega->firma_quien_recibe) {
-                    Storage::disk('public')->delete(str_replace('storage/', '', $entrega->firma_quien_recibe));
+                if ($entrega->getRawOriginal('firma_quien_recibe')) {
+                    Storage::disk('public')->delete(str_replace(['storage/', 'public/'], '', $entrega->getRawOriginal('firma_quien_recibe')));
                 }
                 $filename = time() . '_firma_recibe.' . $firmaRecibeFile->getClientOriginalExtension();
                 $path = $firmaRecibeFile->storeAs('entrega_activos_firma', $filename, 'public');
@@ -115,11 +115,11 @@ class CpEntregaActivosFijosService
             CpEntregaActivosFijosItem::where('entrega_activos_id', $id)->delete();
 
             // Delete signature files if they exist
-            if ($entrega->firma_quien_entrega) {
-                Storage::disk('public')->delete(str_replace('storage/', '', $entrega->firma_quien_entrega));
+            if ($entrega->getRawOriginal('firma_quien_entrega')) {
+                Storage::disk('public')->delete(str_replace(['storage/', 'public/'], '', $entrega->getRawOriginal('firma_quien_entrega')));
             }
-            if ($entrega->firma_quien_recibe) {
-                Storage::disk('public')->delete(str_replace('storage/', '', $entrega->firma_quien_recibe));
+            if ($entrega->getRawOriginal('firma_quien_recibe')) {
+                Storage::disk('public')->delete(str_replace(['storage/', 'public/'], '', $entrega->getRawOriginal('firma_quien_recibe')));
             }
 
             $entrega->delete();

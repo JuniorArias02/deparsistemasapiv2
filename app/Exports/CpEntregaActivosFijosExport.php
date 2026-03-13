@@ -40,8 +40,8 @@ class CpEntregaActivosFijosExport
         $sheet->setCellValue('O7', $entrega->procesoSolicitante->nombre ?? 'N/A');
 
         // Signatures
-        $this->insertFirma($sheet, $entrega->firma_quien_entrega, 'H20', 5, 10);
-        $this->insertFirma($sheet, $entrega->firma_quien_recibe, 'S20', -10, 10);
+        $this->insertFirma($sheet, $entrega->getRawOriginal('firma_quien_entrega'), 'H20', 5, 10);
+        $this->insertFirma($sheet, $entrega->getRawOriginal('firma_quien_recibe'), 'S20', -10, 10);
 
         // Dynamic Items
         $startRow = 14;
@@ -77,7 +77,7 @@ class CpEntregaActivosFijosExport
             // Prefix Logic
             if ($inv && $inv->codigo) {
                 $prefix = preg_replace('/[^A-Z]/i', '', $inv->codigo);
-                $map = ["EB" => "L", "MAQ" => "M", "ME" => "N", "EC" => "O", "MC" => "P"];
+                $map = ["EB" => "L", "MAQ" => "M", "ME" => "N", "EC" => "O", "MC" => "P", "IMC" => "P"];
                 if (isset($map[$prefix])) {
                     $sheet->setCellValue($map[$prefix] . $row, "X");
                 }
@@ -117,10 +117,13 @@ class CpEntregaActivosFijosExport
     {
         if (empty($path)) return;
 
-        // Ensure path is relative to public or absolute
-        $fullPath = public_path($path);
+        // Clean path from common prefixes if they exist in DB
+        $cleanPath = str_replace(['storage/', 'public/'], '', $path);
+        $fullPath = storage_path('app/public/' . $cleanPath);
+
         if (!file_exists($fullPath)) {
-            $fullPath = storage_path('app/public/' . $path);
+            // Fallback to public_path just in case
+            $fullPath = public_path($path);
             if (!file_exists($fullPath)) return;
         }
 

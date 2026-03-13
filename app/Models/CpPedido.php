@@ -114,6 +114,27 @@ class CpPedido extends Model
         return $this->belongsTo(Usuario::class, 'responsable_aprobacion');
     }
 
+    public function getElaboradoPorFirmaAttribute($value)
+    {
+        if (!$value) return null;
+        $path = str_replace(['storage/', 'public/'], '', $value);
+        return url('storage/' . $path);
+    }
+
+    public function getProcesoCompraFirmaAttribute($value)
+    {
+        if (!$value) return null;
+        $path = str_replace(['storage/', 'public/'], '', $value);
+        return url('storage/' . $path);
+    }
+
+    public function getResponsableAprobacionFirmaAttribute($value)
+    {
+        if (!$value) return null;
+        $path = str_replace(['storage/', 'public/'], '', $value);
+        return url('storage/' . $path);
+    }
+
     public function creador()
     {
         return $this->belongsTo(Usuario::class, 'creador_por');

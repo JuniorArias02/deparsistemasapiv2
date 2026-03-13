@@ -26,6 +26,20 @@ class CpEntregaActivosFijos extends Model
         'fecha_entrega' => 'date',
     ];
 
+    public function getFirmaQuienEntregaAttribute($value)
+    {
+        if (!$value) return null;
+        $path = str_replace(['storage/', 'public/'], '', $value);
+        return url('storage/' . $path);
+    }
+
+    public function getFirmaQuienRecibeAttribute($value)
+    {
+        if (!$value) return null;
+        $path = str_replace(['storage/', 'public/'], '', $value);
+        return url('storage/' . $path);
+    }
+
     // Relationships
     public function personal()
     {

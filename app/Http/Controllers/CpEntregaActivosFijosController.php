@@ -46,7 +46,7 @@ class CpEntregaActivosFijosController extends Controller
             'procesoSolicitante',
             'coordinador',
             'items.inventario'
-        ])->get();
+        ])->orderBy('id', 'desc')->get();
     }
 
     /**

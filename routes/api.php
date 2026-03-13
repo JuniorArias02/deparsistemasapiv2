@@ -152,6 +152,7 @@ Route::group(['middleware' => 'api'], function () {
 
     // CP Pedidos Routes (Protected with JWT)
     Route::middleware('auth:api')->group(function () {
+        Route::post('cp-pedidos/exportar-consolidado', [App\Http\Controllers\CpPedidoController::class, 'exportConsolidadoExcel']);
         Route::apiResource('cp-pedidos', App\Http\Controllers\CpPedidoController::class);
         Route::post('cp-pedidos/{id}', [App\Http\Controllers\CpPedidoController::class, 'update']); // Support FormData update
         Route::group(['prefix' => 'cp-pedidos/{id}'], function () {
@@ -163,7 +164,6 @@ Route::group(['middleware' => 'api'], function () {
             Route::patch('tracking', [App\Http\Controllers\CpPedidoController::class, 'updateTracking']);
             Route::get('exportar-excel', [App\Http\Controllers\CpPedidoController::class, 'exportExcel']);
         });
-        Route::post('cp-pedidos/exportar-consolidado', [App\Http\Controllers\CpPedidoController::class, 'exportConsolidadoExcel']);
     });
 
     // CP Entrega Activos Fijos Routes (Protected with JWT)

@@ -61,7 +61,9 @@ class InventarioController extends Controller
 
             $perPage = $request->input('per_page', 100);
 
-            $inventarios = $query->with(['responsablePersonal', 'coordinadorPersonal', 'sede', 'proceso'])->paginate($perPage);
+            $inventarios = $query->with(['responsablePersonal', 'coordinadorPersonal', 'sede', 'proceso'])
+                ->orderBy('id', 'desc')
+                ->paginate($perPage);
 
             return ApiResponse::success($inventarios, 'Lista de inventario', 200);
         } catch (\Exception $e) {

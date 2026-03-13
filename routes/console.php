@@ -9,4 +9,5 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 // Programación de Backup Diario a la medianoche (00:00)
-Schedule::command('db:backup')->daily();
+// Se usa la versión PHP para compatibilidad con Hostinger (sin exec)
+Schedule::command('db:backup-php')->daily();
