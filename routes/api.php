@@ -74,12 +74,12 @@ Route::group(['middleware' => 'api'], function () {
     Route::middleware(['auth:api', 'activity'])->group(function () {
         Route::post('/heartbeat', [App\Http\Controllers\ActivityController::class, 'heartbeat']);
 
+        Route::get('/inventario/by-responsable-coordinador', [App\Http\Controllers\InventarioController::class, 'getByResponsableAndCoordinador']);
         Route::get('inventario', [App\Http\Controllers\InventarioController::class, 'index']);
         Route::get('inventario/{id}', [App\Http\Controllers\InventarioController::class, 'show']);
         Route::post('inventario', [App\Http\Controllers\InventarioController::class, 'store']);
         Route::put('inventario/{id}', [App\Http\Controllers\InventarioController::class, 'update']);
         Route::delete('inventario/{id}', [App\Http\Controllers\InventarioController::class, 'destroy']);
-        Route::get('/inventario/by-responsable-coordinador', [App\Http\Controllers\InventarioController::class, 'getByResponsableAndCoordinador']);
 
         // Roles Routes
         Route::apiResource('roles', App\Http\Controllers\RolController::class);
