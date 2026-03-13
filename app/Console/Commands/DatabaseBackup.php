@@ -63,7 +63,7 @@ class DatabaseBackup extends Command
         $output = [];
         $resultCode = null;
 
-        exec($command, $output, $resultCode);
+        \exec($command, $output, $resultCode);
 
         if ($resultCode === 0) {
             $this->info("¡Éxito! Backup guardado en: storage/app/backups/{$filename}");
