@@ -10,6 +10,7 @@ namespace App\Exports;
 use App\Models\CpPedido;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Exception;
 
@@ -75,6 +76,18 @@ class CpConsolidadoExport
             $sheet->setCellValue("E{$row}", $descripcion);
             $sheet->setCellValue("F{$row}", $pedido->observacion);
             $sheet->setCellValue("G{$row}", $pedido->tipoSolicitud?->nombre);
+
+            // Colorear según el tipo de solicitud
+            $tipoNombre = $pedido->tipoSolicitud?->nombre;
+            if ($tipoNombre === 'Prioritaria') {
+                $sheet->getStyle("G{$row}")->getFill()
+                    ->setFillType(Fill::FILL_SOLID)
+                    ->getStartColor()->setARGB('FF28A745'); // Verde
+            } elseif ($tipoNombre === 'Recurrente') {
+                $sheet->getStyle("G{$row}")->getFill()
+                    ->setFillType(Fill::FILL_SOLID)
+                    ->getStartColor()->setARGB('FFFD7E14'); // Naranja
+            }
             $sheet->setCellValue("H{$row}", $pedido->estado_compras);
             $sheet->setCellValue("I{$row}", $pedido->fecha_compra); // FECHA_RESPUESTA
             $sheet->setCellValue("J{$row}", $pedido->fecha_gerencia); // FECHA_RESPUESTA_SOLICITANTE
