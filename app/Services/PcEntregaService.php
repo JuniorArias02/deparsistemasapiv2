@@ -11,6 +11,27 @@ class PcEntregaService
         return PcEntrega::with(['equipo', 'funcionario'])->orderBy('id', 'desc')->get();
     }
 
+    /**
+     * Search for deliveries that have not been returned yet.
+     */
+    public function search($query)
+    {
+        return PcEntrega::with(['equipo', 'funcionario'])
+            ->where('estado', 'entregado')
+            ->where(function($q) use ($query) {
+                $q->whereHas('equipo', function($eq) use ($query) {
+                    $eq->where('serial', 'like', "%{$query}%")
+                       ->orWhere('nombre_equipo', 'like', "%{$query}%")
+                       ->orWhere('numero_inventario', 'like', "%{$query}%");
+                })
+                ->orWhereHas('funcionario', function($per) use ($query) {
+                    $per->where('nombre', 'like', "%{$query}%");
+                });
+            })
+            ->limit(10)
+            ->get();
+    }
+
     public function create(array $data)
     {
         if (!isset($data['estado'])) {

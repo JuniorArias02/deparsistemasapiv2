@@ -15,6 +15,17 @@ class PcEntregaController extends Controller
         protected PermissionService $permissionService
     ) {}
 
+    public function search(Request $request)
+    {
+        $query = $request->input('query');
+        if (empty($query)) {
+            return ApiResponse::success([], 'Ingrese un término de búsqueda');
+        }
+
+        $items = $this->service->search($query);
+        return ApiResponse::success($items, 'Resultados de búsqueda');
+    }
+
     #[OA\Get(
         path: '/api/pc-entregas',
         tags: ['PcEntregas'],
@@ -52,7 +63,7 @@ class PcEntregaController extends Controller
     )]
     public function store(Request $request)
     {
-        $this->permissionService->authorize('pc_entrega.listar');
+        $this->permissionService->authorize('pc_entrega.crear');
         $validated = $request->validate([
             'equipo_id' => 'required|integer|exists:pc_equipos,id',
             'funcionario_id' => 'required|integer|exists:personal,id',

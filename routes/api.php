@@ -97,6 +97,7 @@ Route::group(['middleware' => 'api'], function () {
         Route::apiResource('pc-mantenimientos', App\Http\Controllers\PcMantenimientoController::class);
         Route::get('pc-mantenimientos/equipo/{equipo_id}', [App\Http\Controllers\PcMantenimientoController::class, 'showByEquipo']);
 
+        Route::get('pc-entregas/search', [App\Http\Controllers\PcEntregaController::class, 'search']);
         Route::apiResource('pc-entregas', App\Http\Controllers\PcEntregaController::class);
         Route::apiResource('pc-devueltos', App\Http\Controllers\PcDevueltoController::class);
         Route::apiResource('pc-perifericos-entregados', App\Http\Controllers\PcPerifericoEntregadoController::class);
