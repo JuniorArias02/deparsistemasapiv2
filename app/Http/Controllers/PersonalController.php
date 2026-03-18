@@ -157,7 +157,7 @@ class PersonalController extends Controller
     )]
     public function destroy($id)
     {
-        $this->permissionService->authorize('personal.delete');
+        $this->permissionService->authorize('personal.eliminar');
 
         if ($this->service->delete($id)) {
             return ApiResponse::success(null, 'Personal eliminado exitosamente');

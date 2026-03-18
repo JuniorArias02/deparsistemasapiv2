@@ -35,20 +35,18 @@ class KubappService
      */
     public function buscarPorNombre(string $nombre): array
     {
-        $url = "{$this->baseUrl}/terceros/buscar";
+        $url = "{$this->baseUrl}/terceros/buscar?nombre=" . urlencode($nombre);
         
         Log::info('Llamando a Kubapp API', [
             'url' => $url,
-            'params' => ['nombre' => $nombre],
             'client_ip' => request()->ip()
         ]);
 
         try {
+            // Un GET puro sin body ni parámetros extras en la función get()
             $response = Http::timeout($this->timeout)
                 ->acceptJson()
-                ->get($url, [
-                    'nombre' => $nombre,
-                ]);
+                ->get($url);
 
             Log::info('Respuesta de Kubapp API recibida', [
                 'status' => $response->status(),

@@ -17,8 +17,14 @@ class PersonalService
 
         if ($search) {
             $query->where(function ($q) use ($search) {
-                $q->where('cedula', 'like', "%{$search}%")
-                    ->orWhere('nombre', 'like', "%{$search}%");
+                $searchTerms = explode(' ', $search);
+                foreach ($searchTerms as $term) {
+                    if (empty($term)) continue;
+                    $q->where(function($sq) use ($term) {
+                        $sq->where('cedula', 'like', "%{$term}%")
+                          ->orWhere('nombre', 'like', "%{$term}%");
+                    });
+                }
             });
         }
 
