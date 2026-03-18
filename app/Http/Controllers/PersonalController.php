@@ -62,7 +62,7 @@ class PersonalController extends Controller
             'nombre' => 'required|string|max:255',
             'cedula' => 'nullable|string|max:255|unique:personal,cedula',
             'telefono' => 'nullable|string|max:255',
-            'cargo_id' => 'required|exists:p_cargo,id',
+            'cargo_id' => 'nullable|exists:p_cargo,id',
         ]);
 
         try {

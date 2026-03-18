@@ -63,16 +63,12 @@ class PersonalService
             }
 
             try {
-                // Buscamos un cargo por defecto (ID 1 o el primero que exista)
-                // ya que cargo_id no es nullable en la base de datos.
-                $defaulCargo = \App\Models\PCargo::first();
-
                 $personal = Personal::firstOrCreate(
                     ['cedula' => $tercero['nit']],
                     [
                         'nombre' => $tercero['nombre'],
                         'telefono' => null,
-                        'cargo_id' => $defaulCargo ? $defaulCargo->id : 1, // Fallback a 1 si no hay cargos
+                        'cargo_id' => null, // Dejamos el cargo en nulo
                     ]
                 );
 
