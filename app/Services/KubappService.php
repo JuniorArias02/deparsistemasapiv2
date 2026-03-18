@@ -17,13 +17,16 @@ class KubappService
         $principalIp = '190.145.135.122';
         $clientIp = request()->ip();
 
+        /*
         if ($clientIp === $principalIp) {
             $this->baseUrl = rtrim(env('KUBAPP_API_URL_PRINCIPAL', 'http://192.168.0.13:8090/api'), '/');
         } else {
             $this->baseUrl = rtrim(env('KUBAPP_API_URL_DEMAS_SEDES', 'http://190.145.135.122:8090/api'), '/');
         }
+        */
+        $this->baseUrl = rtrim(env('KUBAPP_API_URL_DEMAS_SEDES', 'http://190.145.135.122:8090/api'), '/');
 
-        $this->timeout = (int) config('services.kubapp.timeout', 10);
+        $this->timeout = (int) config('services.kubapp.timeout', 30);
     }
 
     /**
