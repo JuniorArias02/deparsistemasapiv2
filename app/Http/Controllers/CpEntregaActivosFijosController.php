@@ -324,7 +324,7 @@ class CpEntregaActivosFijosController extends Controller
 
     public function transferir(Request $request, $id)
     {
-        $this->permissionService->authorize('cp_entrega_activos_fijos.crear');
+        $this->permissionService->authorize('cp_entrega_activos_fijos.transferir');
 
         $request->validate([
             'nuevo_coordinador_id' => 'required|exists:personal,id',
@@ -354,7 +354,7 @@ class CpEntregaActivosFijosController extends Controller
 
     public function transferirTodo(Request $request)
     {
-        $this->permissionService->authorize('cp_entrega_activos_fijos.crear');
+        $this->permissionService->authorize('cp_entrega_activos_fijos.transferir_actas_todo');
 
         $request->validate([
             'coordinador_viejo_id' => 'required|exists:personal,id',
