@@ -301,4 +301,25 @@ class CpEntregaActivosFijosController extends Controller
             ], 500);
         }
     }
+
+    public function coordinadores()
+    {
+        $this->permissionService->authorize('cp_entrega_activos_fijos.listar');
+        return response()->json([
+            'mensaje' => 'Coordinadores obtenidos exitosamente',
+            'objeto' => $this->entregaService->getCoordinadores(),
+            'status' => 200
+        ]);
+    }
+
+    public function porCoordinador($id)
+    {
+        $this->permissionService->authorize('cp_entrega_activos_fijos.listar');
+        return response()->json([
+            'mensaje' => 'Entregas por coordinador obtenidas exitosamente',
+            'objeto' => $this->entregaService->getEntregasPorCoordinador($id),
+            'status' => 200
+        ]);
+    }
 }
+

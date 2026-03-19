@@ -131,4 +131,27 @@ class CpEntregaActivosFijosService
             throw $e;
         }
     }
+
+    public function getCoordinadores()
+    {
+        return \App\Models\Personal::whereIn('id', function ($query) {
+            $query->select('coordinador_id')
+                ->from('cp_entrega_activos_fijos');
+        })->get();
+    }
+
+    public function getEntregasPorCoordinador($coordinadorId)
+    {
+        return CpEntregaActivosFijos::with([
+            'personal',
+            'sede',
+            'procesoSolicitante',
+            'coordinador',
+            'items.inventario'
+        ])
+            ->where('coordinador_id', $coordinadorId)
+            ->orderBy('id', 'desc')
+            ->get();
+    }
 }
+
