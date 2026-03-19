@@ -321,5 +321,66 @@ class CpEntregaActivosFijosController extends Controller
             'status' => 200
         ]);
     }
+
+    public function transferir(Request $request, $id)
+    {
+        $this->permissionService->authorize('cp_entrega_activos_fijos.crear');
+
+        $request->validate([
+            'nuevo_coordinador_id' => 'required|exists:personal,id',
+            'nuevo_personal_id' => 'nullable|exists:personal,id'
+        ]);
+
+        try {
+            $nuevaActa = $this->entregaService->transferir(
+                $id, 
+                $request->nuevo_coordinador_id, 
+                $request->nuevo_personal_id
+            );
+
+            return response()->json([
+                'mensaje' => 'Acta transferida exitosamente',
+                'objeto' => $nuevaActa,
+                'status' => 201
+            ], 201);
+        } catch (Exception $e) {
+            return response()->json([
+                'mensaje' => 'Error al transferir el acta: ' . $e->getMessage(),
+                'objeto' => null,
+                'status' => 500
+            ], 500);
+        }
+    }
+
+    public function transferirTodo(Request $request)
+    {
+        $this->permissionService->authorize('cp_entrega_activos_fijos.crear');
+
+        $request->validate([
+            'coordinador_viejo_id' => 'required|exists:personal,id',
+            'nuevo_coordinador_id' => 'required|exists:personal,id'
+        ]);
+
+        try {
+            $count = $this->entregaService->transferirTodo(
+                $request->coordinador_viejo_id, 
+                $request->nuevo_coordinador_id
+            );
+
+            return response()->json([
+                'mensaje' => "Se han transferido $count actas exitosamente",
+                'objeto' => $count,
+                'status' => 200
+            ]);
+        } catch (Exception $e) {
+            return response()->json([
+                'mensaje' => 'Error al transferir las actas: ' . $e->getMessage(),
+                'objeto' => null,
+                'status' => 500
+            ], 500);
+        }
+    }
 }
+
+
 

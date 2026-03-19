@@ -11,9 +11,14 @@ class PersonalService
         protected KubappService $kubappService
     ) {}
 
-    public function getAll($search = null, $externalSearch = false)
+    public function getAll($search = null, $externalSearch = false, $estado = null)
     {
         $query = Personal::with('cargo');
+
+        if ($estado !== null) {
+            $query->where('estado', $estado);
+        }
+
 
         if ($search) {
             $query->where(function ($q) use ($search) {

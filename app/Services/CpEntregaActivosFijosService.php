@@ -153,5 +153,56 @@ class CpEntregaActivosFijosService
             ->orderBy('id', 'desc')
             ->get();
     }
+
+    public function transferir($id, $nuevoCoordinadorId, $nuevoPersonalId = null)
+    {
+        DB::beginTransaction();
+
+        try {
+            $original = CpEntregaActivosFijos::with('items')->findOrFail($id);
+
+            // Crear la nueva acta duplicada
+            $nuevaActa = new CpEntregaActivosFijos();
+            $nuevaActa->personal_id = $nuevoPersonalId ?? $original->personal_id;
+            $nuevaActa->sede_id = $original->sede_id;
+            $nuevaActa->proceso_solicitante = $original->proceso_solicitante;
+            $nuevaActa->coordinador_id = $nuevoCoordinadorId;
+            $nuevaActa->fecha_entrega = now(); // Fecha actual
+            $nuevaActa->firma_quien_entrega = null; // Nuevas firmas en blanco
+            $nuevaActa->firma_quien_recibe = null;
+            $nuevaActa->save();
+
+            // Duplicar los items
+            foreach ($original->items as $item) {
+                $nuevoItem = new \App\Models\CpEntregaActivosFijosItem();
+                $nuevoItem->item_id = $item->item_id;
+                $nuevoItem->es_accesorio = $item->es_accesorio;
+                $nuevoItem->accesorio_descripcion = $item->accesorio_descripcion;
+                $nuevoItem->entrega_activos_id = $nuevaActa->id;
+                $nuevoItem->save();
+            }
+
+            DB::commit();
+            return $nuevaActa;
+        } catch (Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
+    }
+
+    public function transferirTodo($coordinadorViejoId, $coordinadorNuevoId)
+    {
+        $actas = CpEntregaActivosFijos::where('coordinador_id', $coordinadorViejoId)->get();
+        
+        $transferredCount = 0;
+        foreach ($actas as $acta) {
+            $this->transferir($acta->id, $coordinadorNuevoId);
+            $transferredCount++;
+        }
+
+        return $transferredCount;
+    }
 }
+
+
 

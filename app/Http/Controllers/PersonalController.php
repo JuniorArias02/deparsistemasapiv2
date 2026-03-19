@@ -30,8 +30,10 @@ class PersonalController extends Controller
         $this->permissionService->authorize('personal.listar');
         $search = $request->get('q');
         $externalSearch = $request->get('external_search', false);
-        return ApiResponse::success($this->service->getAll($search, $externalSearch), 'Lista de personal');
+        $estado = $request->get('estado');
+        return ApiResponse::success($this->service->getAll($search, $externalSearch, $estado), 'Lista de personal');
     }
+
 
     #[OA\Post(
         path: '/api/personal',
@@ -46,7 +48,9 @@ class PersonalController extends Controller
                     new OA\Property(property: 'cedula', type: 'string'),
                     new OA\Property(property: 'telefono', type: 'string'),
                     new OA\Property(property: 'cargo_id', type: 'integer'),
+                    new OA\Property(property: 'estado', type: 'integer', description: '0: Inactivo, 1: Activo'),
                 ]
+
             )
         ),
         responses: [
@@ -63,7 +67,9 @@ class PersonalController extends Controller
             'cedula' => 'nullable|string|max:255|unique:personal,cedula',
             'telefono' => 'nullable|string|max:255',
             'cargo_id' => 'nullable|exists:p_cargo,id',
+            'estado' => 'nullable|in:0,1',
         ]);
+
 
         try {
             $personal = $this->service->create($request->all());
@@ -110,7 +116,9 @@ class PersonalController extends Controller
                     new OA\Property(property: 'cedula', type: 'string'),
                     new OA\Property(property: 'telefono', type: 'string'),
                     new OA\Property(property: 'cargo_id', type: 'integer'),
+                    new OA\Property(property: 'estado', type: 'integer', description: '0: Inactivo, 1: Activo'),
                 ]
+
             )
         ),
         responses: [
@@ -133,7 +141,9 @@ class PersonalController extends Controller
             'cedula' => 'nullable|string|max:255|unique:personal,cedula,' . $id,
             'telefono' => 'nullable|string|max:255',
             'cargo_id' => 'nullable|exists:p_cargo,id',
+            'estado' => 'nullable|in:0,1',
         ]);
+
 
         try {
             $updated = $this->service->update($id, $request->all());

@@ -14,7 +14,9 @@ class Personal extends Model
         'cedula',
         'telefono',
         'cargo_id',
+        'estado',
     ];
+
 
     public function cargo()
     {

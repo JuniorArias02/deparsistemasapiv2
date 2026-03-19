@@ -171,7 +171,11 @@ Route::group(['middleware' => 'api'], function () {
     Route::middleware('auth:api')->group(function () {
         Route::get('cp-entrega-activos-fijos/coordinadores', [App\Http\Controllers\CpEntregaActivosFijosController::class, 'coordinadores']);
         Route::get('cp-entrega-activos-fijos/coordinador/{id}', [App\Http\Controllers\CpEntregaActivosFijosController::class, 'porCoordinador']);
+        Route::post('cp-entrega-activos-fijos/transferir-todo', [App\Http\Controllers\CpEntregaActivosFijosController::class, 'transferirTodo']);
+        Route::post('cp-entrega-activos-fijos/{id}/transferir', [App\Http\Controllers\CpEntregaActivosFijosController::class, 'transferir']);
         Route::apiResource('cp-entrega-activos-fijos', App\Http\Controllers\CpEntregaActivosFijosController::class);
+
+
 
         Route::get('cp-entrega-activos-fijos/{id}/exportar-excel', [App\Http\Controllers\CpEntregaActivosFijosController::class, 'exportExcel']);
     });
