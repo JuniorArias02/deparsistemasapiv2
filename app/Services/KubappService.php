@@ -92,8 +92,6 @@ class KubappService
      */
     public function buscarPorNit(string $nit): ?array
     {
-        // La API de Kubapp no tiene endpoint de búsqueda por NIT directo,
-        // así que este método queda disponible para futuras extensiones.
         return null;
     }
 }

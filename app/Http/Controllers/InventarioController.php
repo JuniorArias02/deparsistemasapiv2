@@ -50,13 +50,28 @@ class InventarioController extends Controller
         try {
             $query = Inventario::query();
 
+            // Búsqueda General
             if ($request->has('search') && !empty($request->search)) {
                 $search = $request->search;
                 $query->where(function ($q) use ($search) {
                     $q->where('codigo', 'like', "%{$search}%")
                         ->orWhere('nombre', 'like', "%{$search}%")
-                        ->orWhere('serial', 'like', "%{$search}%");
+                        ->orWhere('serial', 'like', "%{$search}%")
+                        ->orWhere('codigo_barras', 'like', "%{$search}%");
                 });
+            }
+
+            // Filtros Específicos
+            if ($request->has('sede_id') && !empty($request->sede_id)) {
+                $query->where('sede_id', $request->sede_id);
+            }
+
+            if ($request->has('responsable_id') && !empty($request->responsable_id)) {
+                $query->where('responsable_id', $request->responsable_id);
+            }
+
+            if ($request->has('coordinador_id') && !empty($request->coordinador_id)) {
+                $query->where('coordinador_id', $request->coordinador_id);
             }
 
             $perPage = $request->input('per_page', 100);
