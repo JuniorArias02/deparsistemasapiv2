@@ -81,6 +81,10 @@ class AgendaMantenimientoController extends Controller
             'asignado_a' => 'required|exists:usuarios,id',
         ]);
 
+        if (!$this->service->isTecnicoDisponible($validated['asignado_a'], $validated['fecha_inicio'], $validated['fecha_fin'])) {
+            return ApiResponse::error('el técnico tiene una agenda para esa fecha o día o hora', 400);
+        }
+
         try {
             $user = \Illuminate\Support\Facades\Auth::guard('api')->user();
 
@@ -198,13 +202,15 @@ class AgendaMantenimientoController extends Controller
             'sede_id' => 'nullable|exists:sedes,id',
             'fecha_inicio' => 'nullable|date',
             'fecha_fin' => 'nullable|date|after_or_equal:fecha_inicio',
+            'asignado_a' => 'nullable|exists:usuarios,id',
         ]);
 
         try {
             $updated = $this->service->update($id, $request->all());
             return ApiResponse::success($updated, 'Agenda de mantenimiento actualizada exitosamente');
         } catch (\Exception $e) {
-            return ApiResponse::error('Error al actualizar agenda: ' . $e->getMessage(), 500);
+            $statusCode = ($e->getMessage() === 'el técnico tiene una agenda para esa fecha o día o hora') ? 400 : 500;
+            return ApiResponse::error($e->getMessage(), $statusCode);
         }
     }
 
