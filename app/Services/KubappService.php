@@ -94,4 +94,50 @@ class KubappService
     {
         return null;
     }
+
+    /**
+     * Busca artículos (productos/servicios) en Kubapp por término.
+     */
+    public function buscarArticulo(string $termino): array
+    {
+        $url = "{$this->baseUrl}/articulos/buscar?termino=" . urlencode($termino);
+
+        Log::info('Llamando a Kubapp API para artículos', [
+            'url' => $url,
+            'termino' => $termino
+        ]);
+
+        try {
+            $response = Http::timeout($this->timeout)
+                ->acceptJson()
+                ->get($url);
+
+            if ($response->failed()) {
+                Log::warning('Kubapp API Artículos respondió con error', [
+                    'status' => $response->status(),
+                    'body' => $response->body()
+                ]);
+                return [];
+            }
+
+            $data = $response->json();
+            $results = is_array($data) ? $data : [];
+
+            // Guardar automáticamente en la base de datos local
+            foreach ($results as $item) {
+                \App\Models\CpProductoServicio::updateOrCreate(
+                    ['codigo_producto' => $item['codigoProd']],
+                    ['nombre' => $item['nombreProd']]
+                );
+            }
+
+            return $results;
+        } catch (Exception $e) {
+            Log::error('Error conectando con Kubapp API Artículos', [
+                'message' => $e->getMessage(),
+                'termino' => $termino,
+            ]);
+            return [];
+        }
+    }
 }

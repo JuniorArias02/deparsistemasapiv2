@@ -87,6 +87,8 @@ Route::group(['middleware' => 'api'], function () {
 
         // CP Tables Routes
         Route::apiResource('cp-productos', App\Http\Controllers\CpProductoController::class);
+        Route::get('cp-productos-servicios/buscar', [App\Http\Controllers\CpProductoServicioController::class, 'buscar']);
+        Route::get('cp-productos-servicios/buscar-externo', [App\Http\Controllers\CpProductoServicioController::class, 'buscarExterno']);
         Route::apiResource('cp-productos-servicios', App\Http\Controllers\CpProductoServicioController::class);
         Route::apiResource('cp-proveedores', App\Http\Controllers\CpProveedorController::class);
         Route::apiResource('cp-tipos-solicitud', App\Http\Controllers\CpTipoSolicitudController::class);
@@ -143,6 +145,8 @@ Route::group(['middleware' => 'api'], function () {
         Route::get('agenda-mantenimientos/mantenimiento/{mantenimiento_id}', [App\Http\Controllers\AgendaMantenimientoController::class, 'getByMantenimiento']);
         Route::apiResource('agenda-mantenimientos', App\Http\Controllers\AgendaMantenimientoController::class);
     });
+    Route::get('personal/buscar', [App\Http\Controllers\PersonalController::class, 'buscar']);
+    Route::get('personal/buscar-externo', [App\Http\Controllers\PersonalController::class, 'buscarExterno']);
     Route::apiResource('personal', App\Http\Controllers\PersonalController::class);
     // Cp Dependencias
     Route::apiResource('cp-dependencias', App\Http\Controllers\CpDependenciaController::class);

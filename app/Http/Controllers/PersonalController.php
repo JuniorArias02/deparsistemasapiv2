@@ -34,6 +34,38 @@ class PersonalController extends Controller
         return ApiResponse::success($this->service->getAll($search, $externalSearch, $estado), 'Lista de personal');
     }
 
+    public function buscar(Request $request)
+    {
+        $termino = $request->input('termino') ?? $request->input('q');
+
+        if (!$termino) {
+            return ApiResponse::success([], 'Término no proporcionado', 200);
+        }
+
+        // Usamos el servicio existente que ya tiene la lógica de búsqueda local
+        $resultados = $this->service->getAll($termino, false);
+
+        if ($resultados->isNotEmpty()) {
+            return ApiResponse::success($resultados, 'Resultados locales encontrados', 200, ['source' => 'local']);
+        }
+
+        return ApiResponse::success([], 'No se encontraron resultados locales', 200, ['source' => 'empty']);
+    }
+
+    public function buscarExterno(Request $request)
+    {
+        $termino = $request->input('termino') ?? $request->input('q');
+
+        if (!$termino) {
+            return ApiResponse::error('Término requerido', 400);
+        }
+
+        // El servicio ya tiene searchKubappAndSync que guarda en BD
+        $resultados = $this->service->getAll($termino, true);
+
+        return ApiResponse::success($resultados, 'Resultados externos obtenidos y sincronizados', 200, ['source' => 'external']);
+    }
+
 
     #[OA\Post(
         path: '/api/personal',

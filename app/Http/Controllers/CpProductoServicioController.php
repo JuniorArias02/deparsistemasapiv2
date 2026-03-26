@@ -34,8 +34,49 @@ class CpProductoServicioController extends Controller
             $this->service->getAll($search, $perPage),
             'Lista de productos servicios'
         );
+    } 
+
+    public function buscar(Request $request)
+    {
+        $termino = $request->input('termino') ?? $request->input('q');
+
+        if (!$termino) {
+            return ApiResponse::success([], 'Término no proporcionado', 200);
+        }
+
+        $resultados = \App\Models\CpProductoServicio::where('codigo_producto', 'like', "%$termino%")
+            ->orWhere('nombre', 'like', "%$termino%")
+            ->limit(20)
+            ->get();
+
+        if ($resultados->isNotEmpty()) {
+            return ApiResponse::success($resultados, 'Resultados locales encontrados', 200, ['source' => 'local']);
+        }
+
+        return ApiResponse::success([], 'No se encontraron resultados locales', 200, ['source' => 'empty']);
     }
 
+    public function buscarExterno(Request $request, \App\Services\KubappService $kubappService)
+    {
+        $termino = $request->input('termino') ?? $request->input('q');
+
+        if (!$termino) {
+            return ApiResponse::error('Término requerido', 400);
+        }
+
+        $externos = $kubappService->buscarArticulo($termino);
+
+        // Mapear respuesta de Kubapp a nuestro modelo local para el frontend
+        $data = array_map(function($item) {
+            return [
+                'codigo_producto' => $item['codigoProd'],
+                'nombre' => $item['nombreProd'],
+                'is_external' => true
+            ];
+        }, $externos);
+
+        return ApiResponse::success($data, 'Resultados externos obtenidos y sincronizados', 200, ['source' => 'external']);
+    }
     #[OA\Post(
         path: '/api/cp-productos-servicios',
         tags: ['CpProductosServicios'],
