@@ -60,7 +60,7 @@ class RolController extends Controller
     )]
     public function store(Request $request)
     {
-     $this->permissionService->authorize('rol.crud');
+     $this->permissionService->authorize('rol.crear');
         $validator = Validator::make($request->all(), [
             'nombre' => 'required|string|max:60|unique:rol,nombre',
         ]);
@@ -132,7 +132,7 @@ class RolController extends Controller
     )]
     public function update(Request $request, $id)
     {
-        $this->permissionService->authorize('rol.crud');
+        $this->permissionService->authorize('rol.actualizar');
 
         $rol = Rol::find($id);
         if (!$rol) {
@@ -172,7 +172,7 @@ class RolController extends Controller
     )]
     public function destroy($id)
     {
-        $this->permissionService->authorize('rol.crud');
+        $this->permissionService->authorize('rol.eliminar');
         $rol = Rol::find($id);
         if (!$rol) {
             return ApiResponse::error('Rol no encontrado', 404);
