@@ -70,6 +70,8 @@ class CpEntregaActivosFijosController extends Controller
                         new OA\Property(property: 'proceso_solicitante', type: 'integer', description: 'ID del proceso solicitante'),
                         new OA\Property(property: 'coordinador_id', type: 'integer', description: 'ID del coordinador'),
                         new OA\Property(property: 'fecha_entrega', type: 'string', format: 'date', description: 'Fecha de entrega'),
+                        new OA\Property(property: 'use_stored_signature_entrega', type: 'boolean', description: 'Usar firma guardada del usuario que entrega'),
+                        new OA\Property(property: 'use_stored_signature_recibe', type: 'boolean', description: 'Usar firma guardada del usuario que recibe'),
                         new OA\Property(property: 'firma_quien_entrega', type: 'string', format: 'binary', description: 'Firma de quien entrega'),
                         new OA\Property(property: 'firma_quien_recibe', type: 'string', format: 'binary', description: 'Firma de quien recibe'),
                         new OA\Property(
@@ -106,6 +108,8 @@ class CpEntregaActivosFijosController extends Controller
             'proceso_solicitante' => 'required|integer|exists:dependencias_sedes,id',
             'coordinador_id' => 'required|integer|exists:personal,id',
             'fecha_entrega' => 'required|date',
+            'use_stored_signature_entrega' => 'nullable|boolean',
+            'use_stored_signature_recibe' => 'nullable|boolean',
             'firma_quien_entrega' => 'nullable|file|mimes:png,jpg|max:1024',
             'firma_quien_recibe' => 'nullable|file|mimes:png,jpg|max:1024',
             'items' => 'required|array|min:1',
@@ -118,7 +122,10 @@ class CpEntregaActivosFijosController extends Controller
             $entrega = $this->entregaService->create(
                 $validated,
                 $request->file('firma_quien_entrega'),
-                $request->file('firma_quien_recibe')
+                $request->file('firma_quien_recibe'),
+                $request->boolean('use_stored_signature_entrega'),
+                $request->boolean('use_stored_signature_recibe'),
+                auth('api')->user()
             );
 
             return response()->json([
@@ -203,6 +210,8 @@ class CpEntregaActivosFijosController extends Controller
             'proceso_solicitante' => 'sometimes|integer|exists:dependencias_sedes,id',
             'coordinador_id' => 'sometimes|integer|exists:personal,id',
             'fecha_entrega' => 'sometimes|date',
+            'use_stored_signature_entrega' => 'nullable|boolean',
+            'use_stored_signature_recibe' => 'nullable|boolean',
             'firma_quien_entrega' => 'nullable|file|mimes:png,jpg|max:1024',
             'firma_quien_recibe' => 'nullable|file|mimes:png,jpg|max:1024',
         ]);
@@ -212,7 +221,10 @@ class CpEntregaActivosFijosController extends Controller
                 $id,
                 $validated,
                 $request->file('firma_quien_entrega'),
-                $request->file('firma_quien_recibe')
+                $request->file('firma_quien_recibe'),
+                $request->boolean('use_stored_signature_entrega'),
+                $request->boolean('use_stored_signature_recibe'),
+                auth('api')->user()
             );
 
             return response()->json([

@@ -10,25 +10,19 @@ use Exception;
 
 class CpEntregaActivosFijosService
 {
-    public function create(array $data, $firmaEntregaFile = null, $firmaRecibeFile = null)
+    public function create(array $data, $firmaEntregaFile = null, $firmaRecibeFile = null, $useStoredSignatureEntrega = false, $useStoredSignatureRecibe = false, $user = null)
     {
         try {
             DB::beginTransaction();
 
-            // Handle file uploads
-            $firmaEntregaPath = null;
-            $firmaRecibePath = null;
-
-            if ($firmaEntregaFile) {
-                $filename = time() . '_firma_entrega.' . $firmaEntregaFile->getClientOriginalExtension();
-                $path = $firmaEntregaFile->storeAs('entrega_activos_firma', $filename, 'public');
-                $firmaEntregaPath = 'storage/' . $path;
+            $firmaEntregaPath = $this->handleSignature($firmaEntregaFile, $useStoredSignatureEntrega, $user, 'entrega_firma_entrega');
+            if ($firmaEntregaPath) {
+                $firmaEntregaPath = 'storage/' . $firmaEntregaPath;
             }
 
-            if ($firmaRecibeFile) {
-                $filename = time() . '_firma_recibe.' . $firmaRecibeFile->getClientOriginalExtension();
-                $path = $firmaRecibeFile->storeAs('entrega_activos_firma', $filename, 'public');
-                $firmaRecibePath = 'storage/' . $path;
+            $firmaRecibePath = $this->handleSignature($firmaRecibeFile, $useStoredSignatureRecibe, $user, 'entrega_firma_recibe');
+            if ($firmaRecibePath) {
+                $firmaRecibePath = 'storage/' . $firmaRecibePath;
             }
 
             /** @var CpEntregaActivosFijos $entrega */
@@ -61,7 +55,7 @@ class CpEntregaActivosFijosService
         }
     }
 
-    public function update($id, array $data, $firmaEntregaFile = null, $firmaRecibeFile = null)
+    public function update($id, array $data, $firmaEntregaFile = null, $firmaRecibeFile = null, $useStoredSignatureEntrega = false, $useStoredSignatureRecibe = false, $user = null)
     {
         try {
             DB::beginTransaction();
@@ -70,24 +64,24 @@ class CpEntregaActivosFijosService
             $updateData = $data;
 
             // Handle file uploads
-            if ($firmaEntregaFile) {
-                // Delete old file if exists
-                if ($entrega->getRawOriginal('firma_quien_entrega')) {
-                    Storage::disk('public')->delete(str_replace(['storage/', 'public/'], '', $entrega->getRawOriginal('firma_quien_entrega')));
+            if ($firmaEntregaFile || $useStoredSignatureEntrega) {
+                $path = $this->handleSignature($firmaEntregaFile, $useStoredSignatureEntrega, $user, 'entrega_firma_entrega_edit');
+                if ($path) {
+                    if ($entrega->getRawOriginal('firma_quien_entrega')) {
+                        Storage::disk('public')->delete(str_replace(['storage/', 'public/'], '', $entrega->getRawOriginal('firma_quien_entrega')));
+                    }
+                    $updateData['firma_quien_entrega'] = 'storage/' . $path;
                 }
-                $filename = time() . '_firma_entrega.' . $firmaEntregaFile->getClientOriginalExtension();
-                $path = $firmaEntregaFile->storeAs('entrega_activos_firma', $filename, 'public');
-                $updateData['firma_quien_entrega'] = 'storage/' . $path;
             }
 
-            if ($firmaRecibeFile) {
-                // Delete old file if exists
-                if ($entrega->getRawOriginal('firma_quien_recibe')) {
-                    Storage::disk('public')->delete(str_replace(['storage/', 'public/'], '', $entrega->getRawOriginal('firma_quien_recibe')));
+            if ($firmaRecibeFile || $useStoredSignatureRecibe) {
+                $path = $this->handleSignature($firmaRecibeFile, $useStoredSignatureRecibe, $user, 'entrega_firma_recibe_edit');
+                if ($path) {
+                    if ($entrega->getRawOriginal('firma_quien_recibe')) {
+                        Storage::disk('public')->delete(str_replace(['storage/', 'public/'], '', $entrega->getRawOriginal('firma_quien_recibe')));
+                    }
+                    $updateData['firma_quien_recibe'] = 'storage/' . $path;
                 }
-                $filename = time() . '_firma_recibe.' . $firmaRecibeFile->getClientOriginalExtension();
-                $path = $firmaRecibeFile->storeAs('entrega_activos_firma', $filename, 'public');
-                $updateData['firma_quien_recibe'] = 'storage/' . $path;
             }
 
             if (isset($updateData['items'])) {
@@ -201,6 +195,31 @@ class CpEntregaActivosFijosService
         }
 
         return $transferredCount;
+    }
+
+    protected function handleSignature($file, $useStored, $user, $prefix)
+    {
+        $path = null;
+
+        if ($useStored && $user) {
+            $originalPath = $user->getAttributes()['firma_digital'] ?? null;
+
+            if (!$originalPath || !Storage::disk('public')->exists($originalPath)) {
+                throw new Exception('No se encontró una firma digital guardada en su perfil.');
+            }
+
+            $extension = pathinfo($originalPath, PATHINFO_EXTENSION);
+            $filename = $prefix . '_' . time() . '_stored.' . $extension;
+            $newPath = 'entrega_activos_firma/' . $filename;
+
+            Storage::disk('public')->copy($originalPath, $newPath);
+            $path = $newPath;
+        } elseif ($file) {
+            $filename = $prefix . '_' . time() . '.' . $file->getClientOriginalExtension();
+            $path = $file->storeAs('entrega_activos_firma', $filename, 'public');
+        }
+
+        return $path;
     }
 }
 
