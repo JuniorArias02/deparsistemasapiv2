@@ -84,11 +84,28 @@ class CpEntregaActivosFijosService
                 }
             }
 
+            $itemsData = null;
             if (isset($updateData['items'])) {
+                $itemsData = $updateData['items'];
                 unset($updateData['items']);
             }
 
             $entrega->update($updateData);
+
+            if ($itemsData !== null && is_array($itemsData)) {
+                // Remove existing items
+                CpEntregaActivosFijosItem::where('entrega_activos_id', $entrega->id)->delete();
+                
+                // Add new items
+                foreach ($itemsData as $item) {
+                    CpEntregaActivosFijosItem::create([
+                        'item_id' => $item['item_id'],
+                        'es_accesorio' => $item['es_accesorio'] ?? false,
+                        'accesorio_descripcion' => $item['accesorio_descripcion'] ?? null,
+                        'entrega_activos_id' => $entrega->id,
+                    ]);
+                }
+            }
 
             DB::commit();
             return $entrega->load('items');
