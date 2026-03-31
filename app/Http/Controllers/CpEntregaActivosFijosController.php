@@ -214,6 +214,10 @@ class CpEntregaActivosFijosController extends Controller
             'use_stored_signature_recibe' => 'nullable|boolean',
             'firma_quien_entrega' => 'nullable|file|mimes:png,jpg|max:1024',
             'firma_quien_recibe' => 'nullable|file|mimes:png,jpg|max:1024',
+            'items' => 'sometimes|array|min:1',
+            'items.*.item_id' => 'required_with:items|integer|exists:inventario,id',
+            'items.*.es_accesorio' => 'nullable|boolean',
+            'items.*.accesorio_descripcion' => 'nullable|string',
         ]);
 
         try {
