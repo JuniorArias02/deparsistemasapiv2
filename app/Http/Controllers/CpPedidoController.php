@@ -241,7 +241,7 @@ class CpPedidoController extends Controller
     )]
     public function show($id)
     {
-        $this->permissionService->authorize('cp_pedido.listar');
+        $this->permissionService->authorize('cp_pedido.ver');
         $pedido = $this->service->getById($id);
 
         if (!$pedido) {
