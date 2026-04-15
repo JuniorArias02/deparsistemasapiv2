@@ -142,6 +142,7 @@ Route::group(['middleware' => 'api'], function () {
         Route::get('usuarios/por-permiso/{permiso}', [App\Http\Controllers\UsuarioController::class, 'getByPermission']);
 
         // Agenda Mantenimientos Routes
+        Route::get('agenda-mantenimientos/disponibilidad', [App\Http\Controllers\AgendaMantenimientoController::class, 'getDisponibilidad']);
         Route::get('agenda-mantenimientos/mantenimiento/{mantenimiento_id}', [App\Http\Controllers\AgendaMantenimientoController::class, 'getByMantenimiento']);
         Route::apiResource('agenda-mantenimientos', App\Http\Controllers\AgendaMantenimientoController::class);
     });
