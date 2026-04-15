@@ -168,6 +168,7 @@ Route::group(['middleware' => 'api'], function () {
             Route::post('update-items', [App\Http\Controllers\CpPedidoController::class, 'updateItems']);
             Route::patch('tracking', [App\Http\Controllers\CpPedidoController::class, 'updateTracking']);
             Route::get('exportar-excel', [App\Http\Controllers\CpPedidoController::class, 'exportExcel']);
+            Route::get('exportar-pdf', [App\Http\Controllers\CpPedidoController::class, 'exportPdf']);
         });
     });
 

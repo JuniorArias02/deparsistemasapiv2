@@ -8,6 +8,7 @@ use App\Models\Usuario;
 use App\Services\PermissionService;
 use App\Services\CpPedidoService;
 use App\Exports\CpPedidoExport;
+use App\Exports\CpPedidoPdfExport;
 use App\Exports\CpConsolidadoExport;
 use App\Responses\ApiResponse;
 use Illuminate\Http\Request;
@@ -580,6 +581,34 @@ class CpPedidoController extends Controller
             return $export->generate((int) $id);
         } catch (\Exception $e) {
             return ApiResponse::error('Error al exportar pedido: ' . $e->getMessage(), 500);
+        }
+    }
+
+    /**
+     * Export a pedido to PDF.
+     */
+    #[OA\Get(
+        path: '/api/cp-pedidos/{id}/exportar-pdf',
+        tags: ['Pedidos de Compra'],
+        summary: 'Exportar pedido a PDF',
+        description: 'Genera y descarga un archivo PDF con los datos del pedido, replicando la plantilla oficial.',
+        security: [['bearerAuth' => []]],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer'))
+        ],
+        responses: [
+            new OA\Response(response: 200, description: 'Archivo PDF descargado'),
+            new OA\Response(response: 404, description: 'Pedido no encontrado'),
+            new OA\Response(response: 500, description: 'Error del servidor')
+        ]
+    )]
+    public function exportPdf($id)
+    {
+        try {
+            $export = new CpPedidoPdfExport();
+            return $export->generate((int) $id);
+        } catch (\Exception $e) {
+            return ApiResponse::error('Error al exportar pedido a PDF: ' . $e->getMessage(), 500);
         }
     }
 
