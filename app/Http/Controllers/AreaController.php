@@ -27,17 +27,21 @@ class AreaController extends Controller
         path: '/api/areas',
         tags: ['Areas'],
         summary: 'Listar areas',
-        description: 'Obtiene la lista de areas. Requiere permiso area.read.',
+        description: 'Obtiene la lista de areas. Puede filtrarse por sede_id. Requiere permiso area.read.',
         security: [['bearerAuth' => []]],
+        parameters: [
+            new OA\Parameter(name: 'sede_id', in: 'query', required: false, schema: new OA\Schema(type: 'integer'))
+        ],
         responses: [
             new OA\Response(response: 200, description: 'Lista de areas', content: new OA\JsonContent(ref: '#/components/schemas/ApiResponse')),
             new OA\Response(response: 403, description: 'Prohibido')
         ]
     )]
-    public function index()
+    public function index(Request $request)
     {
         // $this->permissionService->authorize('area.read');
-        return ApiResponse::success($this->service->getAll(), 'Lista de areas');
+        $sedeId = $request->query('sede_id');
+        return ApiResponse::success($this->service->getAll($sedeId ? (int)$sedeId : null), 'Lista de areas');
     }
 
     /**

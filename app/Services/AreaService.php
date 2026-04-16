@@ -7,9 +7,13 @@ use Illuminate\Database\Eloquent\Collection;
 
 class AreaService
 {
-    public function getAll(): Collection
+    public function getAll(?int $sedeId = null): Collection
     {
-        return Area::with('sede')->get();
+        $query = Area::with('sede');
+        if ($sedeId) {
+            $query->where('sede_id', $sedeId);
+        }
+        return $query->get();
     }
 
     public function create(array $data): Area

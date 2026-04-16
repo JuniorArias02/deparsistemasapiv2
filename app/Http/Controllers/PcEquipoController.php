@@ -223,3 +223,4 @@ class PcEquipoController extends Controller
         }
     }
 }
+ 
