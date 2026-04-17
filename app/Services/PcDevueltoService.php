@@ -26,7 +26,7 @@ class PcDevueltoService
             if ($entrega) {
                 $entrega->update([
                     'estado' => 'devuelto',
-                    'devuelto' => now()
+                    'devuelto' => $devuelto->fecha_devolucion
                 ]);
             }
         }

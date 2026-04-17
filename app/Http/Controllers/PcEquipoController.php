@@ -222,5 +222,12 @@ class PcEquipoController extends Controller
             return ApiResponse::error('Error al obtener hoja de vida: ' . $e->getMessage(), 500);
         }
     }
+
+    public function buscar(Request $request)
+    {
+        $search = $request->get('q');
+        $equipos = $this->service->buscar($search);
+        return ApiResponse::success($equipos, 'Resultados de búsqueda');
+    }
 }
  

@@ -12,7 +12,8 @@ class PcMantenimientoController extends Controller
 {
     public function __construct(
         protected PcMantenimientoService $service,
-        protected PermissionService $permissionService
+        protected PermissionService $permissionService,
+        protected \App\Services\PcMantenimientoFirmaService $firmaService
     ) {}
 
     #[OA\Get(
@@ -53,7 +54,7 @@ class PcMantenimientoController extends Controller
     )]
     public function store(Request $request)
     {
-        $this->permissionService->authorize("");
+        $this->permissionService->authorize("pc_mantenimiento.crear");
         $validated = $request->validate([
             'equipo_id' => 'required|integer|exists:pc_equipos,id',
             'tipo_mantenimiento' => 'nullable|in:preventivo,correctivo',
@@ -66,11 +67,27 @@ class PcMantenimientoController extends Controller
             'nombre_repuesto' => 'nullable|string|max:255',
             'responsable_mantenimiento' => 'nullable|string|max:255',
             'estado' => 'nullable|in:completado,pendiente',
+            'firma_personal_cargo' => 'nullable|string',
+            'firma_sistemas' => 'required|string', 
         ]);
 
         try {
             if (auth()->check()) {
                 $validated['creado_por'] = auth()->id();
+                $validated['responsable_mantenimiento'] = auth()->user()->nombre_completo;
+            }
+
+            if (!isset($validated['estado'])) {
+                $validated['estado'] = 'completado';
+            }
+
+            // Procesar Firmas
+            if ($request->filled('firma_personal_cargo')) {
+                $validated['firma_personal_cargo'] = $this->firmaService->saveBase64Signature($request->firma_personal_cargo);
+            }
+            
+            if ($request->filled('firma_sistemas')) {
+                $validated['firma_sistemas'] = $this->firmaService->saveBase64Signature($request->firma_sistemas);
             }
 
             $item = $this->service->create($validated);
@@ -78,6 +95,34 @@ class PcMantenimientoController extends Controller
         } catch (\Exception $e) {
             return ApiResponse::error('Error al crear mantenimiento: ' . $e->getMessage(), 500);
         }
+    }
+
+    public function actualizarFirmas(Request $request, $id)
+    {
+        $validated = $request->validate([
+            'firma_personal_cargo' => 'nullable|string',
+            'firma_sistemas' => 'nullable|string',
+        ]);
+
+        $item = $this->service->find($id);
+        if (!$item) {
+            return ApiResponse::error('Mantenimiento no encontrado', 404);
+        }
+
+        $data = [];
+        if ($request->filled('firma_personal_cargo')) {
+            $data['firma_personal_cargo'] = $this->firmaService->saveBase64Signature($request->firma_personal_cargo);
+        }
+        if ($request->filled('firma_sistemas')) {
+            $data['firma_sistemas'] = $this->firmaService->saveBase64Signature($request->firma_sistemas);
+        }
+
+        if (empty($data)) {
+            return ApiResponse::error('No se enviaron firmas para actualizar', 400);
+        }
+
+        $updated = $this->service->update($id, $data);
+        return ApiResponse::success($updated, 'Firmas actualizadas correctamente');
     }
 
     #[OA\Get(

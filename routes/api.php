@@ -92,12 +92,15 @@ Route::group(['middleware' => 'api'], function () {
         Route::apiResource('cp-productos-servicios', App\Http\Controllers\CpProductoServicioController::class);
         Route::apiResource('cp-proveedores', App\Http\Controllers\CpProveedorController::class);
         Route::apiResource('cp-tipos-solicitud', App\Http\Controllers\CpTipoSolicitudController::class);
+        Route::get('pc-equipos/buscar', [App\Http\Controllers\PcEquipoController::class, 'buscar']);
         Route::get('pc-equipos/{id}/hoja-de-vida', [App\Http\Controllers\PcEquipoController::class, 'hojaDeVida']);
         Route::apiResource('pc-equipos', App\Http\Controllers\PcEquipoController::class);
         Route::apiResource('pc-caracteristicas-tecnicas', App\Http\Controllers\PcCaracteristicasTecnicasController::class);
         Route::get('pc-caracteristicas-tecnicas/equipo/{equipo_id}', [App\Http\Controllers\PcCaracteristicasTecnicasController::class, 'showByEquipo']);
         Route::apiResource('pc-mantenimientos', App\Http\Controllers\PcMantenimientoController::class);
+        Route::post('pc-mantenimientos/{id}/actualizar-firmas', [App\Http\Controllers\PcMantenimientoController::class, 'actualizarFirmas']);
         Route::get('pc-mantenimientos/equipo/{equipo_id}', [App\Http\Controllers\PcMantenimientoController::class, 'showByEquipo']);
+        Route::get('pc-cronograma-mantenimientos', [App\Http\Controllers\PcCronogramaController::class, 'index']);
 
         Route::get('pc-entregas/search', [App\Http\Controllers\PcEntregaController::class, 'search']);
         Route::apiResource('pc-entregas', App\Http\Controllers\PcEntregaController::class);

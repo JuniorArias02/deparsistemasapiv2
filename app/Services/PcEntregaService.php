@@ -34,9 +34,15 @@ class PcEntregaService
 
     public function create(array $data)
     {
-        if (!isset($data['estado'])) {
-            $data['estado'] = 'entregado';
-        }
+        // Si el equipo ya estaba entregado a otro funcionario, lo marcamos como devuelto automáticamente
+        PcEntrega::where('equipo_id', $data['equipo_id'])
+            ->where('estado', 'entregado')
+            ->update([
+                'estado' => 'devuelto',
+                'devuelto' => now()
+            ]);
+
+        $data['estado'] = 'entregado';
         return PcEntrega::create($data);
     }
 

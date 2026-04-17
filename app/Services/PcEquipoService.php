@@ -56,6 +56,15 @@ class PcEquipoService
         return false;
     }
 
+    public function buscar($search)
+    {
+        return PcEquipo::where('nombre_equipo', 'like', "%{$search}%")
+            ->orWhere('numero_inventario', 'like', "%{$search}%")
+            ->orWhere('serial', 'like', "%{$search}%")
+            ->limit(5)
+            ->get(['id', 'nombre_equipo', 'numero_inventario', 'serial', 'marca', 'modelo']);
+    }
+
     public function hojaDeVida($id)
     {
         $equipo = PcEquipo::with([
@@ -84,28 +93,59 @@ class PcEquipoService
             $entrega->setAttribute('devolucion', $devuelto);
         });
 
-        // Maintenance countdown
-        $config = \App\Models\PcConfigCronograma::first();
-        $diasCumplimiento = $config?->dias_cumplimiento ?? 180;
-
-        $ultimoMantenimiento = $equipo->mantenimientos->first();
-        $diasRestantes = null;
-        $fechaProximoManto = null;
-
-        if ($ultimoMantenimiento && $ultimoMantenimiento->fecha) {
-            $fechaUltimo = \Carbon\Carbon::parse($ultimoMantenimiento->fecha);
-            $fechaProximoManto = $fechaUltimo->copy()->addDays($diasCumplimiento);
-            $diasRestantes = now()->diffInDays($fechaProximoManto, false);
-        }
+        $mantoInfo = $this->calculateMaintenanceInfo($equipo);
 
         return [
             'equipo' => $equipo,
-            'mantenimiento_config' => [
-                'dias_cumplimiento' => $diasCumplimiento,
-                'dias_restantes' => $diasRestantes !== null ? (int) $diasRestantes : null,
-                'fecha_proximo_mantenimiento' => $fechaProximoManto?->toDateString(),
-                'fecha_ultimo_mantenimiento' => $ultimoMantenimiento?->fecha,
-            ],
+            'mantenimiento_config' => $mantoInfo,
+        ];
+    }
+
+    /**
+     * Calcula la información de mantenimiento basado en el cronograma y el historial.
+     */
+    public function calculateMaintenanceInfo($equipo)
+    {
+        $config = \Illuminate\Support\Facades\DB::table('pc_config_cronograma')->first();
+        
+        // Calcular días de cumplimiento
+        $diasCumplimiento = 180; // Default 6 meses
+        if ($config) {
+            if ($config->dias_cumplimiento) {
+                $diasCumplimiento = $config->dias_cumplimiento;
+            } elseif ($config->meses_cumplimiento) {
+                $diasCumplimiento = $config->meses_cumplimiento * 30;
+            }
+        }
+
+        // Determinar fecha base (último mantenimiento o fecha de ingreso)
+        $ultimoMantenimiento = $equipo->mantenimientos->first(); // Ya vienen ordenados desc en hojaDeVida
+        
+        $fechaBase = null;
+        $tipoBase = 'ninguna';
+
+        if ($ultimoMantenimiento && $ultimoMantenimiento->fecha) {
+            $fechaBase = \Carbon\Carbon::parse($ultimoMantenimiento->fecha);
+            $tipoBase = 'ultimo_mantenimiento';
+        } elseif ($equipo->fecha_ingreso) {
+            $fechaBase = \Carbon\Carbon::parse($equipo->fecha_ingreso);
+            $tipoBase = 'fecha_ingreso';
+        }
+
+        $diasRestantes = null;
+        $fechaProximoManto = null;
+
+        if ($fechaBase) {
+            $fechaProximoManto = $fechaBase->copy()->addDays($diasCumplimiento);
+            $diasRestantes = (int) now()->diffInDays($fechaProximoManto, false);
+        }
+
+        return [
+            'dias_cumplimiento' => $diasCumplimiento,
+            'dias_restantes' => $diasRestantes,
+            'fecha_proximo_mantenimiento' => $fechaProximoManto?->toDateString(),
+            'fecha_ultimo_mantenimiento' => $ultimoMantenimiento?->fecha,
+            'base_calculo' => $tipoBase
         ];
     }
 }

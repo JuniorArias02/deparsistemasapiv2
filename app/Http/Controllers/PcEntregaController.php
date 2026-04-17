@@ -70,8 +70,6 @@ class PcEntregaController extends Controller
             'fecha_entrega' => 'nullable|date',
             'firma_entrega' => 'nullable|string',
             'firma_recibe' => 'nullable|string',
-            'devuelto' => 'nullable|date',
-            'estado' => 'nullable|in:entregado,devuelto',
         ]);
 
         try {
@@ -139,8 +137,6 @@ class PcEntregaController extends Controller
             'fecha_entrega' => 'nullable|date',
             'firma_entrega' => 'nullable|string',
             'firma_recibe' => 'nullable|string',
-            'devuelto' => 'nullable|date',
-            'estado' => 'nullable|in:entregado,devuelto',
         ]);
 
         try {

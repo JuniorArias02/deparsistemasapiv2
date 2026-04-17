@@ -53,3 +53,4 @@ class PcMantenimiento extends Model
         return $this->belongsTo(Usuario::class, 'creado_por');
     }
 }
+ 
