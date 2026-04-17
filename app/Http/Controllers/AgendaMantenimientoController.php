@@ -73,62 +73,86 @@ class AgendaMantenimientoController extends Controller
         $this->permissionService->authorize('agenda_mantenimiento.crear');
 
         $validated = $request->validate([
-            'titulo' => 'required|string|max:255',
-            'descripcion' => 'nullable|string',
-            'sede_id' => 'nullable|exists:sedes,id',
-            'fecha_inicio' => 'required|date',
-            'fecha_fin' => 'required|date|after_or_equal:fecha_inicio',
-            'asignado_a' => 'required|exists:usuarios,id',
+            'titulo'        => 'required|string|max:255',
+            'descripcion'   => 'nullable|string',
+            'sede_id'       => 'required|exists:sedes,id',
+            'fecha_inicio'  => 'required|date', 
+            'fecha_fin'     => 'required|date|after:fecha_inicio',
+            'asignado_a'    => 'required|exists:usuarios,id',
         ]);
 
-        if (!$this->service->isTecnicoDisponible($validated['asignado_a'], $validated['fecha_inicio'], $validated['fecha_fin'])) {
-            return ApiResponse::error('el técnico tiene una agenda para esa fecha o día o hora', 400);
+        // ── 1. Validar rango horario (pasado, duración mínima/máxima) ─────────
+        $errorRango = $this->service->validarRangoHorario(
+            $validated['fecha_inicio'],
+            $validated['fecha_fin']
+        );
+        if ($errorRango) {
+            return ApiResponse::error($errorRango, 422);
+        }
+
+        // ── 2. Verificar que el técnico no tenga conflicto de horario ─────────
+        if (!$this->service->isTecnicoDisponible(
+            $validated['asignado_a'],
+            $validated['fecha_inicio'],
+            $validated['fecha_fin']
+        )) {
+            // Recuperamos el bloque en conflicto para dar un mensaje preciso
+            $conflicto = \App\Models\AgendaMantenimiento::where('tecnico_id', $validated['asignado_a'])
+                ->where('fecha_inicio', '<', $validated['fecha_fin'])
+                ->where('fecha_fin',    '>', $validated['fecha_inicio'])
+                ->with('tecnico')
+                ->first();
+
+            $nombreTecnico = $conflicto?->tecnico?->nombre_completo ?? 'El técnico seleccionado';
+            $desde = $conflicto ? \Carbon\Carbon::parse($conflicto->fecha_inicio)->format('d/m/Y H:i') : '';
+            $hasta = $conflicto ? \Carbon\Carbon::parse($conflicto->fecha_fin)->format('H:i') : '';
+
+            return ApiResponse::error(
+                "{$nombreTecnico} ya tiene una agenda asignada de {$desde} a {$hasta}. Por favor elige otro técnico u otro horario.",
+                409
+            );
         }
 
         try {
             $user = \Illuminate\Support\Facades\Auth::guard('api')->user();
 
-            // 1. Create the Mantenimiento record
+            // ── 3. Crear el Mantenimiento ─────────────────────────────────────
             $mantenimiento = \App\Models\Mantenimiento::create([
-                'titulo' => $validated['titulo'],
-                'descripcion' => $validated['descripcion'] ?? null,
-                'sede_id' => $validated['sede_id'] ?? null,
-                'creado_por' => $validated['asignado_a'], // Technician
-                'coordinador_id' => $user ? $user->id : null, // Coordinator
+                'titulo'         => $validated['titulo'],
+                'descripcion'    => $validated['descripcion'] ?? null,
+                'sede_id'        => $validated['sede_id'] ?? null,
+                'creado_por'     => $validated['asignado_a'],
+                'coordinador_id' => $user?->id,
                 'fecha_creacion' => \Carbon\Carbon::now(),
-                'esta_revisado' => false,
+                'esta_revisado'  => false,
             ]);
 
-            // 2. Create the Agenda linking to the mantenimiento
-            $agendaData = [
+            // ── 4. Crear la Agenda ────────────────────────────────────────────
+            $agenda = \App\Models\AgendaMantenimiento::create([
                 'mantenimiento_id' => $mantenimiento->id,
-                'titulo' => $validated['titulo'],
-                'descripcion' => $validated['descripcion'] ?? null,
-                'sede_id' => $validated['sede_id'] ?? null,
-                'fecha_inicio' => $validated['fecha_inicio'],
-                'fecha_fin' => $validated['fecha_fin'],
-                'tecnico_id' => $validated['asignado_a'],
-                'coordinador_id' => $user ? $user->id : null,
-                'fecha_creacion' => \Carbon\Carbon::now(),
-            ];
+                'titulo'           => $validated['titulo'],
+                'descripcion'      => $validated['descripcion'] ?? null,
+                'sede_id'          => $validated['sede_id'] ?? null,
+                'fecha_inicio'     => $validated['fecha_inicio'],
+                'fecha_fin'        => $validated['fecha_fin'],
+                'tecnico_id'       => $validated['asignado_a'],
+                'coordinador_id'   => $user?->id,
+                'fecha_creacion'   => \Carbon\Carbon::now(),
+            ]);
 
-            $agenda = \App\Models\AgendaMantenimiento::create($agendaData);
             $agenda->load(['mantenimiento', 'sede', 'tecnico', 'coordinador']);
 
-            // 3. Send email notification to the assigned person
+            // ── 5. Notificación por email (no bloquea si falla) ───────────────
             try {
                 $assignedUser = \App\Models\Usuario::find($validated['asignado_a']);
                 if ($assignedUser && $assignedUser->correo) {
                     \Illuminate\Support\Facades\Mail::to($assignedUser->correo)
                         ->send(new \App\Mail\AgendaMantenimientoNotification(
-                            $agenda,
-                            $mantenimiento,
-                            $assignedUser,
-                            $user
+                            $agenda, $mantenimiento, $assignedUser, $user
                         ));
                 }
             } catch (\Exception $mailError) {
-                \Illuminate\Support\Facades\Log::error('Error sending agenda notification email: ' . $mailError->getMessage());
+                \Illuminate\Support\Facades\Log::error('Error al enviar notificación de agenda: ' . $mailError->getMessage());
             }
 
             return ApiResponse::success($agenda, 'Agenda de mantenimiento creada exitosamente', 201);
@@ -197,20 +221,51 @@ class AgendaMantenimientoController extends Controller
 
         $validated = $request->validate([
             'mantenimiento_id' => 'nullable|exists:mantenimientos,id',
-            'titulo' => 'nullable|string|max:255',
-            'descripcion' => 'nullable|string',
-            'sede_id' => 'nullable|exists:sedes,id',
-            'fecha_inicio' => 'nullable|date',
-            'fecha_fin' => 'nullable|date|after_or_equal:fecha_inicio',
-            'asignado_a' => 'nullable|exists:usuarios,id',
+            'titulo'           => 'nullable|string|max:255',
+            'descripcion'      => 'nullable|string',
+            'sede_id'          => 'nullable|exists:sedes,id',
+            'fecha_inicio'     => 'nullable|date',
+            'fecha_fin'        => 'nullable|date|after:fecha_inicio',
+            'asignado_a'       => 'nullable|exists:usuarios,id',
         ]);
+
+        // Construir los valores finales (merge con los actuales de la agenda)
+        $tecnicoId   = $validated['asignado_a']  ?? $agenda->tecnico_id;
+        $fechaInicio = $validated['fecha_inicio'] ?? $agenda->fecha_inicio;
+        $fechaFin    = $validated['fecha_fin']    ?? $agenda->fecha_fin;
+
+        // ── 1. Validar rango horario ──────────────────────────────────────────
+        if (isset($validated['fecha_inicio']) || isset($validated['fecha_fin'])) {
+            $errorRango = $this->service->validarRangoHorario($fechaInicio, $fechaFin);
+            if ($errorRango) {
+                return ApiResponse::error($errorRango, 422);
+            }
+        }
+
+        // ── 2. Verificar conflicto del técnico (excluyendo la agenda actual) ──
+        if (!$this->service->isTecnicoDisponible($tecnicoId, $fechaInicio, $fechaFin, (int) $id)) {
+            $conflicto = \App\Models\AgendaMantenimiento::where('tecnico_id', $tecnicoId)
+                ->where('id', '!=', $id)
+                ->where('fecha_inicio', '<', $fechaFin)
+                ->where('fecha_fin',    '>', $fechaInicio)
+                ->with('tecnico')
+                ->first();
+
+            $nombreTecnico = $conflicto?->tecnico?->nombre_completo ?? 'El técnico seleccionado';
+            $desde = $conflicto ? \Carbon\Carbon::parse($conflicto->fecha_inicio)->format('d/m/Y H:i') : '';
+            $hasta = $conflicto ? \Carbon\Carbon::parse($conflicto->fecha_fin)->format('H:i') : '';
+
+            return ApiResponse::error(
+                "{$nombreTecnico} ya tiene una agenda de {$desde} a {$hasta}. Elige otro horario o técnico.",
+                409
+            );
+        }
 
         try {
             $updated = $this->service->update($id, $request->all());
             return ApiResponse::success($updated, 'Agenda de mantenimiento actualizada exitosamente');
         } catch (\Exception $e) {
-            $statusCode = ($e->getMessage() === 'el técnico tiene una agenda para esa fecha o día o hora') ? 400 : 500;
-            return ApiResponse::error($e->getMessage(), $statusCode);
+            return ApiResponse::error('Error al actualizar agenda: ' . $e->getMessage(), 500);
         }
     }
 
@@ -254,5 +309,33 @@ class AgendaMantenimientoController extends Controller
 
         $agendas = $this->service->getByMantenimiento($mantenimientoId);
         return ApiResponse::success($agendas, 'Agendas del mantenimiento');
+    }
+
+    /**
+     * GET /api/agenda-mantenimientos/disponibilidad?fecha_inicio=...&fecha_fin=...[&exclude_id=...]
+     *
+     * Retorna los IDs de técnicos que tienen conflicto en el rango dado.
+     * El frontend lo usa para deshabilitar técnicos ya ocupados antes de guardar.
+     */
+    public function getDisponibilidad(Request $request)
+    {
+        $this->permissionService->authorize('agenda_mantenimiento.crear');
+
+        $request->validate([
+            'fecha_inicio' => 'required|date',
+            'fecha_fin'    => 'required|date|after:fecha_inicio',
+            'exclude_id'   => 'nullable|integer|exists:agenda_mantenimientos,id',
+        ]);
+
+        $ocupados = $this->service->getTecnicosOcupados(
+            $request->fecha_inicio,
+            $request->fecha_fin,
+            $request->exclude_id ? (int) $request->exclude_id : null
+        );
+
+        return ApiResponse::success(
+            ['tecnicos_ocupados' => $ocupados],
+            'Técnicos con conflicto de horario en el rango solicitado'
+        );
     }
 }
