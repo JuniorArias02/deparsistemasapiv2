@@ -230,7 +230,7 @@ class PcMantenimientoController extends Controller
     )]
     public function destroy($id)
     {
-        $this->permissionService->authorize("pc_mantenimientos.eliminar");
+        $this->permissionService->authorize("pc_mantenimiento.eliminar");
         if ($this->service->delete($id)) {
             return ApiResponse::success(null, 'Mantenimiento eliminado exitosamente');
         }
