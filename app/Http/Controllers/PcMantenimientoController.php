@@ -68,7 +68,8 @@ class PcMantenimientoController extends Controller
             'responsable_mantenimiento' => 'nullable|string|max:255',
             'estado' => 'nullable|in:completado,pendiente',
             'firma_personal_cargo' => 'nullable|string',
-            'firma_sistemas' => 'required|string', 
+            'use_stored_signature_sistemas' => 'nullable|boolean',
+            'firma_sistemas' => 'required_without:use_stored_signature_sistemas|string|nullable', 
         ]);
 
         try {
@@ -86,7 +87,13 @@ class PcMantenimientoController extends Controller
                 $validated['firma_personal_cargo'] = $this->firmaService->saveBase64Signature($request->firma_personal_cargo);
             }
             
-            if ($request->filled('firma_sistemas')) {
+            if ($request->boolean('use_stored_signature_sistemas')) {
+                if (auth()->check() && auth()->user()->firma_digital) {
+                    $validated['firma_sistemas'] = auth()->user()->firma_digital;
+                } else {
+                    return ApiResponse::error('El usuario no tiene una firma digital configurada', 400);
+                }
+            } elseif ($request->filled('firma_sistemas')) {
                 $validated['firma_sistemas'] = $this->firmaService->saveBase64Signature($request->firma_sistemas);
             }
 
