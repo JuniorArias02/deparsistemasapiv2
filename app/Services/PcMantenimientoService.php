@@ -8,7 +8,7 @@ class PcMantenimientoService
 {
     public function getAll()
     {
-        return PcMantenimiento::with(['equipo', 'empresaResponsable', 'creador'])->get();
+        return PcMantenimiento::with(['equipo', 'empresaResponsable', 'creador:id,nombre_completo'])->get();
     }
 
     public function create(array $data)
@@ -25,12 +25,12 @@ class PcMantenimientoService
 
     public function find($id)
     {
-        return PcMantenimiento::with(['equipo', 'empresaResponsable', 'creador'])->find($id);
+        return PcMantenimiento::with(['equipo', 'empresaResponsable', 'creador:id,nombre_completo'])->find($id);
     }
 
     public function getByEquipo($equipoId)
     {
-        return PcMantenimiento::with(['empresaResponsable', 'creador'])
+        return PcMantenimiento::with(['empresaResponsable', 'creador:id,nombre_completo'])
             ->where('equipo_id', $equipoId)
             ->get();
     }

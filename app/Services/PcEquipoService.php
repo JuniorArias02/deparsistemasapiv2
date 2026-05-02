@@ -78,7 +78,7 @@ class PcEquipoService
                 $q->with(['funcionario'])->orderBy('fecha_entrega', 'desc');
             },
             'mantenimientos' => function ($q) {
-                $q->with(['empresaResponsable', 'creador'])->orderBy('fecha', 'desc');
+                $q->with(['empresaResponsable', 'creador:id,nombre_completo'])->orderBy('fecha', 'desc');
             },
         ])->find($id);
 
