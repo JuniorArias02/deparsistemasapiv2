@@ -109,6 +109,7 @@ class PcMantenimientoController extends Controller
         $validated = $request->validate([
             'firma_personal_cargo' => 'nullable|string',
             'firma_sistemas' => 'nullable|string',
+            'estado' => 'nullable|in:completado,pendiente',
         ]);
 
         $item = $this->service->find($id);
@@ -123,13 +124,16 @@ class PcMantenimientoController extends Controller
         if ($request->filled('firma_sistemas')) {
             $data['firma_sistemas'] = $this->firmaService->saveBase64Signature($request->firma_sistemas);
         }
+        if ($request->filled('estado')) {
+            $data['estado'] = $request->estado;
+        }
 
         if (empty($data)) {
-            return ApiResponse::error('No se enviaron firmas para actualizar', 400);
+            return ApiResponse::error('No se enviaron datos para actualizar', 400);
         }
 
         $updated = $this->service->update($id, $data);
-        return ApiResponse::success($updated, 'Firmas actualizadas correctamente');
+        return ApiResponse::success($updated, 'Datos actualizados correctamente');
     }
 
     #[OA\Get(
