@@ -11,6 +11,8 @@ Route::get('/ping', function () {
     ]);
 });
 
+\Illuminate\Support\Facades\Broadcast::routes(['middleware' => ['auth:api']]);
+
 // TEMPORARY DEBUG - REMOVE AFTER FIXING
 Route::post('/debug-login', function (\Illuminate\Http\Request $request) {
     $usuario = $request->input('usuario');
@@ -189,3 +191,6 @@ Route::group(['middleware' => 'api'], function () {
         Route::get('cp-entrega-activos-fijos/{id}/exportar-excel', [App\Http\Controllers\CpEntregaActivosFijosController::class, 'exportExcel']);
     });
 });
+
+// Rutas del Dominio: Buzón de Sugerencias
+require base_path('app/Modules/BuzonSugerencias/Presentation/Routes/api.php');

@@ -48,6 +48,7 @@
                     "Agenda Mantenimientos"
                 ],
                 "summary": "Listar agenda de mantenimientos",
+                "description": "Retorna todas las agendas si el usuario tiene permiso \"agenda_mantenimiento.listar\", las programadas por el coordinador si tiene \"agenda_mantenimiento.listar_coordinador\", o las asignadas al técnico si tiene \"agenda_mantenimiento.listar_tecnico\".",
                 "operationId": "b83d5bb127f09b11f620655bed410dc3",
                 "responses": {
                     "200": {
@@ -329,8 +330,18 @@
                     "Areas"
                 ],
                 "summary": "Listar areas",
-                "description": "Obtiene la lista de areas. Requiere permiso area.read.",
+                "description": "Obtiene la lista de areas. Puede filtrarse por sede_id. Requiere permiso area.read.",
                 "operationId": "f16518e18a005a2f966b63c0e1745342",
+                "parameters": [
+                    {
+                        "name": "sede_id",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "Lista de areas",
@@ -1167,6 +1178,14 @@
                                         "type": "string",
                                         "format": "date"
                                     },
+                                    "use_stored_signature_entrega": {
+                                        "description": "Usar firma guardada del usuario que entrega",
+                                        "type": "boolean"
+                                    },
+                                    "use_stored_signature_recibe": {
+                                        "description": "Usar firma guardada del usuario que recibe",
+                                        "type": "boolean"
+                                    },
                                     "firma_quien_entrega": {
                                         "description": "Firma de quien entrega",
                                         "type": "string",
@@ -1955,6 +1974,42 @@
                 "responses": {
                     "200": {
                         "description": "Archivo Excel descargado"
+                    },
+                    "404": {
+                        "description": "Pedido no encontrado"
+                    },
+                    "500": {
+                        "description": "Error del servidor"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/cp-pedidos/{id}/exportar-pdf": {
+            "get": {
+                "tags": [
+                    "Pedidos de Compra"
+                ],
+                "summary": "Exportar pedido a PDF",
+                "description": "Genera y descarga un archivo PDF con los datos del pedido, replicando la plantilla oficial.",
+                "operationId": "b0664056c7ea8339af86595cee174b53",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Archivo PDF descargado"
                     },
                     "404": {
                         "description": "Pedido no encontrado"
@@ -3830,7 +3885,7 @@
                                     "sede_id": {
                                         "type": "integer"
                                     },
-                                    "nombre_receptor": {
+                                    "coordinador_id": {
                                         "type": "integer"
                                     },
                                     "descripcion": {
@@ -3942,7 +3997,7 @@
                                     "sede_id": {
                                         "type": "integer"
                                     },
-                                    "nombre_receptor": {
+                                    "coordinador_id": {
                                         "type": "integer"
                                     },
                                     "descripcion": {
@@ -4049,6 +4104,76 @@
                     },
                     "404": {
                         "description": "No encontrado"
+                    },
+                    "403": {
+                        "description": "Prohibido"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/mantenimientos/mis-mantenimientos": {
+            "get": {
+                "tags": [
+                    "Mantenimientos"
+                ],
+                "summary": "Obtener mantenimientos del usuario o todos según permisos",
+                "description": "Retorna todos los mantenimientos si el usuario tiene permiso \"mantenimiento.listar_todos\", de lo contrario retorna los asignados al usuario si tiene permiso \"mantenimiento.receptor\".",
+                "operationId": "267ae8dac146f27a0fe2f6976380d362",
+                "responses": {
+                    "200": {
+                        "description": "Lista de mantenimientos",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Prohibido"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/mantenimientos/exportar-excel": {
+            "get": {
+                "tags": [
+                    "Mantenimientos"
+                ],
+                "summary": "Exportar mantenimientos a Excel",
+                "operationId": "85b718d5b2e2621510faf2f6c47e6a3d",
+                "parameters": [
+                    {
+                        "name": "fecha_inicio",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "fecha_fin",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Archivo Excel generado"
                     },
                     "403": {
                         "description": "Prohibido"
@@ -6141,6 +6266,10 @@
                                     },
                                     "cargo_id": {
                                         "type": "integer"
+                                    },
+                                    "estado": {
+                                        "description": "0: Inactivo, 1: Activo",
+                                        "type": "integer"
                                     }
                                 },
                                 "type": "object"
@@ -6243,6 +6372,10 @@
                                         "type": "string"
                                     },
                                     "cargo_id": {
+                                        "type": "integer"
+                                    },
+                                    "estado": {
+                                        "description": "0: Inactivo, 1: Activo",
                                         "type": "integer"
                                     }
                                 },
@@ -7144,6 +7277,305 @@
                     }
                 ]
             }
+        },
+        "/api/buzon-sugerencias": {
+            "get": {
+                "tags": [
+                    "Buzón de Sugerencias"
+                ],
+                "summary": "Listar sugerencias",
+                "operationId": "06dda63569d89d22c403f7fcc55ccf2b",
+                "parameters": [
+                    {
+                        "name": "pendientes",
+                        "in": "query",
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    },
+                    {
+                        "name": "mias",
+                        "in": "query",
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Listado de sugerencias"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Buzón de Sugerencias"
+                ],
+                "summary": "Registrar una nueva sugerencia",
+                "operationId": "d483f953734fae98631606482de9d107",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "asunto",
+                                    "observaciones"
+                                ],
+                                "properties": {
+                                    "asunto": {
+                                        "type": "string",
+                                        "example": "Problema con el aire acondicionado"
+                                    },
+                                    "observaciones": {
+                                        "type": "string",
+                                        "example": "El aire de la sala de reuniones no funciona."
+                                    },
+                                    "prioridad": {
+                                        "type": "string",
+                                        "example": "Media"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Sugerencia registrada exitosamente"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/buzon-sugerencias/{id}/adjuntos": {
+            "post": {
+                "tags": [
+                    "Buzón de Sugerencias"
+                ],
+                "summary": "Subir evidencias visuales a una sugerencia",
+                "operationId": "0fc14ec3f402492f9b4b3f41de954b52",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "properties": {
+                                    "archivos[]": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string",
+                                            "format": "binary"
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Adjuntos subidos exitosamente"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/buzon-sugerencias/{codigo}": {
+            "get": {
+                "tags": [
+                    "Buzón de Sugerencias"
+                ],
+                "summary": "Consultar seguimiento de un ticket",
+                "operationId": "fd127676ec5db4eaacb04c3c0380b796",
+                "parameters": [
+                    {
+                        "name": "codigo",
+                        "in": "path",
+                        "description": "Código de ticket (Ej: SUG-2026-001)",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Detalles de la sugerencia"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/buzon-sugerencias/{id}/comentarios": {
+            "post": {
+                "tags": [
+                    "Buzón de Sugerencias"
+                ],
+                "summary": "Agregar comentario a una sugerencia",
+                "operationId": "c61ccd8b2960c2142a5e9a452f085384",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "mensaje"
+                                ],
+                                "properties": {
+                                    "mensaje": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Comentario agregado"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/buzon-sugerencias/{id}/estado": {
+            "patch": {
+                "tags": [
+                    "Buzón de Sugerencias"
+                ],
+                "summary": "Cambiar estado de una sugerencia",
+                "operationId": "a4976cbf8880b4eeac41ac57b3a6e3d0",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "estado_id"
+                                ],
+                                "properties": {
+                                    "estado_id": {
+                                        "type": "integer"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Estado actualizado"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/buzon-sugerencias/{id}/asignar": {
+            "patch": {
+                "tags": [
+                    "Buzón de Sugerencias"
+                ],
+                "summary": "Asignar sugerencia a un responsable",
+                "operationId": "3ce7f28e4e4faf446a0a24ae287973cf",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "usuario_id"
+                                ],
+                                "properties": {
+                                    "usuario_id": {
+                                        "type": "integer"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Responsable asignado"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
         }
     },
     "components": {
@@ -7390,6 +7822,10 @@
         {
             "name": "Usuarios",
             "description": "Usuarios"
+        },
+        {
+            "name": "Buzón de Sugerencias",
+            "description": "Buzón de Sugerencias"
         }
     ]
 }
