@@ -11,6 +11,7 @@ use App\Models\CpProducto;
 use App\Models\CpProveedor;
 use App\Models\Usuario;
 use App\Models\Sede;
+use App\Models\CpTipoSolicitud;
 use Illuminate\Support\Facades\DB;
 
 class DashboardStatsService
@@ -40,6 +41,7 @@ class DashboardStatsService
             // Remove 'proveedor' relation as it does not exist
             'ultimos_pedidos' => CpPedido::with(['elaboradoPor', 'sede'])->latest('fecha_solicitud')->take(5)->get(),
             'estadisticas_tiempo' => $this->getPedidosTimeStats(),
+            'desglose_solicitudes' => $this->getDesgloseSolicitudes(),
         ];
     }
 
@@ -170,5 +172,37 @@ class DashboardStatsService
             return "{$hours}h {$minutes}m";
         }
         return "{$minutes}m";
+    }
+
+    public function getDesgloseSolicitudes(): array
+    {
+        $total = CpPedido::count();
+
+        // Get count grouped by tipo_solicitud
+        $counts = CpPedido::select('tipo_solicitud', DB::raw('count(*) as total_pedidos'))
+            ->groupBy('tipo_solicitud')
+            ->get();
+
+        // Load the types
+        $tipos = CpTipoSolicitud::all()->keyBy('id');
+
+        $resultado = [];
+        foreach ($counts as $item) {
+            $tipoId = $item->tipo_solicitud;
+            $tipoNombre = isset($tipos[$tipoId]) ? $tipos[$tipoId]->nombre : 'No especificado';
+            $count = $item->total_pedidos;
+
+            $resultado[] = [
+                'id' => $tipoId,
+                'nombre' => $tipoNombre,
+                'cantidad' => $count,
+                'porcentaje' => $total > 0 ? round(($count / $total) * 100, 1) : 0,
+            ];
+        }
+
+        return [
+            'total_pedidos' => $total,
+            'tipos' => $resultado,
+        ];
     }
 }
