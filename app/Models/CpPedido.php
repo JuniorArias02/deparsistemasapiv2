@@ -45,6 +45,12 @@ class CpPedido extends Model
     protected $table = 'cp_pedidos';
     public $timestamps = false;
 
+    protected $casts = [
+        'fecha_solicitud' => 'datetime',
+        'fecha_compra' => 'datetime',
+        'fecha_gerencia' => 'datetime',
+    ];
+
     protected $fillable = [
         'estado_compras',
         'fecha_solicitud',

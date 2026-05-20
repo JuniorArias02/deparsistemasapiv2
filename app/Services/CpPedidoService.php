@@ -57,7 +57,7 @@ class CpPedidoService
             /** @var CpPedido $pedido */
             $pedido = CpPedido::create([
                 'estado_compras' => 'pendiente',
-                'fecha_solicitud' => now(),
+                'fecha_solicitud' => now('UTC'),
                 'proceso_solicitante' => $data['proceso_solicitante'],
                 'tipo_solicitud' => $data['tipo_solicitud'],
                 'consecutivo' => $nextConsecutivo,
@@ -374,5 +374,48 @@ class CpPedidoService
         } catch (Exception $e) {
             Log::error('Error enviando correo de rechazo de gerencia: ' . $e->getMessage());
         }
+    }
+
+    public function calcularTiempoEntregaPedido(CpPedido $pedido){
+        $tiempoCompras = null;
+        $tiempoGerencia = null;
+        $tiempoTotal = null;
+
+        if ($pedido->fecha_solicitud && $pedido->fecha_compra) {
+            $tiempoCompras = $pedido->fecha_solicitud->diffInSeconds($pedido->fecha_compra);
+        }
+
+        if ($pedido->fecha_compra && $pedido->fecha_gerencia) {
+            $tiempoGerencia = $pedido->fecha_compra->diffInSeconds($pedido->fecha_gerencia);
+        }
+
+        if ($pedido->fecha_solicitud && $pedido->fecha_gerencia) {
+            $tiempoTotal = $pedido->fecha_solicitud->diffInSeconds($pedido->fecha_gerencia);
+        }
+
+        return [
+            'tiempo_compras' => $tiempoCompras !== null ? $this->formatSeconds($tiempoCompras) : 'N/A',
+            'tiempo_compras_segundos' => $tiempoCompras,
+            'tiempo_gerencia' => $tiempoGerencia !== null ? $this->formatSeconds($tiempoGerencia) : 'N/A',
+            'tiempo_gerencia_segundos' => $tiempoGerencia,
+            'tiempo_total' => $tiempoTotal !== null ? $this->formatSeconds($tiempoTotal) : 'N/A',
+            'tiempo_total_segundos' => $tiempoTotal,
+        ];
+    }
+
+    protected function formatSeconds($seconds)
+    {
+        if ($seconds === null || $seconds < 0) return 'N/A';
+        $days = floor($seconds / 86400);
+        $hours = floor(($seconds % 86400) / 3600);
+        $minutes = floor(($seconds % 3600) / 60);
+
+        if ($days > 0) {
+            return "{$days}d {$hours}h {$minutes}m";
+        }
+        if ($hours > 0) {
+            return "{$hours}h {$minutes}m";
+        }
+        return "{$minutes}m";
     }
 }

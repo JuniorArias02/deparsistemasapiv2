@@ -175,6 +175,7 @@ Route::group(['middleware' => 'api'], function () {
             Route::patch('tracking', [App\Http\Controllers\CpPedidoController::class, 'updateTracking']);
             Route::get('exportar-excel', [App\Http\Controllers\CpPedidoController::class, 'exportExcel']);
             Route::get('exportar-pdf', [App\Http\Controllers\CpPedidoController::class, 'exportPdf']);
+            Route::get('tiempo-entrega', [App\Http\Controllers\CpPedidoController::class, 'calcularTiempoEntregaPedido']);
         });
     });
 

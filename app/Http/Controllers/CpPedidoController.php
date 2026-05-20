@@ -650,4 +650,19 @@ class CpPedidoController extends Controller
             return ApiResponse::error('Error al exportar consolidado: ' . $e->getMessage(), 500);
         }
     }
+ 
+    public function calcularTiempoEntregaPedido($id)
+    {
+        try {
+            $pedido = CpPedido::find($id);
+            if (!$pedido) {
+                return ApiResponse::error('Pedido no encontrado', 404);
+            }
+            $tiempos = $this->service->calcularTiempoEntregaPedido($pedido);
+            return ApiResponse::success($tiempos, 'Tiempos de entrega del pedido calculados exitosamente');
+        } catch (\Exception $e) {
+            return ApiResponse::error('Error al calcular tiempos del pedido: ' . $e->getMessage(), 500);
+        }
+    }
 }
+ 
