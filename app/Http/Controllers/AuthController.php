@@ -76,28 +76,30 @@ class AuthController extends Controller
         $dto = LoginDTO::fromRequest($request);
         $result = $this->authService->login($dto);
 
+        if (is_array($result) && isset($result['error'])) {
+            return ApiResponse::error($result['error'], $result['status']);
+        }
+
         if (! $result) {
             return ApiResponse::error('Credenciales inválidas', 401);
         }
 
-        if ($result) {
-            try {
-                // Retrieve user manually since auth('api')->user() is not yet available
-                $user = \App\Models\Usuario::where('usuario', $request->usuario)
-                    ->orWhere('correo', $request->usuario)
-                    ->first();
+        try {
+            // Retrieve user manually since auth('api')->user() is not yet available
+            $user = \App\Models\Usuario::where('usuario', $request->usuario)
+                ->orWhere('correo', $request->usuario)
+                ->first();
 
-                if ($user && $user->correo) {
-                    $details = [
-                        'ip' => $request->ip(),
-                        'userAgent' => $request->userAgent(),
-                        'time' => now()->format('d/m/Y H:i:s A'),
-                    ];
-                    Mail::to($user->correo)->send(new LoginNotification($user, $details));
-                }
-            } catch (\Exception $e) {
-                Log::error('Error sending login alert email: ' . $e->getMessage());
+            if ($user && $user->correo) {
+                $details = [
+                    'ip' => $request->ip(),
+                    'userAgent' => $request->userAgent(),
+                    'time' => now()->format('d/m/Y H:i:s A'),
+                ];
+                Mail::to($user->correo)->send(new LoginNotification($user, $details));
             }
+        } catch (\Exception $e) {
+            Log::error('Error sending login alert email: ' . $e->getMessage());
         }
 
         return ApiResponse::success($result, 'Login exitoso');

@@ -24,6 +24,13 @@ class AuthService
             return null;
         }
 
+        $user = $this->authRepository->user();
+
+        if ($user && $user->estado == 0) {
+            $this->authRepository->logout();
+            return ['error' => 'Usuario deshabilitado en el sistema', 'status' => 403];
+        }
+
         return $this->respondWithToken($token);
     }
 
