@@ -94,25 +94,7 @@ Route::group(['middleware' => 'api'], function () {
         Route::apiResource('cp-productos-servicios', App\Http\Controllers\CpProductoServicioController::class);
         Route::apiResource('cp-proveedores', App\Http\Controllers\CpProveedorController::class);
         Route::apiResource('cp-tipos-solicitud', App\Http\Controllers\CpTipoSolicitudController::class);
-        Route::get('pc-equipos/buscar', [App\Http\Controllers\PcEquipoController::class, 'buscar']);
-        Route::get('pc-equipos/{id}/hoja-de-vida', [App\Http\Controllers\PcEquipoController::class, 'hojaDeVida']);
-        Route::apiResource('pc-equipos', App\Http\Controllers\PcEquipoController::class);
-        Route::apiResource('pc-caracteristicas-tecnicas', App\Http\Controllers\PcCaracteristicasTecnicasController::class);
-        Route::get('pc-caracteristicas-tecnicas/equipo/{equipo_id}', [App\Http\Controllers\PcCaracteristicasTecnicasController::class, 'showByEquipo']);
-        Route::apiResource('pc-mantenimientos', App\Http\Controllers\PcMantenimientoController::class);
-        Route::post('pc-mantenimientos/{id}/actualizar-firmas', [App\Http\Controllers\PcMantenimientoController::class, 'actualizarFirmas']);
-        Route::get('pc-mantenimientos/equipo/{equipo_id}', [App\Http\Controllers\PcMantenimientoController::class, 'showByEquipo']);
-        Route::get('pc-cronograma-mantenimientos', [App\Http\Controllers\PcCronogramaController::class, 'index']);
-
-        Route::get('pc-entregas/search', [App\Http\Controllers\PcEntregaController::class, 'search']);
-        Route::apiResource('pc-entregas', App\Http\Controllers\PcEntregaController::class);
-        Route::apiResource('pc-devueltos', App\Http\Controllers\PcDevueltoController::class);
-        Route::apiResource('pc-perifericos-entregados', App\Http\Controllers\PcPerifericoEntregadoController::class);
-        Route::get('pc-perifericos-entregados/entrega/{entrega_id}', [App\Http\Controllers\PcPerifericoEntregadoController::class, 'showByEntrega']);
         Route::apiResource('datos-empresa', App\Http\Controllers\DatosEmpresaController::class);
-        Route::apiResource('pc-licencias-software', App\Http\Controllers\PcLicenciaSoftwareController::class);
-        Route::get('pc-licencias-software/equipo/{equipo_id}', [App\Http\Controllers\PcLicenciaSoftwareController::class, 'showByEquipo']);
-        Route::apiResource('pc-config-cronograma', App\Http\Controllers\PcConfigCronogramaController::class);
 
         // Sedes and Dependencias Routes
         Route::apiResource('sedes', App\Http\Controllers\SedeController::class);
@@ -195,3 +177,9 @@ Route::group(['middleware' => 'api'], function () {
 
 // Rutas del Dominio: Buzón de Sugerencias
 require base_path('app/Modules/BuzonSugerencias/Presentation/Routes/api.php');
+
+// Rutas del Dominio: Gestión de Sistemas
+require base_path('app/Modules/GestionSistemas/Presentation/Routes/api.php');
+
+// Rutas del Dominio: Gestión de Compras
+require base_path('app/Modules/GestionCompras/Presentation/Routes/api.php');

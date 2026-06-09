@@ -1,0 +1,39 @@
+<?php
+
+namespace App\Modules\GestionSistemas\Application\UseCases\MantenimientoEquipos;
+
+use App\Modules\GestionSistemas\Domain\Contracts\PcMantenimientoRepositoryInterface;
+use App\Services\PcMantenimientoFirmaService;
+use Exception;
+
+class CrearMantenimientoEquipoUseCase
+{
+    private PcMantenimientoRepositoryInterface $repository;
+    private PcMantenimientoFirmaService $firmaService;
+
+    public function __construct(PcMantenimientoRepositoryInterface $repository, PcMantenimientoFirmaService $firmaService)
+    {
+        $this->repository = $repository;
+        $this->firmaService = $firmaService;
+    }
+
+    public function execute(array $data)
+    {
+        // Procesar Firmas
+        if (!empty($data['firma_personal_cargo'])) {
+            $data['firma_personal_cargo'] = $this->firmaService->saveBase64Signature($data['firma_personal_cargo']);
+        }
+        
+        if (!empty($data['use_stored_signature_sistemas']) && $data['use_stored_signature_sistemas']) {
+            if (auth()->check() && auth()->user()->firma_digital) {
+                $data['firma_sistemas'] = auth()->user()->firma_digital;
+            } else {
+                throw new Exception('El usuario no tiene una firma digital configurada');
+            }
+        } elseif (!empty($data['firma_sistemas'])) {
+            $data['firma_sistemas'] = $this->firmaService->saveBase64Signature($data['firma_sistemas']);
+        }
+
+        return $this->repository->create($data);
+    }
+}

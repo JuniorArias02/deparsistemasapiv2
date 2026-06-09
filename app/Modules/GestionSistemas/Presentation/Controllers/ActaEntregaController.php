@@ -1,0 +1,233 @@
+<?php
+
+namespace App\Modules\GestionSistemas\Presentation\Controllers;
+
+use App\Http\Controllers\Controller;
+use App\Modules\GestionSistemas\Application\DTOs\CrearActaEntregaDTO;
+use App\Modules\GestionSistemas\Application\DTOs\PerifericoDTO;
+use App\Modules\GestionSistemas\Application\UseCases\ActasEntrega\CrearActaEntregaUseCase;
+use App\Modules\GestionSistemas\Application\UseCases\ActasEntrega\ObtenerActaEntregaUseCase;
+use App\Modules\GestionSistemas\Application\UseCases\ActasEntrega\EliminarActaEntregaUseCase;
+use App\Modules\GestionSistemas\Infrastructure\Repositories\ActaEntregaRepository;
+use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
+use OpenApi\Attributes as OA;
+
+class ActaEntregaController extends Controller
+{
+    private CrearActaEntregaUseCase $crearUseCase;
+    private ObtenerActaEntregaUseCase $obtenerUseCase;
+    private EliminarActaEntregaUseCase $eliminarUseCase;
+
+    public function __construct()
+    {
+        // En un escenario ideal, esto se inyecta mediante el Service Container
+        $repository = new ActaEntregaRepository();
+        $this->crearUseCase = new CrearActaEntregaUseCase($repository);
+        $this->obtenerUseCase = new ObtenerActaEntregaUseCase($repository);
+        $this->eliminarUseCase = new EliminarActaEntregaUseCase($repository);
+    }
+
+    #[OA\Get(
+        path: '/api/gestion-sistemas/actas-entrega',
+        tags: ['Actas Entrega'],
+        summary: 'Listar actas de entrega',
+        description: 'Obtiene todas las actas de entrega.',
+        security: [['bearerAuth' => []]],
+        responses: [
+            new OA\Response(response: 200, description: 'Lista de actas de entrega')
+        ]
+    )]
+    public function index(): JsonResponse
+    {
+        // Para simplificar y mantener las relaciones en la lista, usamos Eloquent directo en la capa de presentación o creamos un ListUseCase.
+        // Usaremos Eloquent directamente para la vista de lista rápida, como es común en pragmático DDD/CQRS.
+        $entregas = \App\Models\PcEntrega::with(['equipo', 'funcionario'])->orderBy('id', 'desc')->get();
+        return response()->json($entregas);
+    }
+
+    #[OA\Post(
+        path: '/api/gestion-sistemas/actas-entrega',
+        tags: ['Actas Entrega'],
+        summary: 'Crear acta de entrega',
+        description: 'Crea una nueva acta de entrega junto con sus periféricos. Permite subir firmas en formato archivo.',
+        security: [['bearerAuth' => []]],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\MediaType(
+                mediaType: 'multipart/form-data',
+                schema: new OA\Schema(
+                    required: ['equipo_id', 'funcionario_id', 'fecha_entrega'],
+                    properties: [
+                        new OA\Property(property: 'equipo_id', type: 'integer', description: 'ID del equipo'),
+                        new OA\Property(property: 'funcionario_id', type: 'integer', description: 'ID del funcionario'),
+                        new OA\Property(property: 'fecha_entrega', type: 'string', format: 'date', description: 'Fecha de entrega (YYYY-MM-DD)'),
+                        new OA\Property(property: 'firma_entrega', type: 'string', format: 'binary', description: 'Archivo de firma de quien entrega (jpeg, png, jpg, pdf)'),
+                        new OA\Property(property: 'firma_recibe', type: 'string', format: 'binary', description: 'Archivo de firma de quien recibe (jpeg, png, jpg, pdf)'),
+                        new OA\Property(property: 'perifericos', type: 'string', description: 'Arreglo JSON con los periféricos (ej. [{"inventario_id": 1, "cantidad": 2, "observaciones": "N/A"}])')
+                    ]
+                )
+            )
+        ),
+        responses: [
+            new OA\Response(response: 201, description: 'Acta de entrega creada con éxito'),
+            new OA\Response(response: 422, description: 'Error de validación'),
+            new OA\Response(response: 500, description: 'Error interno del servidor')
+        ]
+    )]
+    public function store(Request $request): JsonResponse
+    {
+        $request->validate([
+            'equipo_id' => 'required|integer',
+            'funcionario_id' => 'required|integer',
+            'fecha_entrega' => 'required|date',
+            'firma_entrega' => 'nullable|file|mimes:jpeg,png,jpg,pdf|max:2048',
+            'firma_recibe' => 'nullable|file|mimes:jpeg,png,jpg,pdf|max:2048',
+            'perifericos' => 'nullable|string', // Aceptamos string para JSON
+        ]);
+
+        $perifericosData = [];
+        if ($request->has('perifericos') && !empty($request->input('perifericos'))) {
+            $decoded = json_decode($request->input('perifericos'), true);
+            if (is_array($decoded)) {
+                foreach ($decoded as $item) {
+                    $perifericosData[] = new PerifericoDTO(
+                        $item['inventario_id'],
+                        $item['cantidad'] ?? 1,
+                        $item['observaciones'] ?? null
+                    );
+                }
+            }
+        }
+
+        $dto = new CrearActaEntregaDTO(
+            $request->input('equipo_id'),
+            $request->input('funcionario_id'),
+            $request->input('fecha_entrega'),
+            $request->file('firma_entrega'),
+            $request->file('firma_recibe'),
+            $perifericosData
+        );
+
+        try {
+            $acta = $this->crearUseCase->execute($dto);
+            return response()->json([
+                'success' => true,
+                'message' => 'Acta de entrega creada con éxito.',
+                'data' => [
+                    'id' => $acta->getId(),
+                    'equipo_id' => $acta->getEquipoId(),
+                    'funcionario_id' => $acta->getFuncionarioId(),
+                    'fecha_entrega' => $acta->getFechaEntrega()
+                ]
+            ], 201);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al crear acta: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    #[OA\Get(
+        path: '/api/gestion-sistemas/actas-entrega/{id}',
+        tags: ['Actas Entrega'],
+        summary: 'Obtener acta de entrega',
+        description: 'Obtiene los detalles de un acta de entrega por su ID, incluyendo sus periféricos y las URLs de las firmas.',
+        security: [['bearerAuth' => []]],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer'), description: 'ID del acta de entrega')
+        ],
+        responses: [
+            new OA\Response(response: 200, description: 'Detalles del acta de entrega'),
+            new OA\Response(response: 404, description: 'Acta de entrega no encontrada')
+        ]
+    )]
+    public function show(int $id): JsonResponse
+    {
+        // Pragmatic CQRS: Usamos Eloquent directo para lectura (Read Model)
+        $acta = \App\Models\PcEntrega::with([
+            'equipo',
+            'funcionario.cargo',
+            'perifericos.inventario'
+        ])->find($id);
+
+        if (!$acta) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Acta de entrega no encontrada.'
+            ], 404);
+        }
+
+        $perifericos = $acta->perifericos->map(function($p) {
+            return [
+                'id' => $p->id,
+                'inventario_id' => $p->inventario_id,
+                'cantidad' => $p->cantidad,
+                'observaciones' => $p->observaciones,
+                'inventario' => $p->inventario ? [
+                    'codigo' => $p->inventario->codigo,
+                    'nombre' => $p->inventario->nombre,
+                    'marca' => $p->inventario->marca,
+                    'modelo' => $p->inventario->modelo,
+                    'serial' => $p->inventario->serial,
+                ] : null
+            ];
+        });
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'id' => $acta->id,
+                'equipo_id' => $acta->equipo_id,
+                'equipo' => $acta->equipo ? [
+                    'serial' => $acta->equipo->serial,
+                    'marca' => $acta->equipo->marca,
+                    'modelo' => $acta->equipo->modelo,
+                ] : null,
+                'funcionario_id' => $acta->funcionario_id,
+                'funcionario' => $acta->funcionario ? [
+                    'nombre' => $acta->funcionario->nombre,
+                    'cedula' => $acta->funcionario->cedula,
+                    'cargo' => $acta->funcionario->cargo,
+                ] : null,
+                'fecha_entrega' => $acta->fecha_entrega,
+                'firma_entrega' => $acta->firma_entrega ? asset('storage/' . $acta->firma_entrega) : null,
+                'firma_recibe' => $acta->firma_recibe ? asset('storage/' . $acta->firma_recibe) : null,
+                'estado' => $acta->estado,
+                'devuelto' => $acta->devuelto,
+                'perifericos' => $perifericos
+            ]
+        ]);
+    }
+
+    #[OA\Delete(
+        path: '/api/gestion-sistemas/actas-entrega/{id}',
+        tags: ['Actas Entrega'],
+        summary: 'Eliminar acta de entrega',
+        security: [['bearerAuth' => []]],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer'), description: 'ID del acta de entrega')
+        ],
+        responses: [
+            new OA\Response(response: 200, description: 'Acta de entrega eliminada'),
+            new OA\Response(response: 404, description: 'Acta de entrega no encontrada')
+        ]
+    )]
+    public function destroy(int $id): JsonResponse
+    {
+        $deleted = $this->eliminarUseCase->execute($id);
+
+        if (!$deleted) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Acta de entrega no encontrada o no se pudo eliminar.'
+            ], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Acta de entrega eliminada con éxito.'
+        ]);
+    }
+}
