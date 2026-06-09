@@ -108,7 +108,12 @@ class PcEquipoController extends Controller
         path: '/api/gestion-sistemas/pc-equipos/{id}',
         tags: ['PcEquipos (DDD)'],
         summary: 'Obtener detalles de un equipo',
-        security: [['bearerAuth' => []]]
+        security: [['bearerAuth' => []]],
+        parameters: [new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer'))],
+        responses: [
+            new OA\Response(response: 200, description: 'Detalle del equipo', content: new OA\JsonContent(ref: '#/components/schemas/ApiResponse')),
+            new OA\Response(response: 404, description: 'No encontrado')
+        ]
     )]
     public function show($id)
     {
@@ -130,7 +135,12 @@ class PcEquipoController extends Controller
         path: '/api/gestion-sistemas/pc-equipos/{id}',
         tags: ['PcEquipos (DDD)'],
         summary: 'Actualizar equipo',
-        security: [['bearerAuth' => []]]
+        security: [['bearerAuth' => []]],
+        parameters: [new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer'))],
+        responses: [
+            new OA\Response(response: 200, description: 'Equipo actualizado exitosamente', content: new OA\JsonContent(ref: '#/components/schemas/ApiResponse')),
+            new OA\Response(response: 404, description: 'No encontrado')
+        ]
     )]
     public function update(Request $request, $id)
     {
@@ -194,7 +204,12 @@ class PcEquipoController extends Controller
         path: '/api/gestion-sistemas/pc-equipos/{id}',
         tags: ['PcEquipos (DDD)'],
         summary: 'Eliminar equipo',
-        security: [['bearerAuth' => []]]
+        security: [['bearerAuth' => []]],
+        parameters: [new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer'))],
+        responses: [
+            new OA\Response(response: 200, description: 'Equipo eliminado exitosamente', content: new OA\JsonContent(ref: '#/components/schemas/ApiResponse')),
+            new OA\Response(response: 404, description: 'No encontrado')
+        ]
     )]
     public function destroy($id)
     {
@@ -212,7 +227,11 @@ class PcEquipoController extends Controller
         path: '/api/gestion-sistemas/pc-equipos/buscar',
         tags: ['PcEquipos (DDD)'],
         summary: 'Buscar equipos',
-        security: [['bearerAuth' => []]]
+        security: [['bearerAuth' => []]],
+        parameters: [new OA\Parameter(name: 'q', in: 'query', required: false, schema: new OA\Schema(type: 'string'))],
+        responses: [
+            new OA\Response(response: 200, description: 'Resultados de búsqueda', content: new OA\JsonContent(ref: '#/components/schemas/ApiResponse'))
+        ]
     )]
     public function buscar(Request $request)
     {
