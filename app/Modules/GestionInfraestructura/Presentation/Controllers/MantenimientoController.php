@@ -1,0 +1,153 @@
+<?php
+
+namespace App\Modules\GestionInfraestructura\Presentation\Controllers;
+
+use App\Http\Controllers\Controller;
+use App\Modules\GestionInfraestructura\Application\UseCases\Mantenimiento\ListarMantenimientosUseCase;
+use App\Modules\GestionInfraestructura\Application\UseCases\Mantenimiento\CrearMantenimientoUseCase;
+use App\Modules\GestionInfraestructura\Application\UseCases\Mantenimiento\ObtenerMantenimientoUseCase;
+use App\Modules\GestionInfraestructura\Application\UseCases\Mantenimiento\ActualizarMantenimientoUseCase;
+use App\Modules\GestionInfraestructura\Application\UseCases\Mantenimiento\EliminarMantenimientoUseCase;
+use App\Modules\GestionInfraestructura\Application\UseCases\Mantenimiento\ObtenerMantenimientosPorTecnicoUseCase;
+use App\Modules\GestionInfraestructura\Application\UseCases\Mantenimiento\ObtenerMantenimientosPorCoordinadorUseCase;
+use App\Modules\GestionInfraestructura\Application\UseCases\Mantenimiento\MarcarMantenimientoRevisadoUseCase;
+use App\Modules\GestionInfraestructura\Application\UseCases\Mantenimiento\ExportarMantenimientosExcelUseCase;
+use App\Modules\GestionInfraestructura\Application\UseCases\Mantenimiento\ObtenerEstadisticasMantenimientoUseCase;
+use App\Services\PermissionService;
+use App\Responses\ApiResponse;
+use App\Exports\MantenimientoExport;
+use Illuminate\Http\Request;
+use OpenApi\Attributes as OA;
+
+class MantenimientoController extends Controller
+{
+    public function __construct(
+        protected PermissionService $permissionService,
+        protected ListarMantenimientosUseCase $listarUseCase,
+        protected CrearMantenimientoUseCase $crearUseCase,
+        protected ObtenerMantenimientoUseCase $obtenerUseCase,
+        protected ActualizarMantenimientoUseCase $actualizarUseCase,
+        protected EliminarMantenimientoUseCase $eliminarUseCase,
+        protected ObtenerMantenimientosPorTecnicoUseCase $porTecnicoUseCase,
+        protected ObtenerMantenimientosPorCoordinadorUseCase $porCoordinadorUseCase,
+        protected MarcarMantenimientoRevisadoUseCase $marcarRevisadoUseCase,
+        protected ExportarMantenimientosExcelUseCase $exportarUseCase,
+        protected ObtenerEstadisticasMantenimientoUseCase $estadisticasUseCase
+    ) {}
+
+    public function index()
+    {
+        $this->permissionService->authorize('mantenimiento.listar');
+        return ApiResponse::success($this->listarUseCase->execute(), 'Lista de mantenimientos');
+    }
+
+    public function store(Request $request)
+    {
+        $this->permissionService->authorize('mantenimiento.crear');
+        $request->validate([
+            'titulo' => 'required|string|max:255',
+            'codigo' => 'nullable|string|max:100',
+            'modelo' => 'nullable|string|max:100',
+            'dependencia' => 'nullable|string|max:255',
+            'sede_id' => 'nullable|exists:sedes,id',
+            'coordinador_id' => 'nullable|exists:usuarios,id',
+            'imagen' => 'nullable|file|image|max:5120',
+            'imagen2' => 'nullable|file|image|max:5120',
+            'descripcion' => 'nullable|string',
+        ]);
+        
+        $data = $request->except(['imagen', 'imagen2']);
+
+        try {
+            return ApiResponse::success($this->crearUseCase->execute($data, $request), 'Mantenimiento creado exitosamente', 201);
+        } catch (\Exception $e) {
+            return ApiResponse::error('Error al crear mantenimiento: ' . $e->getMessage(), 500);
+        }
+    }
+
+    public function show($id)
+    {
+        $this->permissionService->authorize('mantenimiento.listar');
+        $item = $this->obtenerUseCase->execute($id);
+        if (!$item) return ApiResponse::error('Mantenimiento no encontrado', 404);
+        return ApiResponse::success($item, 'Detalle del mantenimiento');
+    }
+
+    public function update(Request $request, $id)
+    {
+        $this->permissionService->authorize('mantenimiento.actualizar');
+        $request->validate([
+            'titulo' => 'nullable|string|max:255',
+            'codigo' => 'nullable|string|max:100',
+            'modelo' => 'nullable|string|max:100',
+            'dependencia' => 'nullable|string|max:255',
+            'sede_id' => 'nullable|exists:sedes,id',
+            'coordinador_id' => 'nullable|exists:usuarios,id',
+            'imagen' => 'nullable|file|image|max:5120',
+            'imagen2' => 'nullable|file|image|max:5120',
+            'descripcion' => 'nullable|string',
+        ]);
+
+        $data = $request->except(['imagen', 'imagen2']);
+
+        try {
+            $item = $this->actualizarUseCase->execute($id, $data, $request);
+            if (!$item) return ApiResponse::error('Mantenimiento no encontrado', 404);
+            return ApiResponse::success($item, 'Mantenimiento actualizado exitosamente');
+        } catch (\Exception $e) {
+            return ApiResponse::error('Error al actualizar mantenimiento: ' . $e->getMessage(), 500);
+        }
+    }
+
+    public function destroy($id)
+    {
+        $this->permissionService->authorize('mantenimiento.eliminar');
+        if ($this->eliminarUseCase->execute($id)) {
+            return ApiResponse::success(null, 'Mantenimiento eliminado exitosamente');
+        }
+        return ApiResponse::error('Mantenimiento no encontrado o no se pudo eliminar', 404);
+    }
+
+    public function misMantenimientos()
+    {
+        $user = \Illuminate\Support\Facades\Auth::guard('api')->user();
+
+        if ($this->permissionService->check($user, 'mantenimiento.listar_todos')) {
+            $mantenimientos = $this->listarUseCase->execute();
+            return ApiResponse::success($mantenimientos, 'Todos los mantenimientos');
+        }
+
+        if ($this->permissionService->check($user, 'mantenimiento.seleccion_coordinador')) {
+            $mantenimientos = $this->porCoordinadorUseCase->execute($user->id);
+            return ApiResponse::success($mantenimientos, 'Mantenimientos como coordinador');
+        }
+
+        return ApiResponse::success([], 'No tienes registros asignados bajo tu cargo');
+    }
+
+    public function exportExcel(Request $request, MantenimientoExport $export)
+    {
+        $this->permissionService->authorize('mantenimiento.listar');
+        $user = \Illuminate\Support\Facades\Auth::guard('api')->user();
+
+        $fechaInicio = $request->query('fecha_inicio');
+        $fechaFin = $request->query('fecha_fin');
+
+        return $this->exportarUseCase->execute($fechaInicio, $fechaFin, $user, $this->permissionService, $export);
+    }
+
+    public function getStatistics(Request $request)
+    {
+        $this->permissionService->authorize('mantenimiento.reportes');
+        $stats = $this->estadisticasUseCase->execute();
+        return ApiResponse::success($stats, 'Estadísticas obtenidas correctamente');
+    }
+
+    public function marcarRevisado($id)
+    {
+        $this->permissionService->authorize('mantenimiento.marcar_revisado');
+        $item = $this->marcarRevisadoUseCase->execute($id);
+        if (!$item) return ApiResponse::error('Mantenimiento no encontrado', 404);
+        return ApiResponse::success($item, 'Mantenimiento marcado como revisado');
+    }
+}

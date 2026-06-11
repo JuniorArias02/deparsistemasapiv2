@@ -26,6 +26,10 @@ Route::middleware('auth:api')->prefix('gestion-sistemas')->group(function () {
     Route::get('/pc-caracteristicas-tecnicas/equipo/{equipo_id}', [\App\Modules\GestionSistemas\Presentation\Controllers\PcCaracteristicasTecnicasController::class, 'showByEquipo']);
     Route::apiResource('/pc-caracteristicas-tecnicas', \App\Modules\GestionSistemas\Presentation\Controllers\PcCaracteristicasTecnicasController::class);
 
+    // Licencias de Software
+    Route::get('/pc-licencias-software/equipo/{equipo_id}', [\App\Modules\GestionSistemas\Presentation\Controllers\PcLicenciasSoftwareController::class, 'showByEquipo']);
+    Route::post('/pc-licencias-software', [\App\Modules\GestionSistemas\Presentation\Controllers\PcLicenciasSoftwareController::class, 'storeOrUpdate']);
+
     // Mantenimientos
     Route::get('/pc-mantenimientos/cronograma', [\App\Modules\GestionSistemas\Presentation\Controllers\PcMantenimientoController::class, 'cronograma']);
     Route::get('/pc-mantenimientos', [\App\Modules\GestionSistemas\Presentation\Controllers\PcMantenimientoController::class, 'index']);

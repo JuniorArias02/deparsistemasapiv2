@@ -1,0 +1,173 @@
+<?php
+
+namespace App\Modules\GestionCompras\Presentation\Controllers;
+
+use App\Http\Controllers\Controller;
+
+use App\Modules\GestionCompras\Application\UseCases\CentroCosto\ListarCentroCostoUseCase;
+use App\Modules\GestionCompras\Application\UseCases\CentroCosto\CrearCentroCostoUseCase;
+use App\Modules\GestionCompras\Application\UseCases\CentroCosto\ObtenerCentroCostoUseCase;
+use App\Modules\GestionCompras\Application\UseCases\CentroCosto\ActualizarCentroCostoUseCase;
+use App\Modules\GestionCompras\Application\UseCases\CentroCosto\EliminarCentroCostoUseCase;
+use App\Services\PermissionService;
+use Illuminate\Http\Request;
+use App\Responses\ApiResponse;
+use OpenApi\Attributes as OA;
+
+class CpCentroCostoController extends Controller
+{
+    protected $permissionService;
+
+    public function __construct(
+        PermissionService $permissionService,
+        protected ListarCentroCostoUseCase $listarUseCase,
+        protected CrearCentroCostoUseCase $crearUseCase,
+        protected ObtenerCentroCostoUseCase $obtenerUseCase,
+        protected ActualizarCentroCostoUseCase $actualizarUseCase,
+        protected EliminarCentroCostoUseCase $eliminarUseCase
+    ) {
+        $this->permissionService = $permissionService;
+    }
+
+    /**
+     * Listar centros de costo.
+     */
+    #[OA\Get(
+        path: '/api/gestion-compras/cp-centro-costos',
+        tags: ['CP Centro Costos'],
+        summary: 'Listar centros de costo',
+        description: 'Obtiene la lista de centros de costo. Requiere permiso cp_centro_costo.read.',
+        security: [['bearerAuth' => []]],
+        responses: [
+            new OA\Response(response: 200, description: 'Lista de centros de costo', content: new OA\JsonContent(ref: '#/components/schemas/ApiResponse')),
+            new OA\Response(response: 403, description: 'Prohibido')
+        ]
+    )]
+    public function index()
+    {
+        return ApiResponse::success($this->listarUseCase->execute(), 'Lista de centros de costo');
+    }
+
+    /**
+     * Crear centro de costo.
+     */
+    #[OA\Post(
+        path: '/api/gestion-compras/cp-centro-costos',
+        tags: ['CP Centro Costos'],
+        summary: 'Crear centro de costo',
+        description: 'Crea un nuevo centro de costo. Requiere permiso cp_centro_costo.create.',
+        security: [['bearerAuth' => []]],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                properties: [
+                    new OA\Property(property: 'codigo', type: 'integer', example: 101),
+                    new OA\Property(property: 'nombre', type: 'string', example: 'Recursos Humanos')
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(response: 201, description: 'Centro de costo creado', content: new OA\JsonContent(ref: '#/components/schemas/ApiResponse')),
+            new OA\Response(response: 403, description: 'Prohibido')
+        ]
+    )]
+    public function store(Request $request)
+    {
+        $this->permissionService->authorize('cp_centro_costo.crear');
+
+        $validated = $request->validate([
+            'codigo' => 'sometimes|integer',
+            'nombre' => 'required|string|max:160'
+        ]);
+
+        return ApiResponse::created($this->crearUseCase->execute($validated), 'Centro de costo creado exitosamente');
+    }
+
+    /**
+     * Mostrar centro de costo.
+     */
+    #[OA\Get(
+        path: '/api/gestion-compras/cp-centro-costos/{id}',
+        tags: ['CP Centro Costos'],
+        summary: 'Obtener centro de costo',
+        description: 'Obtiene los detalles de un centro de costo. Requiere permiso cp_centro_costo.read.',
+        security: [['bearerAuth' => []]],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer'))
+        ],
+        responses: [
+            new OA\Response(response: 200, description: 'Detalles del centro de costo', content: new OA\JsonContent(ref: '#/components/schemas/ApiResponse')),
+            new OA\Response(response: 404, description: 'Centro de costo no encontrado'),
+            new OA\Response(response: 403, description: 'Prohibido')
+        ]
+    )]
+    public function show($id)
+    {
+
+        return ApiResponse::success($this->obtenerUseCase->execute($id), 'Detalle de centro de costo');
+    }
+
+    /**
+     * Actualizar centro de costo.
+     */
+    #[OA\Put(
+        path: '/api/gestion-compras/cp-centro-costos/{id}',
+        tags: ['CP Centro Costos'],
+        summary: 'Actualizar centro de costo',
+        description: 'Actualiza un centro de costo existente. Requiere permiso cp_centro_costo.update.',
+        security: [['bearerAuth' => []]],
+        parameters: [ 
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer'))
+        ],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                properties: [
+                    new OA\Property(property: 'codigo', type: 'integer', example: 102),
+                    new OA\Property(property: 'nombre', type: 'string', example: 'Recursos Humanos Updated')
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(response: 200, description: 'Centro de costo actualizado', content: new OA\JsonContent(ref: '#/components/schemas/ApiResponse')),
+            new OA\Response(response: 404, description: 'Centro de costo no encontrado'),
+            new OA\Response(response: 403, description: 'Prohibido')
+        ]
+    )]
+    public function update(Request $request, $id)
+    {
+        $this->permissionService->authorize('cp_centro_costo.crud');
+
+        $validated = $request->validate([
+            'codigo' => 'sometimes|integer',
+            'nombre' => 'sometimes|string|max:160'
+        ]);
+
+        return ApiResponse::success($this->actualizarUseCase->execute($id, $validated), 'Centro de costo actualizado exitosamente');
+    }
+
+    /**
+     * Eliminar centro de costo.
+     */
+    #[OA\Delete(
+        path: '/api/gestion-compras/cp-centro-costos/{id}',
+        tags: ['CP Centro Costos'],
+        summary: 'Eliminar centro de costo',
+        description: 'Elimina un centro de costo. Requiere permiso cp_centro_costo.delete.',
+        security: [['bearerAuth' => []]],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer'))
+        ],
+        responses: [
+            new OA\Response(response: 200, description: 'Centro de costo eliminado', content: new OA\JsonContent(ref: '#/components/schemas/ApiResponse')),
+            new OA\Response(response: 404, description: 'Centro de costo no encontrado'),
+            new OA\Response(response: 403, description: 'Prohibido')
+        ]
+    )]
+    public function destroy($id)
+    {
+        $this->permissionService->authorize('cp_centro_costo.crud');
+        $this->eliminarUseCase->execute($id);
+        return ApiResponse::success(null, 'Centro de costo eliminado exitosamente');
+    }
+}

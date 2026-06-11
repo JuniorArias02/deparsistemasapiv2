@@ -1,7 +1,6 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\AuthController;
 
 Route::get('/ping', function () {
     return response()->json([
@@ -60,118 +59,59 @@ Route::get('/db-test', function () {
 });
 
 
-Route::group(['middleware' => 'api', 'prefix' => 'auth'], function ($router) {
-    Route::post('login', [AuthController::class, 'login']);
-    Route::post('logout', [AuthController::class, 'logout']);
-    Route::post('me', [AuthController::class, 'me']);
-    Route::post('forgot-password', [AuthController::class, 'sendResetCode']);
-    Route::post('verify-code', [AuthController::class, 'verifyResetCode']);
-    Route::post('reset-password', [AuthController::class, 'resetPassword']);
-});
-
 Route::group(['middleware' => 'api'], function () {
-    Route::apiResource('usuarios', App\Http\Controllers\UsuarioController::class);
 
     // Inventario Routes (protected with JWT authentication)
     Route::middleware(['auth:api', 'activity'])->group(function () {
-        Route::post('/heartbeat', [App\Http\Controllers\ActivityController::class, 'heartbeat']);
+        // Activity heartbeat moved to Autenticacion
 
-        Route::get('/inventario/by-responsable-coordinador', [App\Http\Controllers\InventarioController::class, 'getByResponsableAndCoordinador']);
-        Route::get('inventario', [App\Http\Controllers\InventarioController::class, 'index']);
-        Route::get('inventario/{id}', [App\Http\Controllers\InventarioController::class, 'show']);
-        Route::post('inventario', [App\Http\Controllers\InventarioController::class, 'store']);
-        Route::put('inventario/{id}', [App\Http\Controllers\InventarioController::class, 'update']);
-        Route::delete('inventario/{id}', [App\Http\Controllers\InventarioController::class, 'destroy']);
+        Route::get('/inventario/by-responsable-coordinador', [App\Modules\GestionCompras\Presentation\Controllers\CpInventarioController::class, 'getByResponsableAndCoordinador']);
+        Route::get('inventario', [App\Modules\GestionCompras\Presentation\Controllers\CpInventarioController::class, 'index']);
+        Route::get('inventario/{id}', [App\Modules\GestionCompras\Presentation\Controllers\CpInventarioController::class, 'show']);
+        Route::post('inventario', [App\Modules\GestionCompras\Presentation\Controllers\CpInventarioController::class, 'store']);
+        Route::put('inventario/{id}', [App\Modules\GestionCompras\Presentation\Controllers\CpInventarioController::class, 'update']);
+        Route::delete('inventario/{id}', [App\Modules\GestionCompras\Presentation\Controllers\CpInventarioController::class, 'destroy']);
 
         // Roles Routes
-        Route::apiResource('roles', App\Http\Controllers\RolController::class);
-        Route::put('roles/{id}/permissions', [App\Http\Controllers\RolController::class, 'assignPermissions']);
+        Route::apiResource('roles', App\Modules\Configuracion\Presentation\Controllers\RolController::class);
+        Route::put('roles/{id}/permissions', [App\Modules\Configuracion\Presentation\Controllers\RolController::class, 'assignPermissions']);
 
         // CP Tables Routes
-        Route::apiResource('cp-productos', App\Http\Controllers\CpProductoController::class);
-        Route::get('cp-productos-servicios/buscar', [App\Http\Controllers\CpProductoServicioController::class, 'buscar']);
-        Route::get('cp-productos-servicios/buscar-externo', [App\Http\Controllers\CpProductoServicioController::class, 'buscarExterno']);
-        Route::apiResource('cp-productos-servicios', App\Http\Controllers\CpProductoServicioController::class);
-        Route::apiResource('cp-proveedores', App\Http\Controllers\CpProveedorController::class);
-        Route::apiResource('cp-tipos-solicitud', App\Http\Controllers\CpTipoSolicitudController::class);
-        Route::apiResource('datos-empresa', App\Http\Controllers\DatosEmpresaController::class);
+        Route::apiResource('datos-empresa', App\Modules\Configuracion\Presentation\Controllers\DatosEmpresaController::class);
 
-        // Sedes and Dependencias Routes
-        Route::apiResource('sedes', App\Http\Controllers\SedeController::class);
-        Route::apiResource('dependencias-sedes', App\Http\Controllers\DependenciaSedeController::class);
+        // Sedes, Dependencias and Areas Routes
+        Route::apiResource('sedes', App\Modules\Configuracion\Presentation\Controllers\SedeController::class);
+        Route::apiResource('dependencias-sedes', App\Modules\Configuracion\Presentation\Controllers\DependenciaSedeController::class);
+        Route::apiResource('areas', App\Modules\Configuracion\Presentation\Controllers\AreaController::class);
 
         // Personal and Cargo Routes
-        Route::apiResource('p-cargos', App\Http\Controllers\PCargoController::class);
+        Route::apiResource('p-cargos', App\Modules\Configuracion\Presentation\Controllers\PCargoController::class);
+        Route::get('personal/buscar', [App\Modules\Configuracion\Presentation\Controllers\PersonalController::class, 'buscar']);
+        Route::get('personal/buscar-externo', [App\Modules\Configuracion\Presentation\Controllers\PersonalController::class, 'buscarExterno']);
+        Route::apiResource('personal', App\Modules\Configuracion\Presentation\Controllers\PersonalController::class);
 
-        // Dashboard Stats
-        Route::get('/dashboard/stats', [App\Http\Controllers\DashboardStatsController::class, 'index']);
+        // Dashboard Stats moved to Dashboard module
 
-        // Profile Routes
-        Route::post('profile/update', [App\Http\Controllers\ProfileController::class, 'update']);
-        Route::post('profile/change-password', [App\Http\Controllers\ProfileController::class, 'changePassword']);
-        Route::post('profile/upload-signature', [App\Http\Controllers\ProfileController::class, 'uploadSignature']);
-        Route::post('profile/upload-photo', [App\Http\Controllers\ProfileController::class, 'uploadPhoto']);
-        Route::post('profile/delete-photo', [App\Http\Controllers\ProfileController::class, 'deletePhoto']);
+        // Profile Routes moved to Autenticacion module
 
         // Permisos Routes
-        Route::apiResource('permisos', App\Http\Controllers\PermisoController::class);
-        Route::get('permisos/roles-assignments/list', [App\Http\Controllers\PermisoController::class, 'getRoles']);
-        Route::post('permisos/assign', [App\Http\Controllers\PermisoController::class, 'assignPermisos']);
+        Route::apiResource('permisos', App\Modules\Configuracion\Presentation\Controllers\PermisoController::class);
+        Route::get('permisos/roles-assignments/list', [App\Modules\Configuracion\Presentation\Controllers\PermisoController::class, 'getRoles']);
+        Route::post('permisos/assign', [App\Modules\Configuracion\Presentation\Controllers\PermisoController::class, 'assignPermisos']);
 
         // Mantenimientos Routes
-        Route::get('mantenimientos/mis-mantenimientos', [App\Http\Controllers\MantenimientoController::class, 'misMantenimientos']);
-        Route::get('mantenimientos/exportar-excel', [App\Http\Controllers\MantenimientoController::class, 'exportExcel']);
-        Route::get('mantenimientos/estadisticas', [App\Http\Controllers\MantenimientoController::class, 'getStatistics']);
-        Route::apiResource('mantenimientos', App\Http\Controllers\MantenimientoController::class);
-        Route::post('mantenimientos/{id}/marcar-revisado', [App\Http\Controllers\MantenimientoController::class, 'marcarRevisado']);
+        Route::get('mantenimientos/mis-mantenimientos', [App\Modules\GestionInfraestructura\Presentation\Controllers\MantenimientoController::class, 'misMantenimientos']);
+        Route::get('mantenimientos/exportar-excel', [App\Modules\GestionInfraestructura\Presentation\Controllers\MantenimientoController::class, 'exportExcel']);
+        Route::get('mantenimientos/estadisticas', [App\Modules\GestionInfraestructura\Presentation\Controllers\MantenimientoController::class, 'getStatistics']);
+        Route::apiResource('mantenimientos', App\Modules\GestionInfraestructura\Presentation\Controllers\MantenimientoController::class);
+        Route::post('mantenimientos/{id}/marcar-revisado', [App\Modules\GestionInfraestructura\Presentation\Controllers\MantenimientoController::class, 'marcarRevisado']);
 
-        // Usuarios por permiso
-        Route::get('usuarios/por-permiso/{permiso}', [App\Http\Controllers\UsuarioController::class, 'getByPermission']);
+        // Usuarios por permiso route moved to Autenticacion/Presentation/Routes/api.php
 
         // Agenda Mantenimientos Routes
-        Route::get('agenda-mantenimientos/disponibilidad', [App\Http\Controllers\AgendaMantenimientoController::class, 'getDisponibilidad']);
-        Route::get('agenda-mantenimientos/mantenimiento/{mantenimiento_id}', [App\Http\Controllers\AgendaMantenimientoController::class, 'getByMantenimiento']);
-        Route::apiResource('agenda-mantenimientos', App\Http\Controllers\AgendaMantenimientoController::class);
-    });
-    Route::get('personal/buscar', [App\Http\Controllers\PersonalController::class, 'buscar']);
-    Route::get('personal/buscar-externo', [App\Http\Controllers\PersonalController::class, 'buscarExterno']);
-    Route::apiResource('personal', App\Http\Controllers\PersonalController::class);
-    // Cp Dependencias
-    Route::apiResource('cp-dependencias', App\Http\Controllers\CpDependenciaController::class);
-    // Areas
-    Route::apiResource('areas', App\Http\Controllers\AreaController::class);
-    // Cp Centro Costos
-    Route::apiResource('cp-centro-costos', App\Http\Controllers\CpCentroCostoController::class);
-
-    // CP Pedidos Routes (Protected with JWT)
-    Route::middleware('auth:api')->group(function () {
-        Route::post('cp-pedidos/exportar-consolidado', [App\Http\Controllers\CpPedidoController::class, 'exportConsolidadoExcel']);
-        Route::apiResource('cp-pedidos', App\Http\Controllers\CpPedidoController::class);
-        Route::post('cp-pedidos/{id}', [App\Http\Controllers\CpPedidoController::class, 'update']); // Support FormData update
-        Route::group(['prefix' => 'cp-pedidos/{id}'], function () {
-            Route::post('aprobar-compras', [App\Http\Controllers\CpPedidoController::class, 'aprobarCompras']);
-            Route::post('rechazar-compras', [App\Http\Controllers\CpPedidoController::class, 'rechazarCompras']);
-            Route::post('aprobar-gerencia', [App\Http\Controllers\CpPedidoController::class, 'aprobarGerencia']);
-            Route::post('rechazar-gerencia', [App\Http\Controllers\CpPedidoController::class, 'rechazarGerencia']);
-            Route::post('update-items', [App\Http\Controllers\CpPedidoController::class, 'updateItems']);
-            Route::patch('tracking', [App\Http\Controllers\CpPedidoController::class, 'updateTracking']);
-            Route::get('exportar-excel', [App\Http\Controllers\CpPedidoController::class, 'exportExcel']);
-            Route::get('exportar-pdf', [App\Http\Controllers\CpPedidoController::class, 'exportPdf']);
-            Route::get('tiempo-entrega', [App\Http\Controllers\CpPedidoController::class, 'calcularTiempoEntregaPedido']);
-        });
-    });
-
-    // CP Entrega Activos Fijos Routes (Protected with JWT)
-    Route::middleware('auth:api')->group(function () {
-        Route::get('cp-entrega-activos-fijos/coordinadores', [App\Http\Controllers\CpEntregaActivosFijosController::class, 'coordinadores']);
-        Route::get('cp-entrega-activos-fijos/coordinador/{id}', [App\Http\Controllers\CpEntregaActivosFijosController::class, 'porCoordinador']);
-        Route::post('cp-entrega-activos-fijos/transferir-todo', [App\Http\Controllers\CpEntregaActivosFijosController::class, 'transferirTodo']);
-        Route::post('cp-entrega-activos-fijos/{id}/transferir', [App\Http\Controllers\CpEntregaActivosFijosController::class, 'transferir']);
-        Route::apiResource('cp-entrega-activos-fijos', App\Http\Controllers\CpEntregaActivosFijosController::class);
-
-
-
-        Route::get('cp-entrega-activos-fijos/{id}/exportar-excel', [App\Http\Controllers\CpEntregaActivosFijosController::class, 'exportExcel']);
+        Route::get('agenda-mantenimientos/disponibilidad', [App\Modules\GestionInfraestructura\Presentation\Controllers\AgendaMantenimientoController::class, 'getDisponibilidad']);
+        Route::get('agenda-mantenimientos/mantenimiento/{mantenimiento_id}', [App\Modules\GestionInfraestructura\Presentation\Controllers\AgendaMantenimientoController::class, 'getByMantenimiento']);
+        Route::apiResource('agenda-mantenimientos', App\Modules\GestionInfraestructura\Presentation\Controllers\AgendaMantenimientoController::class);
     });
 });
 
@@ -183,3 +123,9 @@ require base_path('app/Modules/GestionSistemas/Presentation/Routes/api.php');
 
 // Rutas del Dominio: Gestión de Compras
 require base_path('app/Modules/GestionCompras/Presentation/Routes/api.php');
+
+// Rutas del Dominio: Autenticación
+require base_path('app/Modules/Autenticacion/Presentation/Routes/api.php');
+
+// Rutas del Dominio: Dashboard
+require base_path('app/Modules/Dashboard/Presentation/Routes/api.php');
