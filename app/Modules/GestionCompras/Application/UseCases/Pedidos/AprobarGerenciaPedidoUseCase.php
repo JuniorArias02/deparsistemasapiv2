@@ -3,7 +3,7 @@
 namespace App\Modules\GestionCompras\Application\UseCases\Pedidos;
 
 use App\Models\CpPedido;
-use App\Models\CpPedidoItem;
+use App\Models\CpItemPedido;
 use App\Models\Usuario;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -14,7 +14,7 @@ use App\Services\PermissionService;
 
 class AprobarGerenciaPedidoUseCase
 {
-    use HandleSignaturePedidoTrait;
+    use HandleSignaturePedidoTrait, NotificaPedidosTrait;
     
 
     public function execute($id, array $data, $firmaFile = null, $useStoredSignature = false, Usuario $user)

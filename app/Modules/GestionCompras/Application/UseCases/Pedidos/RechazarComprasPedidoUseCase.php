@@ -3,7 +3,7 @@
 namespace App\Modules\GestionCompras\Application\UseCases\Pedidos;
 
 use App\Models\CpPedido;
-use App\Models\CpPedidoItem;
+use App\Models\CpItemPedido;
 use App\Models\Usuario;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -14,7 +14,7 @@ use App\Services\PermissionService;
 
 class RechazarComprasPedidoUseCase
 {
-    
+    use NotificaPedidosTrait;
     
 
     public function execute($id, $motivo)
