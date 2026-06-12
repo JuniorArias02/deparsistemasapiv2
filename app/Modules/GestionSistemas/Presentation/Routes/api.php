@@ -9,6 +9,7 @@ Route::middleware('auth:api')->prefix('gestion-sistemas')->group(function () {
     Route::get('/actas-entrega', [ActaEntregaController::class, 'index']);
     Route::post('/actas-entrega', [ActaEntregaController::class, 'store']);
     Route::get('/actas-entrega/{id}', [ActaEntregaController::class, 'show']);
+    Route::match(['put', 'post'], '/actas-entrega/{id}', [ActaEntregaController::class, 'update']);
     Route::delete('/actas-entrega/{id}', [ActaEntregaController::class, 'destroy']);
 
     // Actas de Devolución

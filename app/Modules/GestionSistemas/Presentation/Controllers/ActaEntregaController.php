@@ -230,4 +230,98 @@ class ActaEntregaController extends Controller
             'message' => 'Acta de entrega eliminada con éxito.'
         ]);
     }
+
+    #[OA\Post(
+        path: '/api/gestion-sistemas/actas-entrega/{id}',
+        tags: ['Actas Entrega'],
+        summary: 'Actualizar acta de entrega',
+        description: 'Actualiza una acta de entrega existente. Requiere usar POST con el campo _method=PUT si se envían archivos multipart/form-data.',
+        security: [['bearerAuth' => []]],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer'), description: 'ID del acta de entrega a actualizar')
+        ],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\MediaType(
+                mediaType: 'multipart/form-data',
+                schema: new OA\Schema(
+                    properties: [
+                        new OA\Property(property: '_method', type: 'string', example: 'PUT', description: 'Requerido para simular PUT en Laravel con FormData'),
+                        new OA\Property(property: 'equipo_id', type: 'integer', description: 'ID del equipo'),
+                        new OA\Property(property: 'funcionario_id', type: 'integer', description: 'ID del funcionario'),
+                        new OA\Property(property: 'fecha_entrega', type: 'string', format: 'date', description: 'Fecha de entrega (YYYY-MM-DD)'),
+                        new OA\Property(property: 'estado', type: 'string', description: 'Estado del acta (entregado, etc)'),
+                        new OA\Property(property: 'firma_entrega', type: 'string', format: 'binary', description: 'Nuevo archivo de firma de quien entrega'),
+                        new OA\Property(property: 'firma_recibe', type: 'string', format: 'binary', description: 'Nuevo archivo de firma de quien recibe'),
+                        new OA\Property(property: 'perifericos', type: 'string', description: 'Arreglo JSON con los periféricos actualizados')
+                    ]
+                )
+            )
+        ),
+        responses: [
+            new OA\Response(response: 200, description: 'Acta actualizada exitosamente'),
+            new OA\Response(response: 404, description: 'Acta no encontrada'),
+            new OA\Response(response: 500, description: 'Error interno')
+        ]
+    )]
+    public function update(Request $request, int $id): JsonResponse
+    {
+        $request->validate([
+            'equipo_id' => 'nullable|integer',
+            'funcionario_id' => 'nullable|integer',
+            'fecha_entrega' => 'nullable|date',
+            'estado' => 'nullable|string',
+            'firma_entrega' => 'nullable|file|mimes:jpeg,png,jpg,pdf|max:2048',
+            'firma_recibe' => 'nullable|file|mimes:jpeg,png,jpg,pdf|max:2048',
+            'perifericos' => 'nullable|string',
+        ]);
+
+        $perifericosData = null;
+        if ($request->has('perifericos') && !empty($request->input('perifericos'))) {
+            $perifericosData = [];
+            $decoded = json_decode($request->input('perifericos'), true);
+            if (is_array($decoded)) {
+                foreach ($decoded as $item) {
+                    $perifericosData[] = new PerifericoDTO(
+                        $item['inventario_id'],
+                        $item['cantidad'] ?? 1,
+                        $item['observaciones'] ?? null
+                    );
+                }
+            }
+        }
+
+        $dto = new \App\Modules\GestionSistemas\Application\DTOs\ActualizarActaEntregaDTO(
+            $id,
+            $request->input('equipo_id'),
+            $request->input('funcionario_id'),
+            $request->input('fecha_entrega'),
+            $request->file('firma_entrega'),
+            $request->file('firma_recibe'),
+            $request->input('estado'),
+            null, // devuelto
+            $perifericosData
+        );
+
+        try {
+            $useCase = new \App\Modules\GestionSistemas\Application\UseCases\ActasEntrega\ActualizarActaEntregaUseCase(new ActaEntregaRepository());
+            $acta = $useCase->execute($dto);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Acta de entrega actualizada con éxito.',
+                'data' => [
+                    'id' => $acta->getId(),
+                    'equipo_id' => $acta->getEquipoId(),
+                    'funcionario_id' => $acta->getFuncionarioId(),
+                    'fecha_entrega' => $acta->getFechaEntrega()
+                ]
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al actualizar acta: ' . $e->getMessage()
+            ], $e->getMessage() === 'Acta de entrega no encontrada' ? 404 : 500);
+        }
+    }
 }

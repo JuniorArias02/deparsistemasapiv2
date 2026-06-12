@@ -94,4 +94,37 @@ class ActaEntrega
     {
         $this->firmaRecibe = $firma;
     }
+
+    public function setEquipoId(int $equipoId): void
+    {
+        $this->equipoId = $equipoId;
+    }
+
+    public function setFuncionarioId(int $funcionarioId): void
+    {
+        $this->funcionarioId = $funcionarioId;
+    }
+
+    public function setFechaEntrega(string $fechaEntrega): void
+    {
+        $this->fechaEntrega = $fechaEntrega;
+    }
+
+    public function setEstado(string $estado): void
+    {
+        $this->estado = $estado;
+    }
+
+    public function setDevuelto(?string $devuelto): void
+    {
+        $this->devuelto = $devuelto;
+    }
+
+    /**
+     * @param PerifericoEntregado[] $perifericos
+     */
+    public function setPerifericos(array $perifericos): void
+    {
+        $this->perifericos = $perifericos;
+    }
 }

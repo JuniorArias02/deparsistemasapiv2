@@ -31,7 +31,10 @@ class CpInventarioController extends Controller
         path: '/api/inventario',
         tags: ['Inventario'],
         summary: 'Listar todos los items de inventario',
-        security: [['bearerAuth' => []]]
+        security: [['bearerAuth' => []]],
+        responses: [
+            new OA\Response(response: 200, description: 'Success')
+        ]
     )]
     public function index(Request $request)
     {
@@ -78,7 +81,10 @@ class CpInventarioController extends Controller
         path: '/api/inventario',
         tags: ['Inventario'],
         summary: 'Crear item de inventario',
-        security: [['bearerAuth' => []]]
+        security: [['bearerAuth' => []]],
+        responses: [
+            new OA\Response(response: 200, description: 'Success')
+        ]
     )]
     public function store(Request $request)
     {
@@ -144,7 +150,10 @@ class CpInventarioController extends Controller
         path: '/api/inventario/{id}',
         tags: ['Inventario'],
         summary: 'Obtener item de inventario',
-        security: [['bearerAuth' => []]]
+        security: [['bearerAuth' => []]],
+        responses: [
+            new OA\Response(response: 200, description: 'Success')
+        ]
     )]
     public function show($id)
     {
@@ -161,7 +170,10 @@ class CpInventarioController extends Controller
         path: '/api/inventario/{id}',
         tags: ['Inventario'],
         summary: 'Actualizar item de inventario',
-        security: [['bearerAuth' => []]]
+        security: [['bearerAuth' => []]],
+        responses: [
+            new OA\Response(response: 200, description: 'Success')
+        ]
     )]
     public function update(Request $request, $id)
     {
@@ -227,7 +239,10 @@ class CpInventarioController extends Controller
         path: '/api/inventario/{id}',
         tags: ['Inventario'],
         summary: 'Eliminar item de inventario',
-        security: [['bearerAuth' => []]]
+        security: [['bearerAuth' => []]],
+        responses: [
+            new OA\Response(response: 200, description: 'Success')
+        ]
     )]
     public function destroy($id)
     {
