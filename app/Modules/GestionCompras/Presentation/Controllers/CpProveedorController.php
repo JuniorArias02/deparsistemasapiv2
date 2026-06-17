@@ -28,7 +28,8 @@ class CpProveedorController extends Controller
         path: '/api/gestion-compras/cp-proveedores',
         tags: ['CpProveedores'],
         summary: 'Listar proveedor',
-        security: [['bearerAuth' => []]]
+        security: [['bearerAuth' => []]],
+        responses: [new OA\Response(response: 200, description: 'Éxito')]
     )]
     public function index()
     {
@@ -40,7 +41,8 @@ class CpProveedorController extends Controller
         path: '/api/gestion-compras/cp-proveedores',
         tags: ['CpProveedores'],
         summary: 'Crear proveedor',
-        security: [['bearerAuth' => []]]
+        security: [['bearerAuth' => []]],
+        responses: [new OA\Response(response: 200, description: 'Éxito')]
     )]
     public function store(Request $request)
     {
@@ -57,7 +59,8 @@ class CpProveedorController extends Controller
         path: '/api/gestion-compras/cp-proveedores/{id}',
         tags: ['CpProveedores'],
         summary: 'Obtener proveedor',
-        security: [['bearerAuth' => []]]
+        security: [['bearerAuth' => []]],
+        responses: [new OA\Response(response: 200, description: 'Éxito')]
     )]
     public function show($id)
     {
@@ -72,7 +75,8 @@ class CpProveedorController extends Controller
         path: '/api/gestion-compras/cp-proveedores/{id}',
         tags: ['CpProveedores'],
         summary: 'Actualizar proveedor',
-        security: [['bearerAuth' => []]]
+        security: [['bearerAuth' => []]],
+        responses: [new OA\Response(response: 200, description: 'Éxito')]
     )]
     public function update(Request $request, $id)
     {
@@ -89,7 +93,8 @@ class CpProveedorController extends Controller
         path: '/api/gestion-compras/cp-proveedores/{id}',
         tags: ['CpProveedores'],
         summary: 'Eliminar proveedor',
-        security: [['bearerAuth' => []]]
+        security: [['bearerAuth' => []]],
+        responses: [new OA\Response(response: 200, description: 'Éxito')]
     )]
     public function destroy($id)
     {

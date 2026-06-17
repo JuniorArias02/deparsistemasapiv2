@@ -28,7 +28,8 @@ class CpTipoSolicitudController extends Controller
         path: '/api/gestion-compras/cp-tipos-solicitud',
         tags: ['CpTiposSolicitud'],
         summary: 'Listar tipo de solicitud',
-        security: [['bearerAuth' => []]]
+        security: [['bearerAuth' => []]],
+        responses: [new OA\Response(response: 200, description: 'Éxito')]
     )]
     public function index()
     {
@@ -40,7 +41,8 @@ class CpTipoSolicitudController extends Controller
         path: '/api/gestion-compras/cp-tipos-solicitud',
         tags: ['CpTiposSolicitud'],
         summary: 'Crear tipo de solicitud',
-        security: [['bearerAuth' => []]]
+        security: [['bearerAuth' => []]],
+        responses: [new OA\Response(response: 200, description: 'Éxito')]
     )]
     public function store(Request $request)
     {
@@ -57,7 +59,8 @@ class CpTipoSolicitudController extends Controller
         path: '/api/gestion-compras/cp-tipos-solicitud/{id}',
         tags: ['CpTiposSolicitud'],
         summary: 'Obtener tipo de solicitud',
-        security: [['bearerAuth' => []]]
+        security: [['bearerAuth' => []]],
+        responses: [new OA\Response(response: 200, description: 'Éxito')]
     )]
     public function show($id)
     {
@@ -72,7 +75,8 @@ class CpTipoSolicitudController extends Controller
         path: '/api/gestion-compras/cp-tipos-solicitud/{id}',
         tags: ['CpTiposSolicitud'],
         summary: 'Actualizar tipo de solicitud',
-        security: [['bearerAuth' => []]]
+        security: [['bearerAuth' => []]],
+        responses: [new OA\Response(response: 200, description: 'Éxito')]
     )]
     public function update(Request $request, $id)
     {
@@ -89,7 +93,8 @@ class CpTipoSolicitudController extends Controller
         path: '/api/gestion-compras/cp-tipos-solicitud/{id}',
         tags: ['CpTiposSolicitud'],
         summary: 'Eliminar tipo de solicitud',
-        security: [['bearerAuth' => []]]
+        security: [['bearerAuth' => []]],
+        responses: [new OA\Response(response: 200, description: 'Éxito')]
     )]
     public function destroy($id)
     {
