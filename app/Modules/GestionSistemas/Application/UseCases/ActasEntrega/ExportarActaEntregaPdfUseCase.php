@@ -3,13 +3,20 @@
 namespace App\Modules\GestionSistemas\Application\UseCases\ActasEntrega;
 
 use App\Models\PcEntrega;
+use App\Modules\Shared\Domain\Contracts\ExcelToPdfConverterInterface;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Worksheet\Drawing;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Storage;
+use Exception;
 
-class ExportarActaEntregaExcelUseCase
+class ExportarActaEntregaPdfUseCase
 {
+    public function __construct(
+        protected ExcelToPdfConverterInterface $pdfConverter
+    ) {}
+
     public function execute(int $id): string
     {
         $acta = PcEntrega::with([
@@ -19,6 +26,11 @@ class ExportarActaEntregaExcelUseCase
         ])->findOrFail($id);
 
         $templatePath = storage_path('app/templates/plantilla_acta_entrega_equipos.xlsx');
+        
+        if (!file_exists($templatePath)) {
+            throw new Exception('No se encontró la plantilla de acta de entrega.');
+        }
+
         $spreadsheet = IOFactory::load($templatePath);
         $sheet = $spreadsheet->getActiveSheet();
 
@@ -50,7 +62,7 @@ class ExportarActaEntregaExcelUseCase
             $sheet->setCellValue('Z' . $row, $acta->equipo->serial ?? '');
             $sheet->setCellValue('AJ' . $row, $acta->devuelto ? Carbon::parse($acta->devuelto)->format('Y-m-d') : '');
             
-            // Insertar Firmas si existen (Solo en la primera fila o donde se requiera)
+            // Insertar Firmas si existen
             $this->insertarFirma($sheet, $acta->firma_entrega, 'AD' . $row);
             $this->insertarFirma($sheet, $acta->firma_recibe, 'AG' . $row);
             $row++;
@@ -73,17 +85,38 @@ class ExportarActaEntregaExcelUseCase
             }
         }
 
-        $fileName = 'acta_entrega_' . $acta->id . '_' . time() . '.xlsx';
-        $exportPath = storage_path('app/public/exports/' . $fileName);
-        
-        if (!file_exists(storage_path('app/public/exports'))) {
-            mkdir(storage_path('app/public/exports'), 0777, true);
+        // Remover otras hojas para evitar que LibreOffice genere páginas extra en el PDF
+        while ($spreadsheet->getSheetCount() > 1) {
+            $activeIndex = $spreadsheet->getActiveSheetIndex();
+            $indexToRemove = $activeIndex === 0 ? 1 : 0;
+            $spreadsheet->removeSheetByIndex($indexToRemove);
         }
 
-        $writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
-        $writer->save($exportPath);
+        $funcionarioName = $this->sanitize(optional($acta->funcionario)->nombre ?? 'SIN_NOMBRE');
+        $filename = 'acta_entrega_' . $acta->id . '_' . time() . '.pdf';
 
-        return $fileName;
+        $tempExcelPath = tempnam(sys_get_temp_dir(), 'acta_excel_') . '.xlsx';
+        $writer = new Xlsx($spreadsheet);
+        $writer->save($tempExcelPath);
+        $spreadsheet->disconnectWorksheets();
+
+        try {
+            $pdfContent = $this->pdfConverter->convert($tempExcelPath);
+            @unlink($tempExcelPath);
+
+            $exportDir = storage_path('app/public/exports');
+            if (!file_exists($exportDir)) {
+                mkdir($exportDir, 0777, true);
+            }
+
+            $exportPath = $exportDir . '/' . $filename;
+            file_put_contents($exportPath, $pdfContent);
+
+            return $filename;
+        } catch (Exception $e) {
+            @unlink($tempExcelPath);
+            throw $e;
+        }
     }
 
     private function insertarFirma($sheet, $path, $cell)
@@ -97,5 +130,11 @@ class ExportarActaEntregaExcelUseCase
             $drawing->setHeight(40); // Ajustar según el tamaño de la celda
             $drawing->setWorksheet($sheet);
         }
+    }
+
+    private function sanitize(string $string): string
+    {
+        $string = preg_replace('/[^A-Za-z0-9\-\s]/', '', $string);
+        return trim(preg_replace('/\s+/', '_', $string));
     }
 }

@@ -13,7 +13,9 @@ use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use App\Modules\GestionSistemas\Application\UseCases\ActasEntrega\ExportarActaEntregaExcelUseCase;
+use App\Modules\GestionSistemas\Application\UseCases\ActasEntrega\ExportarActaEntregaPdfUseCase;
 use OpenApi\Attributes as OA;
+use App\Modules\Shared\Domain\Contracts\ExcelToPdfConverterInterface;
 
 class ActaEntregaController extends Controller
 {
@@ -385,6 +387,52 @@ class ActaEntregaController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Error al exportar acta a Excel: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    #[OA\Get(
+        path: '/api/gestion-sistemas/actas-entrega/{id}/exportar-pdf',
+        tags: ['Actas Entrega'],
+        summary: 'Exportar acta de entrega a PDF',
+        description: 'Genera y descarga un archivo PDF con la información de la acta de entrega.',
+        security: [['bearerAuth' => []]],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer'), description: 'ID del acta de entrega')
+        ],
+        responses: [
+            new OA\Response(
+                response: 200, 
+                description: 'Archivo PDF descargado'
+            ),
+            new OA\Response(response: 404, description: 'Acta de entrega no encontrada'),
+            new OA\Response(response: 500, description: 'Error interno del servidor')
+        ]
+    )]
+    public function exportPdf(int $id, ExcelToPdfConverterInterface $pdfConverter)
+    {
+        try {
+            $useCase = new ExportarActaEntregaPdfUseCase($pdfConverter);
+            $fileName = $useCase->execute($id);
+            $url = asset('storage/exports/' . $fileName);
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Archivo PDF generado con éxito.',
+                'data' => [
+                    'file_url' => $url,
+                    'file_name' => $fileName
+                ]
+            ], 200);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Acta de entrega no encontrada.'
+            ], 404);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al exportar acta a PDF: ' . $e->getMessage()
             ], 500);
         }
     }

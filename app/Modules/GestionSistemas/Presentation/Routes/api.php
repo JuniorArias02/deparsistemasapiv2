@@ -10,6 +10,7 @@ Route::middleware('auth:api')->prefix('gestion-sistemas')->group(function () {
     Route::post('/actas-entrega', [ActaEntregaController::class, 'store']);
     Route::get('/actas-entrega/{id}', [ActaEntregaController::class, 'show']);
     Route::get('/actas-entrega/{id}/exportar-excel', [ActaEntregaController::class, 'exportExcel']);
+    Route::get('/actas-entrega/{id}/exportar-pdf', [ActaEntregaController::class, 'exportPdf']);
     Route::match(['put', 'post'], '/actas-entrega/{id}', [ActaEntregaController::class, 'update']);
     Route::delete('/actas-entrega/{id}', [ActaEntregaController::class, 'destroy']);
 

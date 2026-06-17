@@ -59,7 +59,8 @@ class CpProductoServicioController extends Controller
         path: '/api/gestion-compras/cp-producto-servicios',
         tags: ['CpProductoServicios'],
         summary: 'Listar producto/servicio',
-        security: [['bearerAuth' => []]]
+        security: [['bearerAuth' => []]],
+        responses: [new OA\Response(response: 200, description: 'Éxito')]
     )]
     public function index()
     {
@@ -71,7 +72,8 @@ class CpProductoServicioController extends Controller
         path: '/api/gestion-compras/cp-producto-servicios',
         tags: ['CpProductoServicios'],
         summary: 'Crear producto/servicio',
-        security: [['bearerAuth' => []]]
+        security: [['bearerAuth' => []]],
+        responses: [new OA\Response(response: 200, description: 'Éxito')]
     )]
     public function store(Request $request)
     {
@@ -88,7 +90,8 @@ class CpProductoServicioController extends Controller
         path: '/api/gestion-compras/cp-producto-servicios/{id}',
         tags: ['CpProductoServicios'],
         summary: 'Obtener producto/servicio',
-        security: [['bearerAuth' => []]]
+        security: [['bearerAuth' => []]],
+        responses: [new OA\Response(response: 200, description: 'Éxito')]
     )]
     public function show($id)
     {
@@ -103,7 +106,8 @@ class CpProductoServicioController extends Controller
         path: '/api/gestion-compras/cp-producto-servicios/{id}',
         tags: ['CpProductoServicios'],
         summary: 'Actualizar producto/servicio',
-        security: [['bearerAuth' => []]]
+        security: [['bearerAuth' => []]],
+        responses: [new OA\Response(response: 200, description: 'Éxito')]
     )]
     public function update(Request $request, $id)
     {
@@ -120,7 +124,8 @@ class CpProductoServicioController extends Controller
         path: '/api/gestion-compras/cp-producto-servicios/{id}',
         tags: ['CpProductoServicios'],
         summary: 'Eliminar producto/servicio',
-        security: [['bearerAuth' => []]]
+        security: [['bearerAuth' => []]],
+        responses: [new OA\Response(response: 200, description: 'Éxito')]
     )]
     public function destroy($id)
     {
