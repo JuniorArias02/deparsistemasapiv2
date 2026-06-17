@@ -11,6 +11,8 @@ use App\Modules\GestionSistemas\Application\UseCases\ActasEntrega\EliminarActaEn
 use App\Modules\GestionSistemas\Infrastructure\Repositories\ActaEntregaRepository;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use App\Modules\GestionSistemas\Application\UseCases\ActasEntrega\ExportarActaEntregaExcelUseCase;
 use OpenApi\Attributes as OA;
 
 class ActaEntregaController extends Controller
@@ -100,12 +102,18 @@ class ActaEntregaController extends Controller
             }
         }
 
+        $firmaGuardadaEntregaPath = null;
+        if ($request->input('usar_firma_guardada_entrega') === 'true' && $request->user()) {
+            $firmaGuardadaEntregaPath = $request->user()->firma_digital;
+        }
+
         $dto = new CrearActaEntregaDTO(
             $request->input('equipo_id'),
             $request->input('funcionario_id'),
             $request->input('fecha_entrega'),
             $request->file('firma_entrega'),
             $request->file('firma_recibe'),
+            $firmaGuardadaEntregaPath,
             $perifericosData
         );
 
@@ -291,6 +299,11 @@ class ActaEntregaController extends Controller
             }
         }
 
+        $firmaGuardadaEntregaPath = null;
+        if ($request->input('usar_firma_guardada_entrega') === 'true' && $request->user()) {
+            $firmaGuardadaEntregaPath = $request->user()->firma_digital;
+        }
+
         $dto = new \App\Modules\GestionSistemas\Application\DTOs\ActualizarActaEntregaDTO(
             $id,
             $request->input('equipo_id'),
@@ -298,6 +311,7 @@ class ActaEntregaController extends Controller
             $request->input('fecha_entrega'),
             $request->file('firma_entrega'),
             $request->file('firma_recibe'),
+            $firmaGuardadaEntregaPath,
             $request->input('estado'),
             null, // devuelto
             $perifericosData
@@ -322,6 +336,56 @@ class ActaEntregaController extends Controller
                 'success' => false,
                 'message' => 'Error al actualizar acta: ' . $e->getMessage()
             ], $e->getMessage() === 'Acta de entrega no encontrada' ? 404 : 500);
+        }
+    }
+
+    #[OA\Get(
+        path: '/api/gestion-sistemas/actas-entrega/{id}/exportar-excel',
+        tags: ['Actas Entrega'],
+        summary: 'Exportar acta de entrega a Excel',
+        description: 'Genera y descarga un archivo Excel con la información de la acta de entrega.',
+        security: [['bearerAuth' => []]],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer'), description: 'ID del acta de entrega')
+        ],
+        responses: [
+            new OA\Response(
+                response: 200, 
+                description: 'Archivo Excel generado exitosamente',
+                content: new OA\MediaType(
+                    mediaType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+                )
+            ),
+            new OA\Response(response: 404, description: 'Acta de entrega no encontrada'),
+            new OA\Response(response: 500, description: 'Error interno del servidor')
+        ]
+    )]
+    public function exportExcel(int $id): JsonResponse|BinaryFileResponse
+    {
+        try {
+            $useCase = new ExportarActaEntregaExcelUseCase();
+            $fileName = $useCase->execute($id);
+            $filePath = storage_path('app/public/exports/' . $fileName);
+            $url = asset('storage/exports/' . $fileName);
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Archivo Excel generado con éxito.',
+                'data' => [
+                    'file_url' => $url,
+                    'file_name' => $fileName
+                ]
+            ], 200);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Acta de entrega no encontrada.'
+            ], 404);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al exportar acta a Excel: ' . $e->getMessage()
+            ], 500);
         }
     }
 }

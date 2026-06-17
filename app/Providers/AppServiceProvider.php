@@ -11,7 +11,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->bind(
+            \App\Modules\Shared\Domain\Contracts\ExcelToPdfConverterInterface::class,
+            \App\Modules\Shared\Infrastructure\Adapters\MicroserviceExcelToPdfConverter::class
+        );
     }
 
     /**

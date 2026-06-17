@@ -21,7 +21,7 @@ use App\Modules\GestionCompras\Application\UseCases\Pedidos\ActualizarItemsPedid
 use App\Modules\GestionCompras\Application\UseCases\Pedidos\CalcularTiempoEntregaPedidoUseCase;
 
 use App\Exports\CpPedidoExport;
-use App\Exports\CpPedidoPdfExport;
+use App\Modules\GestionCompras\Application\UseCases\Pedidos\ExportarPedidoPdfUseCase;
 use App\Exports\CpConsolidadoExport;
 use App\Responses\ApiResponse;
 use Illuminate\Http\Request;
@@ -41,7 +41,8 @@ class CpPedidoController extends Controller
         protected AprobarGerenciaPedidoUseCase $aprobarGerenciaUseCase,
         protected RechazarGerenciaPedidoUseCase $rechazarGerenciaUseCase,
         protected ActualizarItemsPedidoUseCase $actualizarItemsUseCase,
-        protected CalcularTiempoEntregaPedidoUseCase $calcularTiempoEntregaUseCase
+        protected CalcularTiempoEntregaPedidoUseCase $calcularTiempoEntregaUseCase,
+        protected ExportarPedidoPdfUseCase $exportarPdfUseCase
     ) {}
 
     /**
@@ -628,8 +629,7 @@ class CpPedidoController extends Controller
     public function exportPdf($id)
     {
         try {
-            $export = new CpPedidoPdfExport();
-            return $export->generate((int) $id);
+            return $this->exportarPdfUseCase->execute((int) $id);
         } catch (\Exception $e) {
             return ApiResponse::error('Error al exportar pedido a PDF: ' . $e->getMessage(), 500);
         }

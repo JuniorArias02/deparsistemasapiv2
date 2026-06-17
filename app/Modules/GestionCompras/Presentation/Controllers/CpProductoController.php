@@ -28,7 +28,8 @@ class CpProductoController extends Controller
         path: '/api/gestion-compras/cp-productos',
         tags: ['CpProductos'],
         summary: 'Listar producto',
-        security: [['bearerAuth' => []]]
+        security: [['bearerAuth' => []]],
+        responses: [new OA\Response(response: 200, description: 'Lista de producto')]
     )]
     public function index()
     {
@@ -40,7 +41,8 @@ class CpProductoController extends Controller
         path: '/api/gestion-compras/cp-productos',
         tags: ['CpProductos'],
         summary: 'Crear producto',
-        security: [['bearerAuth' => []]]
+        security: [['bearerAuth' => []]],
+        responses: [new OA\Response(response: 201, description: 'Producto creado exitosamente')]
     )]
     public function store(Request $request)
     {
@@ -57,7 +59,8 @@ class CpProductoController extends Controller
         path: '/api/gestion-compras/cp-productos/{id}',
         tags: ['CpProductos'],
         summary: 'Obtener producto',
-        security: [['bearerAuth' => []]]
+        security: [['bearerAuth' => []]],
+        responses: [new OA\Response(response: 200, description: 'Detalle de producto')]
     )]
     public function show($id)
     {
@@ -72,7 +75,8 @@ class CpProductoController extends Controller
         path: '/api/gestion-compras/cp-productos/{id}',
         tags: ['CpProductos'],
         summary: 'Actualizar producto',
-        security: [['bearerAuth' => []]]
+        security: [['bearerAuth' => []]],
+        responses: [new OA\Response(response: 200, description: 'Producto actualizado exitosamente')]
     )]
     public function update(Request $request, $id)
     {
@@ -89,7 +93,8 @@ class CpProductoController extends Controller
         path: '/api/gestion-compras/cp-productos/{id}',
         tags: ['CpProductos'],
         summary: 'Eliminar producto',
-        security: [['bearerAuth' => []]]
+        security: [['bearerAuth' => []]],
+        responses: [new OA\Response(response: 200, description: 'Producto eliminado exitosamente')]
     )]
     public function destroy($id)
     {

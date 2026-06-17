@@ -48,7 +48,12 @@ class ActualizarActaEntregaUseCase
         }
 
         // Procesar archivos si se enviaron
-        if ($dto->getFirmaEntrega()) {
+        if ($dto->getFirmaGuardadaEntregaPath()) {
+            if ($acta->getFirmaEntrega()) {
+                Storage::disk('public')->delete(str_replace('storage/', '', $acta->getFirmaEntrega()));
+            }
+            $acta->setFirmaEntrega($dto->getFirmaGuardadaEntregaPath());
+        } elseif ($dto->getFirmaEntrega()) {
             if ($acta->getFirmaEntrega()) {
                 Storage::disk('public')->delete(str_replace('storage/', '', $acta->getFirmaEntrega()));
             }

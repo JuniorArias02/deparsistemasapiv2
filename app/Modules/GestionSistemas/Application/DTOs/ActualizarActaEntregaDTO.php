@@ -13,6 +13,7 @@ class ActualizarActaEntregaDTO
      * @param string|null $fecha_entrega
      * @param UploadedFile|null $firma_entrega
      * @param UploadedFile|null $firma_recibe
+     * @param string|null $firmaGuardadaEntregaPath
      * @param string|null $estado
      * @param string|null $devuelto
      * @param PerifericoDTO[]|null $perifericos
@@ -24,6 +25,7 @@ class ActualizarActaEntregaDTO
         private ?string $fecha_entrega = null,
         private ?UploadedFile $firma_entrega = null,
         private ?UploadedFile $firma_recibe = null,
+        private ?string $firmaGuardadaEntregaPath = null,
         private ?string $estado = null,
         private ?string $devuelto = null,
         private ?array $perifericos = null
@@ -58,6 +60,11 @@ class ActualizarActaEntregaDTO
     public function getFirmaRecibe(): ?UploadedFile
     {
         return $this->firma_recibe;
+    }
+
+    public function getFirmaGuardadaEntregaPath(): ?string
+    {
+        return $this->firmaGuardadaEntregaPath;
     }
 
     public function getEstado(): ?string

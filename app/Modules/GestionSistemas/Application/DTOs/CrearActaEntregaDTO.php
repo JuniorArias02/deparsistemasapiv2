@@ -13,6 +13,8 @@ class CrearActaEntregaDTO
     public ?UploadedFile $firmaEntrega;
     /** @var UploadedFile|null */
     public ?UploadedFile $firmaRecibe;
+    /** @var string|null */
+    public ?string $firmaGuardadaEntregaPath;
     /** @var PerifericoDTO[] */
     public array $perifericos;
 
@@ -22,6 +24,7 @@ class CrearActaEntregaDTO
         string $fechaEntrega,
         ?UploadedFile $firmaEntrega = null,
         ?UploadedFile $firmaRecibe = null,
+        ?string $firmaGuardadaEntregaPath = null,
         array $perifericos = []
     ) {
         $this->equipoId = $equipoId;
@@ -29,6 +32,7 @@ class CrearActaEntregaDTO
         $this->fechaEntrega = $fechaEntrega;
         $this->firmaEntrega = $firmaEntrega;
         $this->firmaRecibe = $firmaRecibe;
+        $this->firmaGuardadaEntregaPath = $firmaGuardadaEntregaPath;
         $this->perifericos = $perifericos;
     }
 }
