@@ -22,6 +22,14 @@ class CrearPedidoUseCase
         DB::beginTransaction();
 
         try {
+            $tipoSolicitud = \App\Models\CpTipoSolicitud::find($data['tipo_solicitud']);
+            if ($tipoSolicitud && strtolower($tipoSolicitud->nombre) === 'prioritario') {
+                $permissionService = app(PermissionService::class);
+                if (!$permissionService->check($user, 'cp_pedido.realizar_pedido_prioritario')) {
+                    throw new Exception('No tienes permisos para realizar un pedido prioritario.');
+                }
+            }
+
             $path = $this->handleSignature($firmaFile, $useStoredSignature, $user, 'elaboracion');
 
             if (empty($path)) {
