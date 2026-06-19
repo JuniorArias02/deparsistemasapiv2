@@ -24,6 +24,8 @@ Route::middleware('auth:api')->prefix('gestion-sistemas')->group(function () {
     Route::get('/pc-equipos/buscar', [\App\Modules\GestionSistemas\Presentation\Controllers\PcEquipoController::class, 'buscar']);
     Route::apiResource('/pc-equipos', \App\Modules\GestionSistemas\Presentation\Controllers\PcEquipoController::class);
     Route::get('/pc-equipos/{id}/hoja-vida', [\App\Modules\GestionSistemas\Presentation\Controllers\PcEquipoHojaVidaController::class, 'show']);
+    Route::get('/pc-equipos/{id}/hoja-vida/exportar-excel', [\App\Modules\GestionSistemas\Presentation\Controllers\PcEquipoHojaVidaController::class, 'exportarExcel']);
+    Route::get('/pc-equipos/{id}/hoja-vida/exportar-pdf', [\App\Modules\GestionSistemas\Presentation\Controllers\PcEquipoHojaVidaController::class, 'exportarPdf']);
 
     // Características Técnicas
     Route::get('/pc-caracteristicas-tecnicas/equipo/{equipo_id}', [\App\Modules\GestionSistemas\Presentation\Controllers\PcCaracteristicasTecnicasController::class, 'showByEquipo']);
