@@ -13,6 +13,10 @@ use App\Modules\GestionSistemas\Infrastructure\Repositories\PcMantenimientoRepos
 use App\Modules\GestionSistemas\Application\UseCases\MantenimientoEquipos\CrearMantenimientoEquipoUseCase;
 use App\Modules\GestionSistemas\Application\UseCases\MantenimientoEquipos\ActualizarMantenimientoEquipoUseCase;
 use App\Modules\GestionSistemas\Application\UseCases\MantenimientoEquipos\EliminarMantenimientoEquipoUseCase;
+use App\Modules\GestionSistemas\Application\UseCases\MantenimientoEquipos\ObtenerMantenimientoEquipoUseCase;
+use App\Modules\GestionSistemas\Application\UseCases\MantenimientoEquipos\ExportarMantenimientoEquipoExcelUseCase;
+use App\Modules\GestionSistemas\Application\UseCases\MantenimientoEquipos\ExportarMantenimientoEquipoPdfUseCase;
+use App\Modules\Shared\Domain\Contracts\ExcelToPdfConverterInterface;
 
 class PcMantenimientoController extends Controller
 {
@@ -73,13 +77,14 @@ class PcMantenimientoController extends Controller
     )]
     public function show($id)
     {
-        $item = $this->repository->find($id);
-
-        if (!$item) {
-            return ApiResponse::error('Mantenimiento no encontrado', 404);
+        try {
+            $useCase = new ObtenerMantenimientoEquipoUseCase($this->repository);
+            $item = $useCase->execute($id);
+            return ApiResponse::success($item, 'Detalle del mantenimiento');
+        } catch (\Exception $e) {
+            $code = $e->getCode() === 404 ? 404 : 500;
+            return ApiResponse::error($e->getMessage(), $code);
         }
-
-        return ApiResponse::success($item, 'Detalle del mantenimiento');
     }
 
     #[OA\Get(
@@ -111,6 +116,11 @@ class PcMantenimientoController extends Controller
                     new OA\Property(property: 'equipo_id', type: 'integer'),
                     new OA\Property(property: 'tipo_mantenimiento', type: 'string', enum: ['preventivo', 'correctivo']),
                     new OA\Property(property: 'descripcion', type: 'string'),
+                    new OA\Property(property: 'cpu', type: 'boolean'),
+                    new OA\Property(property: 'pantalla', type: 'boolean'),
+                    new OA\Property(property: 'teclado', type: 'boolean'),
+                    new OA\Property(property: 'mouse', type: 'boolean'),
+                    new OA\Property(property: 'unidad_cd', type: 'boolean'),
                 ]
             )
         ),
@@ -137,6 +147,11 @@ class PcMantenimientoController extends Controller
             'firma_personal_cargo' => 'nullable|string',
             'use_stored_signature_sistemas' => 'nullable|boolean',
             'firma_sistemas' => 'required_without:use_stored_signature_sistemas|string|nullable', 
+            'cpu' => 'nullable|boolean',
+            'pantalla' => 'nullable|boolean',
+            'teclado' => 'nullable|boolean',
+            'mouse' => 'nullable|boolean',
+            'unidad_cd' => 'nullable|boolean',
         ]);
 
         try {
@@ -166,6 +181,11 @@ class PcMantenimientoController extends Controller
                 properties: [
                     new OA\Property(property: 'descripcion', type: 'string'),
                     new OA\Property(property: 'estado', type: 'string', enum: ['completado', 'pendiente']),
+                    new OA\Property(property: 'cpu', type: 'boolean'),
+                    new OA\Property(property: 'pantalla', type: 'boolean'),
+                    new OA\Property(property: 'teclado', type: 'boolean'),
+                    new OA\Property(property: 'mouse', type: 'boolean'),
+                    new OA\Property(property: 'unidad_cd', type: 'boolean'),
                 ]
             )
         ),
@@ -195,6 +215,11 @@ class PcMantenimientoController extends Controller
             'nombre_repuesto' => 'nullable|string|max:255',
             'responsable_mantenimiento' => 'nullable|string|max:255',
             'estado' => 'nullable|in:completado,pendiente',
+            'cpu' => 'nullable|boolean',
+            'pantalla' => 'nullable|boolean',
+            'teclado' => 'nullable|boolean',
+            'mouse' => 'nullable|boolean',
+            'unidad_cd' => 'nullable|boolean',
         ]);
 
         try {
@@ -250,5 +275,79 @@ class PcMantenimientoController extends Controller
         }
 
         return ApiResponse::error('Mantenimiento no encontrado o no se pudo eliminar', 404);
+    }
+
+    #[OA\Get(
+        path: '/api/gestion-sistemas/pc-mantenimientos/{id}/exportar-excel',
+        tags: ['PcMantenimientos (DDD)'],
+        summary: 'Exportar mantenimiento a Excel',
+        security: [['bearerAuth' => []]],
+        parameters: [new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer'))],
+        responses: [
+            new OA\Response(response: 200, description: 'Archivo Excel generado', content: new OA\JsonContent(ref: '#/components/schemas/ApiResponse')),
+            new OA\Response(response: 404, description: 'No encontrado'),
+            new OA\Response(response: 403, description: 'Prohibido')
+        ]
+    )]
+    public function exportarExcel($id)
+    {
+        $this->permissionService->authorize("pc_mantenimiento.crear"); // or similar permission
+        try {
+            $useCase = new ExportarMantenimientoEquipoExcelUseCase($this->repository);
+            $fileName = $useCase->execute($id);
+            $url = asset('storage/exports/' . $fileName);
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Archivo Excel generado con éxito.',
+                'data' => [
+                    'file_url' => $url,
+                    'file_name' => $fileName
+                ]
+            ], 200);
+        } catch (\Exception $e) {
+            $code = $e->getCode() === 404 ? 404 : 500;
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al exportar acta a Excel: ' . $e->getMessage()
+            ], $code);
+        }
+    }
+
+    #[OA\Get(
+        path: '/api/gestion-sistemas/pc-mantenimientos/{id}/exportar-pdf',
+        tags: ['PcMantenimientos (DDD)'],
+        summary: 'Exportar mantenimiento a PDF',
+        security: [['bearerAuth' => []]],
+        parameters: [new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer'))],
+        responses: [
+            new OA\Response(response: 200, description: 'Archivo PDF generado', content: new OA\JsonContent(ref: '#/components/schemas/ApiResponse')),
+            new OA\Response(response: 404, description: 'No encontrado'),
+            new OA\Response(response: 403, description: 'Prohibido')
+        ]
+    )]
+    public function exportarPdf($id, ExcelToPdfConverterInterface $pdfConverter)
+    {
+        $this->permissionService->authorize("pc_mantenimiento.crear"); // or similar permission
+        try {
+            $useCase = new ExportarMantenimientoEquipoPdfUseCase($pdfConverter);
+            $fileName = $useCase->execute($id);
+            $url = asset('storage/exports/' . $fileName);
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Archivo PDF generado con éxito.',
+                'data' => [
+                    'file_url' => $url,
+                    'file_name' => $fileName
+                ]
+            ], 200);
+        } catch (\Exception $e) {
+            $code = $e->getCode() === 404 ? 404 : 500;
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al exportar acta a PDF: ' . $e->getMessage()
+            ], $code);
+        }
     }
 }

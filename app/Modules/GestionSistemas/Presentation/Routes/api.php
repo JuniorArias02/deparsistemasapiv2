@@ -39,6 +39,8 @@ Route::middleware('auth:api')->prefix('gestion-sistemas')->group(function () {
     Route::get('/pc-mantenimientos/equipo/{equipo_id}', [\App\Modules\GestionSistemas\Presentation\Controllers\PcMantenimientoController::class, 'showByEquipo']);
     Route::post('/pc-mantenimientos', [\App\Modules\GestionSistemas\Presentation\Controllers\PcMantenimientoController::class, 'store']);
     Route::get('/pc-mantenimientos/{id}', [\App\Modules\GestionSistemas\Presentation\Controllers\PcMantenimientoController::class, 'show']);
+    Route::get('/pc-mantenimientos/{id}/exportar-excel', [\App\Modules\GestionSistemas\Presentation\Controllers\PcMantenimientoController::class, 'exportarExcel']);
+    Route::get('/pc-mantenimientos/{id}/exportar-pdf', [\App\Modules\GestionSistemas\Presentation\Controllers\PcMantenimientoController::class, 'exportarPdf']);
     Route::put('/pc-mantenimientos/{id}', [\App\Modules\GestionSistemas\Presentation\Controllers\PcMantenimientoController::class, 'update']);
     Route::delete('/pc-mantenimientos/{id}', [\App\Modules\GestionSistemas\Presentation\Controllers\PcMantenimientoController::class, 'destroy']);
     Route::post('/pc-mantenimientos/{id}/actualizar-firmas', [\App\Modules\GestionSistemas\Presentation\Controllers\PcMantenimientoController::class, 'actualizarFirmas']);

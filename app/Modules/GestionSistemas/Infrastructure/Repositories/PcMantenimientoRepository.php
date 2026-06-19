@@ -14,7 +14,14 @@ class PcMantenimientoRepository implements PcMantenimientoRepositoryInterface
 
     public function find(int $id)
     {
-        return PcMantenimiento::with(['equipo', 'empresaResponsable', 'creador:id,nombre_completo'])->find($id);
+        return PcMantenimiento::with([
+            'equipo.sede',
+            'equipo.area',
+            'equipo.responsable',
+            'equipo.caracteristicasTecnicas',
+            'empresaResponsable',
+            'creador:id,nombre_completo'
+        ])->find($id);
     }
 
     public function getByEquipo(int $equipoId)

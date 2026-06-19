@@ -19,6 +19,13 @@ class CrearMantenimientoEquipoUseCase
 
     public function execute(array $data)
     {
+        // Campos de limpieza por defecto a false si no se envían
+        $data['cpu'] = filter_var($data['cpu'] ?? false, FILTER_VALIDATE_BOOLEAN);
+        $data['pantalla'] = filter_var($data['pantalla'] ?? false, FILTER_VALIDATE_BOOLEAN);
+        $data['teclado'] = filter_var($data['teclado'] ?? false, FILTER_VALIDATE_BOOLEAN);
+        $data['mouse'] = filter_var($data['mouse'] ?? false, FILTER_VALIDATE_BOOLEAN);
+        $data['unidad_cd'] = filter_var($data['unidad_cd'] ?? false, FILTER_VALIDATE_BOOLEAN);
+
         // Procesar Firmas
         if (!empty($data['firma_personal_cargo'])) {
             $data['firma_personal_cargo'] = $this->firmaService->saveBase64Signature($data['firma_personal_cargo']);

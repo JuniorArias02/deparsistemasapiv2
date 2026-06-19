@@ -24,7 +24,12 @@ class PcMantenimiento extends Model
         'firma_sistemas',
         'creado_por',
         'fecha_creacion',
-        'estado'
+        'estado',
+        'cpu',
+        'pantalla',
+        'teclado',
+        'mouse',
+        'unidad_cd'
     ];
 
     protected $casts = [
@@ -36,6 +41,11 @@ class PcMantenimiento extends Model
         'equipo_id' => 'integer',
         'empresa_responsable_id' => 'integer',
         'creado_por' => 'integer',
+        'cpu' => 'boolean',
+        'pantalla' => 'boolean',
+        'teclado' => 'boolean',
+        'mouse' => 'boolean',
+        'unidad_cd' => 'boolean',
     ];
 
     public function equipo()
