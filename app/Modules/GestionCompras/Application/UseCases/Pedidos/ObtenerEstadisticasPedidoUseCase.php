@@ -86,8 +86,72 @@ class ObtenerEstadisticasPedidoUseCase
             }
         }
 
+        // Progreso de Items
+        $totalItems = $pedido->items->count();
+        $itemsComprados = $pedido->items->where('comprado', 1)->count();
+        $porcentajeCompletado = $totalItems > 0 ? round(($itemsComprados / $totalItems) * 100, 1) : 0;
+
+        // Historial de Trazabilidad (Timeline)
+        $trazabilidad = [];
+        
+        if ($pedido->fecha_solicitud) {
+            $trazabilidad[] = [
+                'hito' => 'Solicitud Creada',
+                'fecha' => $pedido->fecha_solicitud->format('Y-m-d H:i:s'),
+                'estado' => 'completado'
+            ];
+        }
+
+        if ($pedido->fecha_solicitud_cotizacion) {
+            $trazabilidad[] = [
+                'hito' => 'Solicitud de Cotización',
+                'fecha' => $pedido->fecha_solicitud_cotizacion,
+                'estado' => 'completado'
+            ];
+        }
+
+        if ($pedido->fecha_respuesta_cotizacion) {
+            $trazabilidad[] = [
+                'hito' => 'Respuesta de Cotización',
+                'fecha' => $pedido->fecha_respuesta_cotizacion,
+                'estado' => 'completado'
+            ];
+        }
+
+        if ($pedido->fecha_compra) {
+            $trazabilidad[] = [
+                'hito' => 'Revisión de Compras',
+                'fecha' => $pedido->fecha_compra->format('Y-m-d H:i:s'),
+                'observacion' => $pedido->motivo_aprobacion_compras ?? $pedido->motivo_rechazado_compras,
+                'estado' => 'completado'
+            ];
+        }
+
+        if ($pedido->fecha_gerencia) {
+            $trazabilidad[] = [
+                'hito' => 'Revisión de Gerencia',
+                'fecha' => $pedido->fecha_gerencia->format('Y-m-d H:i:s'),
+                'observacion' => $pedido->motivo_aprobacion_gerencia ?? $pedido->motivo_rechazado_gerencia,
+                'estado' => 'completado'
+            ];
+        }
+
+        if ($pedido->fecha_envio_proveedor) {
+            $trazabilidad[] = [
+                'hito' => 'Envío a Proveedor',
+                'fecha' => $pedido->fecha_envio_proveedor,
+                'estado' => 'completado'
+            ];
+        }
+
+        // Ordenar trazabilidad por fecha
+        usort($trazabilidad, function ($a, $b) {
+            return strtotime($a['fecha']) <=> strtotime($b['fecha']);
+        });
+
         return [
             'pedido_id' => $pedido->id,
+            'estado_actual' => $pedido->estado_compras,
             'estadisticas' => [
                 'tiempo_aprobacion_total_horas' => round($tiempoAprobacionHoras, 1),
                 'tiempo_aprobacion_total_formato' => $tiempoAprobacionFormato,
@@ -99,7 +163,8 @@ class ObtenerEstadisticasPedidoUseCase
                             'rol' => 'Compras'
                         ] : null,
                         'tiempo_horas' => round($tiempoComprasHoras, 1),
-                        'tiempo_formato' => $tiempoComprasFormato
+                        'tiempo_formato' => $tiempoComprasFormato,
+                        'motivo' => $pedido->motivo_aprobacion_compras
                     ],
                     'gerencia' => [
                         'responsable' => $pedido->responsableAprobacion ? [
@@ -108,19 +173,32 @@ class ObtenerEstadisticasPedidoUseCase
                             'rol' => 'Gerente'
                         ] : null,
                         'tiempo_horas' => round($tiempoGerenciaHoras, 1),
-                        'tiempo_formato' => $tiempoGerenciaFormato
+                        'tiempo_formato' => $tiempoGerenciaFormato,
+                        'motivo' => $pedido->motivo_aprobacion_gerencia
                     ]
+                ],
+                'progreso_items' => [
+                    'total' => $totalItems,
+                    'comprados_entregados' => $itemsComprados,
+                    'pendientes' => $totalItems - $itemsComprados,
+                    'porcentaje_completado' => $porcentajeCompletado
                 ],
                 'tiempo_estimado_entrega_items' => $tiempoMaximoPermitido,
                 'reglas_cumplimiento' => [
                     'aprobado_a_tiempo' => $cumpleSla,
-                    'entregado_a_tiempo' => false,
+                    'entregado_a_tiempo' => $porcentajeCompletado == 100,
                     'dias_retraso' => $diasRetraso,
                     'cumple_sla' => $cumpleSla,
                     'tipo_solicitud' => trim($tipoSolicitud),
                     'categoria' => trim($categoria),
                     'tiempo_maximo_permitido' => $tiempoMaximoPermitido,
                 ]
+            ],
+            'auditoria' => [
+                'trazabilidad_eventos' => $trazabilidad,
+                'observaciones_generales' => $pedido->observacion,
+                'observaciones_pedidos' => $pedido->observaciones_pedidos,
+                'observacion_gerencia' => $pedido->observacion_gerencia,
             ]
         ];
     }
