@@ -11,6 +11,10 @@ use App\Modules\GestionSistemas\Infrastructure\Repositories\ActaDevolucionReposi
 use App\Models\PcDevuelto;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use App\Modules\GestionSistemas\Application\UseCases\ActasDevolucion\ExportarActaDevolucionExcelUseCase;
+use App\Modules\GestionSistemas\Application\UseCases\ActasDevolucion\ExportarActaDevolucionPdfUseCase;
+use App\Modules\Shared\Domain\Contracts\ExcelToPdfConverterInterface;
 use OpenApi\Attributes as OA;
 
 class ActaDevolucionController extends Controller
@@ -211,5 +215,91 @@ class ActaDevolucionController extends Controller
         }
 
         return response()->json(['success' => true, 'message' => 'Eliminada con éxito']);
+    }
+
+    #[OA\Get(
+        path: '/api/gestion-sistemas/actas-devolucion/{id}/exportar-excel',
+        tags: ['Actas Devolucion'],
+        summary: 'Exportar acta de devolución a Excel',
+        description: 'Genera y descarga un archivo Excel con la información de la acta de devolución.',
+        security: [['bearerAuth' => []]],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer'))
+        ],
+        responses: [
+            new OA\Response(response: 200, description: 'Archivo Excel generado exitosamente'),
+            new OA\Response(response: 404, description: 'Acta no encontrada'),
+            new OA\Response(response: 500, description: 'Error interno')
+        ]
+    )]
+    public function exportExcel(int $id): JsonResponse|BinaryFileResponse
+    {
+        try {
+            $useCase = new ExportarActaDevolucionExcelUseCase();
+            $fileName = $useCase->execute($id);
+            $url = asset('storage/exports/' . $fileName);
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Archivo Excel generado con éxito.',
+                'data' => [
+                    'file_url' => $url,
+                    'file_name' => $fileName
+                ]
+            ], 200);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Acta de devolución no encontrada.'
+            ], 404);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al exportar acta a Excel: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    #[OA\Get(
+        path: '/api/gestion-sistemas/actas-devolucion/{id}/exportar-pdf',
+        tags: ['Actas Devolucion'],
+        summary: 'Exportar acta de devolución a PDF',
+        description: 'Genera y descarga un archivo PDF con la información de la acta de devolución.',
+        security: [['bearerAuth' => []]],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer'))
+        ],
+        responses: [
+            new OA\Response(response: 200, description: 'Archivo PDF generado exitosamente'),
+            new OA\Response(response: 404, description: 'Acta no encontrada'),
+            new OA\Response(response: 500, description: 'Error interno')
+        ]
+    )]
+    public function exportPdf(int $id, ExcelToPdfConverterInterface $pdfConverter)
+    {
+        try {
+            $useCase = new ExportarActaDevolucionPdfUseCase($pdfConverter);
+            $fileName = $useCase->execute($id);
+            $url = asset('storage/exports/' . $fileName);
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Archivo PDF generado con éxito.',
+                'data' => [
+                    'file_url' => $url,
+                    'file_name' => $fileName
+                ]
+            ], 200);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Acta de devolución no encontrada.'
+            ], 404);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al exportar acta a PDF: ' . $e->getMessage()
+            ], 500);
+        }
     }
 }

@@ -18,6 +18,8 @@ Route::middleware('auth:api')->prefix('gestion-sistemas')->group(function () {
     Route::get('/actas-devolucion', [ActaDevolucionController::class, 'index']);
     Route::post('/actas-devolucion', [ActaDevolucionController::class, 'store']);
     Route::get('/actas-devolucion/{id}', [ActaDevolucionController::class, 'show']);
+    Route::get('/actas-devolucion/{id}/exportar-excel', [ActaDevolucionController::class, 'exportExcel']);
+    Route::get('/actas-devolucion/{id}/exportar-pdf', [ActaDevolucionController::class, 'exportPdf']);
     Route::delete('/actas-devolucion/{id}', [ActaDevolucionController::class, 'destroy']);
 
     // PcEquipos
