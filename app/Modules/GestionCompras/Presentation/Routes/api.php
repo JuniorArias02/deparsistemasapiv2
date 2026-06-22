@@ -37,4 +37,5 @@ Route::prefix('gestion-compras')->middleware('auth:api')->group(function () {
     Route::get('cp-pedidos/{id}/exportar-excel', [\App\Modules\GestionCompras\Presentation\Controllers\CpPedidoController::class, 'exportExcel']);
     Route::get('cp-pedidos/{id}/exportar-pdf', [\App\Modules\GestionCompras\Presentation\Controllers\CpPedidoController::class, 'exportPdf']);
     Route::get('cp-pedidos/{id}/tiempos', [\App\Modules\GestionCompras\Presentation\Controllers\CpPedidoController::class, 'calcularTiempoEntregaPedido']);
+    Route::get('cp-pedidos/{id}/estadisticas', [\App\Modules\GestionCompras\Presentation\Controllers\CpPedidoController::class, 'obtenerEstadisticas']);
 });

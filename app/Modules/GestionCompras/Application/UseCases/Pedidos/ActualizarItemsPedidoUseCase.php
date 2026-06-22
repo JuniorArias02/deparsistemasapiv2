@@ -25,9 +25,16 @@ class ActualizarItemsPedidoUseCase
         }
 
         foreach ($items as $itemData) {
+            $updateData = ['comprado' => $itemData['comprado']];
+            if (isset($itemData['comprado']) && $itemData['comprado']) {
+                $updateData['fecha_entregado'] = now();
+            } else {
+                $updateData['fecha_entregado'] = null;
+            }
+
             CpItemPedido::where('id', $itemData['id'])
                 ->where('cp_pedido', $id)
-                ->update(['comprado' => $itemData['comprado']]);
+                ->update($updateData);
         }
 
         return $pedido->load('items');

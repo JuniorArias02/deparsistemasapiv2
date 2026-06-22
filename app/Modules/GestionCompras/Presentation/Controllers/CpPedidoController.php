@@ -19,6 +19,7 @@ use App\Modules\GestionCompras\Application\UseCases\Pedidos\AprobarGerenciaPedid
 use App\Modules\GestionCompras\Application\UseCases\Pedidos\RechazarGerenciaPedidoUseCase;
 use App\Modules\GestionCompras\Application\UseCases\Pedidos\ActualizarItemsPedidoUseCase;
 use App\Modules\GestionCompras\Application\UseCases\Pedidos\CalcularTiempoEntregaPedidoUseCase;
+use App\Modules\GestionCompras\Application\UseCases\Pedidos\ObtenerEstadisticasPedidoUseCase;
 
 use App\Exports\CpPedidoExport;
 use App\Modules\GestionCompras\Application\UseCases\Pedidos\ExportarPedidoPdfUseCase;
@@ -42,7 +43,8 @@ class CpPedidoController extends Controller
         protected RechazarGerenciaPedidoUseCase $rechazarGerenciaUseCase,
         protected ActualizarItemsPedidoUseCase $actualizarItemsUseCase,
         protected CalcularTiempoEntregaPedidoUseCase $calcularTiempoEntregaUseCase,
-        protected ExportarPedidoPdfUseCase $exportarPdfUseCase
+        protected ExportarPedidoPdfUseCase $exportarPdfUseCase,
+        protected ObtenerEstadisticasPedidoUseCase $obtenerEstadisticasUseCase
     ) {}
 
     /**
@@ -685,6 +687,32 @@ class CpPedidoController extends Controller
             return ApiResponse::success($tiempos, 'Tiempos de entrega del pedido calculados exitosamente');
         } catch (\Exception $e) {
             return ApiResponse::error('Error al calcular tiempos del pedido: ' . $e->getMessage(), 500);
+        }
+    }
+
+    #[OA\Get(
+        path: '/api/gestion-compras/cp-pedidos/{id}/estadisticas',
+        tags: ['Pedidos de Compra'],
+        summary: 'Obtener estadísticas de un pedido',
+        description: 'Obtiene los cálculos de SLA y tiempos de cumplimiento de un pedido específico.',
+        security: [['bearerAuth' => []]],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer'))
+        ],
+        responses: [
+            new OA\Response(response: 200, description: 'Estadísticas del pedido calculadas exitosamente'),
+            new OA\Response(response: 404, description: 'Pedido no encontrado'),
+            new OA\Response(response: 500, description: 'Error del servidor')
+        ]
+    )]
+    public function obtenerEstadisticas($id)
+    {
+        try {
+            $estadisticas = $this->obtenerEstadisticasUseCase->execute($id);
+            return ApiResponse::success($estadisticas, 'Estadísticas del pedido obtenidas exitosamente');
+        } catch (\Exception $e) {
+            $status = $e->getCode() === 404 ? 404 : 500;
+            return ApiResponse::error('Error al obtener estadísticas: ' . $e->getMessage(), $status);
         }
     }
 }

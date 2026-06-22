@@ -20,6 +20,7 @@ class CpItemPedido extends Model
         'cp_pedido',
         'productos_id',
         'comprado',
+        'fecha_entregado',
     ];
 
     public function pedido()
