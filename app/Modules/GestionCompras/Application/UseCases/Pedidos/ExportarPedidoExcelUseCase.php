@@ -53,13 +53,6 @@ class ExportarPedidoExcelUseCase extends CpPedidoExport
         $filename = "N.{$consecutivo} SOLICITUD DE PEDIDO {$proceso} {$sede}.xlsx";
 
         return new StreamedResponse(function () use ($spreadsheet) {
-            // Remover otras hojas para que el usuario no descargue la plantilla vacía
-            while ($spreadsheet->getSheetCount() > 1) {
-                $activeIndex = $spreadsheet->getActiveSheetIndex();
-                $indexToRemove = $activeIndex === 0 ? 1 : 0;
-                $spreadsheet->removeSheetByIndex($indexToRemove);
-            }
-
             $writer = new Xlsx($spreadsheet);
             $writer->save('php://output');
             $spreadsheet->disconnectWorksheets();

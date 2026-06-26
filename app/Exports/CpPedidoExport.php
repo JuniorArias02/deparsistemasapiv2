@@ -165,6 +165,7 @@ class CpPedidoExport
             $drawing->setName('Firma_' . $celda);
             $drawing->setDescription('Firma de Aprobacion');
             $drawing->setPath($fullPath);
+            
             $drawing->setCoordinates($celda);
             $drawing->setHeight(75);
             $drawing->setResizeProportional(true);
