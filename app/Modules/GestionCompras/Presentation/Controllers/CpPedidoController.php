@@ -21,7 +21,7 @@ use App\Modules\GestionCompras\Application\UseCases\Pedidos\ActualizarItemsPedid
 use App\Modules\GestionCompras\Application\UseCases\Pedidos\CalcularTiempoEntregaPedidoUseCase;
 use App\Modules\GestionCompras\Application\UseCases\Pedidos\ObtenerEstadisticasPedidoUseCase;
 
-use App\Exports\CpPedidoExport;
+use App\Modules\GestionCompras\Application\UseCases\Pedidos\ExportarPedidoExcelUseCase;
 use App\Modules\GestionCompras\Application\UseCases\Pedidos\ExportarPedidoPdfUseCase;
 use App\Exports\CpConsolidadoExport;
 use App\Responses\ApiResponse;
@@ -43,6 +43,7 @@ class CpPedidoController extends Controller
         protected RechazarGerenciaPedidoUseCase $rechazarGerenciaUseCase,
         protected ActualizarItemsPedidoUseCase $actualizarItemsUseCase,
         protected CalcularTiempoEntregaPedidoUseCase $calcularTiempoEntregaUseCase,
+        protected ExportarPedidoExcelUseCase $exportarExcelUseCase,
         protected ExportarPedidoPdfUseCase $exportarPdfUseCase,
         protected ObtenerEstadisticasPedidoUseCase $obtenerEstadisticasUseCase
     ) {}
@@ -603,8 +604,7 @@ class CpPedidoController extends Controller
         $this->permissionService->authorize('cp_pedido.ver');
 
         try {
-            $export = new CpPedidoExport();
-            return $export->generate((int) $id);
+            return $this->exportarExcelUseCase->execute((int) $id);
         } catch (\Exception $e) {
             return ApiResponse::error('Error al exportar pedido: ' . $e->getMessage(), 500);
         }

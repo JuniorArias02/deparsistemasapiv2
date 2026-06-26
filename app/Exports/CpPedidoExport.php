@@ -3,14 +3,11 @@
 namespace App\Exports;
 
 use App\Models\CpPedido;
-use PhpOffice\PhpSpreadsheet\IOFactory;
-use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use PhpOffice\PhpSpreadsheet\Worksheet\Drawing;
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Shared\Date as ExcelDate;
 use Illuminate\Support\Facades\Storage;
-use Symfony\Component\HttpFoundation\StreamedResponse;
 use DateTime;
 use Exception;
 
@@ -18,69 +15,6 @@ class CpPedidoExport
 {
     protected $sheet;
     protected $extra = 0;
-
-    /**
-     * Generate and stream the Excel file for a pedido.
-     */
-    public function generate(int $pedidoId): StreamedResponse
-    {
-        $pedido = CpPedido::with([
-            'solicitante',
-            'tipoSolicitud',
-            'sede',
-            'elaboradoPor.rol',
-            'procesoCompra.rol',
-            'responsableAprobacion.rol',
-            'items.producto',
-        ])->findOrFail($pedidoId);
-
-        $templatePath = storage_path('app/templates/plantilla_pedidos.xlsx');
-
-        if (!file_exists($templatePath)) {
-            throw new Exception('No se encontró la plantilla de pedidos.');
-        }
-
-        $spreadsheet = IOFactory::load($templatePath);
-        $this->sheet = $spreadsheet->getActiveSheet();
-
-        $items = $pedido->items;
-
-        // Dynamic row adjustment for > 12 items
-        $this->extra = max(0, $items->count() - 12);
-        if ($this->extra > 0) {
-            $this->insertarFilasExtra();
-        }
-
-        // Fill data
-        $this->llenarEncabezado($pedido);
-        $this->llenarItems($items);
-        $this->insertarFirmas($pedido);
-        $this->responsableProceso($pedido);
-
-        // Build filename
-        $proceso = $this->sanitize($pedido->solicitante?->nombre ?? 'SIN_PROCESO');
-        $sede = $this->sanitize($pedido->sede?->nombre ?? 'SIN_SEDE');
-        $consecutivo = $this->sanitize($pedido->consecutivo ?? 'SIN_CONSECUTIVO');
-        $filename = "N.{$consecutivo} SOLICITUD DE PEDIDO {$proceso} {$sede}.xlsx";
-
-        return new StreamedResponse(function () use ($spreadsheet) {
-            // Remover otras hojas para que el usuario no descargue la plantilla vacía
-            while ($spreadsheet->getSheetCount() > 1) {
-                $activeIndex = $spreadsheet->getActiveSheetIndex();
-                $indexToRemove = $activeIndex === 0 ? 1 : 0;
-                $spreadsheet->removeSheetByIndex($indexToRemove);
-            }
-
-            $writer = new Xlsx($spreadsheet);
-            $writer->save('php://output');
-            $spreadsheet->disconnectWorksheets();
-        }, 200, [
-            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
-            'Cache-Control' => 'max-age=0',
-            'Access-Control-Expose-Headers' => 'Content-Disposition',
-        ]);
-    }
 
     // ─── Encabezado ───────────────────────────────────────────
     protected function llenarEncabezado(CpPedido $pedido): void
@@ -221,7 +155,15 @@ class CpPedidoExport
         }
 
         try {
+            // Validar que sea una imagen válida y soportada
+            $imageInfo = @getimagesize($fullPath);
+            if (!$imageInfo) {
+                return; // No es una imagen válida o soportada
+            }
+
             $drawing = new Drawing();
+            $drawing->setName('Firma_' . $celda);
+            $drawing->setDescription('Firma de Aprobacion');
             $drawing->setPath($fullPath);
             $drawing->setCoordinates($celda);
             $drawing->setHeight(75);
