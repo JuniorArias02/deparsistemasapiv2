@@ -6,6 +6,11 @@ class CrearDependenciaSedeUseCase
 {
     public function execute(array $data)
     {
-        return DependenciaSede::create($data);
+        $dependenciaData = [
+            'sede_id' => $data['sede_id'] ?? null,
+            'nombre' => $data['nombre'] ?? null,
+        ];
+
+        return DependenciaSede::create($dependenciaData);
     }
 }
