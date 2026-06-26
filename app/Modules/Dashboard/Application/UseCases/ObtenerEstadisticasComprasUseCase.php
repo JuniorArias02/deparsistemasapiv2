@@ -2,54 +2,15 @@
 
 namespace App\Modules\Dashboard\Application\UseCases;
 
-use App\Models\PcEquipo;
-use App\Models\PcEntrega;
-use App\Models\PcMantenimiento;
-use App\Models\PcDevuelto;
 use App\Models\CpPedido;
 use App\Models\CpProducto;
 use App\Models\CpProveedor;
-use App\Models\Usuario;
-use App\Models\Sede;
 use App\Models\CpTipoSolicitud;
 use Illuminate\Support\Facades\DB;
 
-class ObtenerEstadisticasUseCase
+class ObtenerEstadisticasComprasUseCase
 {
-    public function execute(string $type = 'admin'): array
-    {
-        $stats = [];
-        switch ($type) {
-            case 'sistemas':
-                $stats = $this->getSistemasStats();
-                break;
-            case 'compras':
-                $stats = $this->getComprasStats();
-                break;
-            case 'admin':
-            case 'administrador web':
-            default:
-                $stats = $this->getAdminStats();
-                break;
-        }
-        return $stats;
-    }
-
-    private function getSistemasStats(): array
-    {
-        return [
-            'total_equipos' => PcEquipo::count(),
-            'equipos_disponibles' => PcEquipo::where('estado', 'disponible')->count(),
-            'equipos_asignados' => PcEquipo::where('estado', 'asignado')->count(),
-            'equipos_mantenimiento' => PcEquipo::where('estado', 'mantenimiento')->count(),
-            'total_entregas' => PcEntrega::count(),
-            'total_devoluciones' => PcDevuelto::count(),
-            'total_mantenimientos' => PcMantenimiento::count(),
-            'ultimas_entregas' => PcEntrega::with(['equipo', 'funcionario'])->latest('fecha_entrega')->take(5)->get(),
-        ];
-    }
-
-    private function getComprasStats(): array
+    public function execute(): array
     {
         return [
             'total_pedidos' => CpPedido::count(),
@@ -60,18 +21,9 @@ class ObtenerEstadisticasUseCase
             'ultimos_pedidos' => CpPedido::with(['elaboradoPor', 'sede'])->latest('fecha_solicitud')->take(5)->get(),
             'estadisticas_tiempo' => $this->getPedidosTimeStats(),
             'desglose_solicitudes' => $this->getDesgloseSolicitudes(),
+            'desglose_por_sede' => $this->getDesglosePorSedes(),
+            'desglose_por_proceso' => $this->getDesglosePorProcesos(),
         ];
-    }
-
-    private function getAdminStats(): array
-    {
-        $sistemas = $this->getSistemasStats();
-        $compras = $this->getComprasStats();
-
-        return array_merge($sistemas, $compras, [
-            'total_usuarios' => Usuario::count(),
-            'total_sedes' => Sede::count(),
-        ]);
     }
 
     private function getPedidosTimeStats(): array
@@ -213,5 +165,48 @@ class ObtenerEstadisticasUseCase
             'total_pedidos' => $total,
             'tipos' => $resultado,
         ];
+    }
+
+    private function getDesglosePorSedes(): array
+    {
+        return CpPedido::select('sede_id', DB::raw('count(*) as cantidad'))
+            ->with('sede:id,nombre')
+            ->groupBy('sede_id')
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'id' => $item->sede_id,
+                    'nombre' => $item->sede ? $item->sede->nombre : 'Sin Sede',
+                    'cantidad' => $item->cantidad,
+                ];
+            })
+            ->sortByDesc('cantidad')
+            ->values()
+            ->toArray();
+    }
+
+    private function getDesglosePorProcesos(): array
+    {
+        return CpPedido::select('proceso_solicitante', DB::raw('count(*) as cantidad'))
+            ->with(['solicitante', 'solicitante.sede'])
+            ->groupBy('proceso_solicitante')
+            ->get()
+            ->map(function ($item) {
+                $nombreProceso = $item->solicitante ? $item->solicitante->nombre : 'Sin Proceso';
+                $nombreSede = ($item->solicitante && $item->solicitante->sede) ? $item->solicitante->sede->nombre : '';
+                
+                $nombreCompleto = $nombreSede ? "{$nombreProceso} ({$nombreSede})" : $nombreProceso;
+
+                return [
+                    'id' => $item->proceso_solicitante,
+                    'nombre' => $nombreCompleto,
+                    'proceso_nombre' => $nombreProceso,
+                    'sede_nombre' => $nombreSede,
+                    'cantidad' => $item->cantidad,
+                ];
+            })
+            ->sortByDesc('cantidad')
+            ->values()
+            ->toArray();
     }
 }
