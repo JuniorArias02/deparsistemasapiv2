@@ -43,6 +43,7 @@ return [
     'convertidor' => [
         'url' => env('MICROSERVICIO_CONVERTIDOR_URL', 'http://localhost:3000'),
         'api_key' => env('MICROSERVICIO_CONVERTIDOR_API_KEY'),
+        'alert_email' => env('MICROSERVICIO_ALERT_EMAIL', 'junior.arias02yt@gmail.com'),
     ],
 
 ];
