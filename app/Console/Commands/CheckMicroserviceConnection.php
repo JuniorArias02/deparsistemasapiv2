@@ -30,10 +30,17 @@ class CheckMicroserviceConnection extends Command
     public function handle()
     {
         $url = config('services.convertidor.url');
-        $alertEmail = config('services.convertidor.alert_email');
+        $alertEmailRaw = config('services.convertidor.alert_email');
         
-        if (!$url || !$alertEmail) {
+        if (!$url || !$alertEmailRaw) {
             $this->warn('URL o Email de alerta no están configurados.');
+            return;
+        }
+
+        $alertEmails = array_filter(array_map('trim', explode(',', $alertEmailRaw)));
+
+        if (empty($alertEmails)) {
+            $this->warn('No hay correos electrónicos válidos configurados para alertas.');
             return;
         }
 
@@ -50,7 +57,7 @@ class CheckMicroserviceConnection extends Command
                 // Si responde algo (incluso un 404), significa que el servidor está vivo y hay conexión
                 if ($isCurrentlyDown) {
                     $this->info('El servicio se ha recuperado. Enviando correo de recuperación...');
-                    $this->sendAlertEmail('up', $url, $alertEmail);
+                    $this->sendAlertEmail('up', $url, $alertEmails);
                     Cache::put('microservice_convertidor_is_down', false);
                 } else {
                     $this->info('El servicio está funcionando correctamente.');
@@ -65,7 +72,7 @@ class CheckMicroserviceConnection extends Command
 
             if (!$isCurrentlyDown) {
                 $this->info('Detectada nueva caída. Enviando correo de alerta...');
-                $this->sendAlertEmail('down', $url, $alertEmail, $errorMessage);
+                $this->sendAlertEmail('down', $url, $alertEmails, $errorMessage);
                 // Lo marcamos como caído indefinidamente hasta que responda un status de nuevo
                 Cache::put('microservice_convertidor_is_down', true);
             } else {
@@ -74,10 +81,10 @@ class CheckMicroserviceConnection extends Command
         }
     }
 
-    private function sendAlertEmail(string $status, string $url, string $email, string $errorMessage = '')
+    private function sendAlertEmail(string $status, string $url, array $emails, string $errorMessage = '')
     {
         try {
-            Mail::to($email)->send(new MicroserviceConnectionAlert($status, $url, $errorMessage));
+            Mail::to($emails)->send(new MicroserviceConnectionAlert($status, $url, $errorMessage));
         } catch (\Exception $e) {
             $this->error("No se pudo enviar el correo de alerta: " . $e->getMessage());
         }
