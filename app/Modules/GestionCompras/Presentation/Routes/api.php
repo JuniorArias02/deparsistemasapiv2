@@ -38,4 +38,11 @@ Route::prefix('gestion-compras')->middleware('auth:api')->group(function () {
     Route::get('cp-pedidos/{id}/exportar-pdf', [\App\Modules\GestionCompras\Presentation\Controllers\CpPedidoController::class, 'exportPdf']);
     Route::get('cp-pedidos/{id}/tiempos', [\App\Modules\GestionCompras\Presentation\Controllers\CpPedidoController::class, 'calcularTiempoEntregaPedido']);
     Route::get('cp-pedidos/{id}/estadisticas', [\App\Modules\GestionCompras\Presentation\Controllers\CpPedidoController::class, 'obtenerEstadisticas']);
+
+    // Pedidos Programados
+    Route::post('pedidos-programados', [\App\Modules\GestionCompras\Presentation\Controllers\CpPedidoProgramadoController::class, 'store']);
+    Route::get('pedidos-programados', [\App\Modules\GestionCompras\Presentation\Controllers\CpPedidoProgramadoController::class, 'index']);
+    Route::get('pedidos-programados/{id}', [\App\Modules\GestionCompras\Presentation\Controllers\CpPedidoProgramadoController::class, 'show']);
+    Route::post('pedidos-programados/{id}', [\App\Modules\GestionCompras\Presentation\Controllers\CpPedidoProgramadoController::class, 'update']); // usamos post para simular put y enviar archivos
+    Route::delete('pedidos-programados/{id}', [\App\Modules\GestionCompras\Presentation\Controllers\CpPedidoProgramadoController::class, 'destroy']);
 });

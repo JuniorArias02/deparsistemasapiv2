@@ -11,3 +11,6 @@ Artisan::command('inspire', function () {
 // Programación de Backup Diario a la medianoche (00:00)
 // Se usa la versión PHP para compatibilidad con Hostinger (sin exec)
 Schedule::command('db:backup-php')->daily();
+
+// Programación para procesar los pedidos programados (ahora por minuto para mayor precisión de datetime)
+Schedule::command('pedidos:procesar-programados')->everyMinute();
